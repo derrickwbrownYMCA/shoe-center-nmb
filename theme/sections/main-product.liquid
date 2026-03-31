@@ -1,0 +1,629 @@
+{% comment %}
+  sections/main-product.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Product Detail Page (PDP) — clean two-column layout.
+
+  Left:  Product image gallery (main + thumbnail strip)
+  Right: Vendor · Title · Price · Variant options · Qty · Add to Cart · Description
+
+  Custom elements used:
+    <variant-selector> — detects option changes, finds matching variant
+    <product-form>     — intercepts submit, calls CartAPI, opens drawer
+
+  The <script type="application/json" data-variant-json> block embeds all
+  variant data so VariantSelector can find matches without extra fetches.
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign section_id      = section.id
+  assign show_vendor     = section.settings.show_vendor
+  assign show_qty        = section.settings.show_quantity_input
+  assign show_desc       = section.settings.show_description
+-%}
+
+<section
+  class="main-product section-padding"
+  id="MainProduct-{{ section_id }}"
+  data-section-id="{{ section_id }}"
+>
+  <div class="container main-product__layout">
+
+    <!-- ── Left: Image gallery ──────────────────────────────────────────── -->
+    <div class="product-gallery" aria-label="Product images">
+
+      <!-- Main image -->
+      <div class="product-gallery__main">
+        {%- if product.featured_image != blank -%}
+          {{
+            product.featured_image
+            | image_url: width: 900
+            | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              class: 'product-gallery__main-img js-main-product-img',
+              alt: product.featured_image.alt | default: product.title,
+              width: product.featured_image.width,
+              height: product.featured_image.height,
+              widths: '600, 800, 900, 1200',
+              sizes: '(max-width: 767px) calc(100vw - 32px), (max-width: 1023px) 50vw, calc(min(100vw, 1280px) / 2 - 80px)'
+          }}
+        {%- else -%}
+          <div class="product-gallery__main-img product-gallery__main-img--placeholder">
+            {{- 'product-1' | placeholder_svg_tag: 'product-gallery__placeholder-svg' -}}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- Thumbnail strip -->
+      {%- if product.images.size > 1 -%}
+        <div class="product-gallery__thumbs" role="list" aria-label="Product image thumbnails">
+          {%- for image in product.images -%}
+            <button
+              class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+              role="listitem"
+              data-image-src="{{ image | image_url: width: 800 }}"
+              data-image-alt="{{ image.alt | default: product.title | escape }}"
+              aria-label="View image {{ forloop.index }} of {{ product.images.size }}"
+              tabindex="0"
+              type="button"
+            >
+              {{
+                image
+                | image_url: width: 160
+                | image_tag:
+                  loading: 'lazy',
+                  decoding: 'async',
+                  class: 'product-gallery__thumb-img',
+                  alt: image.alt | default: product.title,
+                  width: image.width,
+                  height: image.height
+              }}
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div><!-- /.product-gallery -->
+
+    <!-- ── Right: Product info ──────────────────────────────────────────── -->
+    <div class="product-info">
+
+      {%- if show_vendor and product.vendor != blank -%}
+        <a
+          href="{{ product.vendor | url_for_vendor }}"
+          class="product-info__vendor"
+        >
+          {{- product.vendor | escape -}}
+        </a>
+      {%- endif -%}
+
+      <h1 class="product-info__title">{{ product.title | escape }}</h1>
+
+      <!-- Price (updated dynamically on variant change via JS) -->
+      <div class="product-info__price js-variant-price">
+        {%- render 'price', product: product, variant: current_variant -%}
+      </div>
+
+      <!-- Variant options -->
+      {%- unless product.has_only_default_variant -%}
+        <variant-selector
+          class="product-info__variants"
+          data-section-id="{{ section_id }}"
+          data-url="{{ product.url }}"
+        >
+          {%- for option in product.options_with_values -%}
+            {%- liquid
+              # Gender-aware size label: if a product is tagged as women's but the
+              # WooCommerce option name imported as "US Men's Size", correct it —
+              # and vice versa. The form name attribute keeps the original option
+              # name so Shopify's variant lookup still works.
+              assign display_option_name = option.name
+              if option.name == "US Men's Size"
+                if product.tags contains "Women's Shoes" or product.tags contains "womens" or product.tags contains "women" or product.type == "Women's Shoes"
+                  assign display_option_name = "US Women's Size"
+                endif
+              elsif option.name == "US Women's Size"
+                if product.tags contains "Men's Shoes" or product.tags contains "mens" or product.tags contains "men" or product.type == "Men's Shoes"
+                  assign display_option_name = "US Men's Size"
+                endif
+              endif
+            -%}
+            <div class="product-info__option">
+              <label
+                class="product-info__option-label"
+                for="Option-{{ section_id }}-{{ forloop.index0 }}"
+              >
+                {{ display_option_name | escape }}
+              </label>
+              <select
+                id="Option-{{ section_id }}-{{ forloop.index0 }}"
+                name="options[{{ option.name | escape }}]"
+                class="product-info__option-select"
+                data-option-index="{{ forloop.index0 }}"
+                aria-label="{{ display_option_name | escape }}"
+              >
+                {%- for value in option.values -%}
+                  <option
+                    value="{{ value | escape }}"
+                    {% if option.selected_value == value %}selected{% endif %}
+                  >
+                    {{- value | escape -}}
+                  </option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endfor -%}
+
+          {%- comment -%}
+            Embed all variant data as JSON for VariantSelector custom element.
+            Placed inside <variant-selector> so the element can find it easily.
+          {%- endcomment -%}
+          <script type="application/json" data-variant-json>
+            {{ product.variants | json }}
+          </script>
+
+        </variant-selector>
+      {%- endunless -%}
+
+      <!-- Add to Cart form -->
+      <product-form>
+        {%- assign product_form_id = 'ProductForm-' | append: section_id -%}
+        {%- form 'product', product, id: product_form_id, novalidate: 'novalidate' -%}
+
+          <input type="hidden" name="id" id="ProductVariantId-{{ section_id }}" value="{{ current_variant.id }}">
+
+          {%- if show_qty -%}
+            <div class="product-info__qty-row">
+              <label class="product-info__qty-label" for="Qty-{{ section_id }}">
+                Quantity
+              </label>
+              <div class="product-info__qty-stepper">
+                <button
+                  class="product-info__qty-btn"
+                  type="button"
+                  data-qty-down="{{ section_id }}"
+                  aria-label="Decrease quantity"
+                >−</button>
+                <input
+                  class="product-info__qty-input"
+                  type="number"
+                  id="Qty-{{ section_id }}"
+                  name="quantity"
+                  value="1"
+                  min="1"
+                  data-qty-target="{{ section_id }}"
+                  aria-label="Quantity"
+                >
+                <button
+                  class="product-info__qty-btn"
+                  type="button"
+                  data-qty-up="{{ section_id }}"
+                  aria-label="Increase quantity"
+                >+</button>
+              </div>
+            </div>
+          {%- else -%}
+            <input type="hidden" name="quantity" value="1">
+          {%- endif -%}
+
+          {%- if current_variant.available -%}
+            <button
+              class="btn btn--full product-info__add-btn js-add-to-cart"
+              type="submit"
+              name="add"
+              data-add-text="Add to Cart"
+            >
+              Add to Cart
+            </button>
+          {%- else -%}
+            <button
+              class="btn btn--full product-info__add-btn"
+              type="submit"
+              disabled
+              aria-disabled="true"
+            >
+              Sold Out
+            </button>
+          {%- endif -%}
+
+        {%- endform -%}
+      </product-form>
+
+      <!-- Description accordion -->
+      {%- if show_desc and product.description != blank -%}
+        <details class="product-info__details" open>
+          <summary class="product-info__details-trigger">
+            <span>Product Details</span>
+            <svg class="product-info__details-icon" xmlns="http://www.w3.org/2000/svg"
+              width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true" focusable="false">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="product-info__description rte">
+            {{ product.description }}
+          </div>
+        </details>
+      {%- endif -%}
+
+    </div><!-- /.product-info -->
+
+  </div><!-- /.main-product__layout -->
+</section>
+
+<!-- ── JSON-LD Structured Data ──────────────────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "description": {{ product.description | strip_html | truncate: 500 | json }},
+  "url": {{ canonical_url | json }},
+  "brand": {
+    "@type": "Brand",
+    "name": {{ product.vendor | json }}
+  },
+  "image": [
+    {%- for image in product.images limit: 5 -%}
+      {{ image | image_url: width: 800 | prepend: 'https:' | json }}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ],
+  "offers": [
+    {%- for variant in product.variants -%}
+      {
+        "@type": "Offer",
+        "price": {{ variant.price | divided_by: 100.0 | json }},
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "availability": "{%- if variant.available -%}https://schema.org/InStock{%- else -%}https://schema.org/OutOfStock{%- endif -%}",
+        "sku": {{ variant.sku | json }},
+        "url": {{ canonical_url | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+<style>
+  /* ── Two-column layout ──────────────────────────────────────────────────── */
+  .main-product__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  /* ── Gallery ────────────────────────────────────────────────────────────── */
+  .product-gallery {}
+
+  .product-gallery__main {
+    border-radius: var(--radius-card, 12px);
+    overflow: hidden;
+    background-color: var(--color-card, #FFFFFF);
+    aspect-ratio: 1 / 1;
+  }
+
+  .product-gallery__main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s ease;
+  }
+
+  .product-gallery__main-img--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: var(--color-card, #FFFFFF);
+  }
+
+  .product-gallery__placeholder-svg {
+    width: 50%;
+    fill: var(--color-border, #EBEBEB);
+  }
+
+  /* Thumbnail strip */
+  .product-gallery__thumbs {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border, #EBEBEB) transparent;
+    padding-bottom: 4px;
+  }
+
+  .product-gallery__thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border: 2px solid var(--color-border, #EBEBEB);
+    border-radius: 8px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.18s ease;
+  }
+
+  .product-gallery__thumb.is-active,
+  .product-gallery__thumb:hover {
+    border-color: var(--color-heading, #000000);
+  }
+
+  .product-gallery__thumb:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+  }
+
+  .product-gallery__thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Product info ──────────────────────────────────────────────────────── */
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .product-info__vendor {
+    display: block;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #A8A8A8);
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+
+  .product-info__vendor:hover { color: var(--color-text, #3D3D3D); }
+  .product-info__vendor:focus-visible { outline: 3px solid #005FCC; outline-offset: 2px; border-radius: 2px; }
+
+  .product-info__title {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    font-size: clamp(22px, 2.5vw, 32px);
+    letter-spacing: var(--heading-letter-spacing, 0.03em);
+    color: var(--color-heading, #000000);
+    margin: 0;
+    line-height: 1.15;
+  }
+
+  /* Price (js-variant-price updated by JS) */
+  .product-info__price .price__current {
+    font-size: 22px;
+  }
+
+  /* ── Variant options ────────────────────────────────────────────────────── */
+  .product-info__variants {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .product-info__option {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .product-info__option-label {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+  }
+
+  .product-info__option-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-btn, 8px);
+    background-color: var(--color-bg, #FAF9F6);
+    color: var(--color-text, #3D3D3D);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 15px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233D3D3D' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 40px;
+    transition: border-color 0.18s ease;
+  }
+
+  .product-info__option-select:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+    border-color: #005FCC;
+  }
+
+  /* ── Qty stepper ────────────────────────────────────────────────────────── */
+  .product-info__qty-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .product-info__qty-label {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+  }
+
+  .product-info__qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-btn, 8px);
+    overflow: hidden;
+    width: fit-content;
+  }
+
+  .product-info__qty-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--color-text, #3D3D3D);
+    transition: background-color 0.15s ease;
+  }
+
+  .product-info__qty-btn:hover {
+    background-color: var(--color-accent, #F5E1E1);
+  }
+
+  .product-info__qty-btn:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: -2px;
+  }
+
+  .product-info__qty-input {
+    width: 56px;
+    height: 44px;
+    border: none;
+    border-left: 1px solid var(--color-border, #EBEBEB);
+    border-right: 1px solid var(--color-border, #EBEBEB);
+    text-align: center;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 16px;
+    font-weight: 600;
+    background: none;
+    color: var(--color-heading, #000000);
+    -moz-appearance: textfield;
+  }
+
+  .product-info__qty-input::-webkit-outer-spin-button,
+  .product-info__qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* ── Add to Cart button ─────────────────────────────────────────────────── */
+  .product-info__add-btn {
+    /* btn btn--full handles sizing; just ensure min height */
+    min-height: 52px;
+    font-size: 14px;
+  }
+
+  /* ── Description accordion ──────────────────────────────────────────────── */
+  .product-info__details {
+    border-top: 1px solid var(--color-border, #EBEBEB);
+    border-bottom: 1px solid var(--color-border, #EBEBEB);
+    padding: 4px 0;
+  }
+
+  .product-info__details-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+    user-select: none;
+  }
+
+  .product-info__details-trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .product-info__details-trigger:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+  }
+
+  .product-info__details-icon {
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  details[open] .product-info__details-icon {
+    transform: rotate(180deg);
+  }
+
+  .product-info__description {
+    padding: 0 0 20px;
+    color: var(--color-text, #3D3D3D);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── rte (rich text from Shopify) ──────────────────────────────────────── */
+  .product-info__description h2,
+  .product-info__description h3,
+  .product-info__description h4 {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    margin: 1em 0 0.5em;
+  }
+  .product-info__description p { margin: 0 0 1em; }
+  .product-info__description ul,
+  .product-info__description ol { padding-left: 1.5em; margin-bottom: 1em; }
+  .product-info__description li { margin-bottom: 0.35em; }
+  .product-info__description a { color: var(--color-heading, #000000); text-decoration: underline; }
+  .product-info__description img { max-width: 100%; border-radius: 8px; }
+
+  /* ── Responsive ─────────────────────────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .main-product__layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity_input",
+      "label": "Show quantity input",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show product description",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

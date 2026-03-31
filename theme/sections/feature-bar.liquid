@@ -1,0 +1,257 @@
+{% comment %}
+  sections/feature-bar.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Icon + text trust-signal strip. 3-4 columns of features.
+  Design: subtle top/bottom dividers, cream background, centered.
+  Each cell: SVG icon (40px) + heading + optional description.
+
+  Icons are pulled from snippets/icons.liquid.
+  Available icon values: shoe, tag, pin, heart, refresh, truck, award, check.
+{% endcomment %}
+
+<div class="feature-bar">
+  <div class="container">
+    <ul class="feature-bar__grid" role="list">
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'feature' -%}
+          <li class="feature-bar__item" {{ block.shopify_attributes }}>
+
+            {%- if block.settings.icon != blank and block.settings.icon != 'none' -%}
+              <div class="feature-bar__icon" aria-hidden="true">
+                {%- render 'icons', icon: block.settings.icon -%}
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.heading != blank -%}
+              <p class="feature-bar__heading">
+                {{- block.settings.heading | escape -}}
+              </p>
+            {%- endif -%}
+
+            {%- if block.settings.description != blank -%}
+              <p class="feature-bar__description">
+                {{- block.settings.description | escape -}}
+              </p>
+            {%- endif -%}
+
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* ── Feature bar ──────────────────────────────────────────────────────── */
+  .feature-bar {
+    background-color: var(--color-bg, #FAF9F6);
+    border-top: 1px solid var(--color-border, #EBEBEB);
+    border-bottom: 1px solid var(--color-border, #EBEBEB);
+    padding: 40px 0;
+  }
+
+  /* ── Grid ─────────────────────────────────────────────────────────────── */
+  .feature-bar__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px 24px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* ── Individual cell ──────────────────────────────────────────────────── */
+  .feature-bar__item {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 8px 16px;
+    /*
+      Vertical dividers between cells using border-right on all but the last.
+      Uses :last-child to remove it on the final item — avoids an orphan line.
+    */
+  }
+
+  /* Subtle vertical divider between cells */
+  .feature-bar__item:not(:last-child) {
+    border-right: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  /* ── Icon ─────────────────────────────────────────────────────────────── */
+  .feature-bar__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    background-color: var(--color-accent, #F5E1E1);
+    border-radius: 50%;
+    color: var(--color-heading, #000000);
+    flex-shrink: 0;
+  }
+
+  .feature-bar__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* ── Heading ──────────────────────────────────────────────────────────── */
+  .feature-bar__heading {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--color-heading, #000000);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  /* ── Description ──────────────────────────────────────────────────────── */
+  .feature-bar__description {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 22ch;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────────────── */
+  /*
+    On tablet/mobile, stack vertically and remove the side dividers.
+    A top divider between stacked items reads better.
+  */
+  @media (max-width: 767px) {
+    .feature-bar__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px 0;
+    }
+
+    .feature-bar__item:not(:last-child) {
+      border-right: none;
+    }
+
+    /* Add bottom border to all but last 2 items (2 columns) */
+    .feature-bar__item {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--color-border, #EBEBEB);
+    }
+
+    /* Remove bottom border from the last two items */
+    .feature-bar__item:nth-last-child(-n+2) {
+      border-bottom: none;
+    }
+
+    /* Restore the right border for the first column */
+    .feature-bar__item:nth-child(odd):not(:nth-last-child(-n+2)) {
+      border-right: 1px solid var(--color-border, #EBEBEB);
+    }
+  }
+
+  @media (max-width: 479px) {
+    .feature-bar__grid {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .feature-bar__item {
+      border-right: none !important;
+      border-bottom: 1px solid var(--color-border, #EBEBEB);
+      padding: 20px 0;
+    }
+
+    .feature-bar__item:last-child {
+      border-bottom: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Feature bar",
+  "tag": "div",
+  "class": "feature-bar-section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "shoe",    "label": "Shoe / Fitting" },
+            { "value": "tag",     "label": "Tag / Brands" },
+            { "value": "pin",     "label": "Pin / Local" },
+            { "value": "heart",   "label": "Heart / Quality" },
+            { "value": "refresh", "label": "Refresh / Returns" },
+            { "value": "truck",   "label": "Truck / Shipping" },
+            { "value": "award",   "label": "Award / Excellence" },
+            { "value": "check",   "label": "Check / Guarantee" },
+            { "value": "none",    "label": "No icon" }
+          ],
+          "default": "shoe"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Expert Fitting"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "We measure and fit every customer personally"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Feature bar",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "shoe",
+            "heading": "Expert Fitting",
+            "description": "We measure and fit every customer personally"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "tag",
+            "heading": "50+ Brands",
+            "description": "From HOKA to Birkenstock and beyond"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "pin",
+            "heading": "Family Owned",
+            "description": "Serving North Myrtle Beach since 1976"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "refresh",
+            "heading": "Easy Returns",
+            "description": "We stand behind every pair we sell"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

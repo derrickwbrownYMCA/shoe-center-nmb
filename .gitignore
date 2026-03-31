@@ -1,0 +1,42 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.env
+.env.*
+*.local
+*.secret
+*.secrets
+
+node_modules/
+dist/
+build/
+.cache/
+
+.idea/
+.vscode/
+
+*.log
+*.tmp
+*.bak
+*.swp
+
+coverage/
+
+# Shopify / theme tooling artifacts
+config.yml
+.shopify/
+
+# Large or sensitive migration artifacts
+exports/
+imports/
+backups/
+inventory-exports/
+catalog-exports/
+product-images-raw/
+*.zip
+*.xlsx
+*.xls
+*.csv
+
+# Keep curated docs and code in git; keep raw data dumps out

@@ -1,0 +1,223 @@
+{% comment %}
+  snippets/pagination.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Renders Shopify's paginate object as a styled page number nav.
+
+  Usage (must be inside a {% paginate %} block):
+    {% paginate collection.products by 24 %}
+      ...
+      {% render 'pagination', paginate: paginate %}
+    {% endpaginate %}
+
+  Design: clean, minimal. Active page: dark fill. Prev/Next: outlined.
+  Matches the cream/blush aesthetic of the rest of the theme.
+{% endcomment %}
+
+{%- if paginate.pages > 1 -%}
+  <nav class="pagination" aria-label="Page navigation" role="navigation">
+    <ul class="pagination__list" role="list">
+
+      {%- comment -%} ── Previous page ──────────────────────────────────── {%- endcomment -%}
+      {%- if paginate.previous -%}
+        <li class="pagination__item">
+          <a
+            href="{{ paginate.previous.url }}"
+            class="pagination__link pagination__link--prev"
+            aria-label="Previous page"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true" focusable="false">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <span>Prev</span>
+          </a>
+        </li>
+      {%- else -%}
+        <li class="pagination__item pagination__item--disabled" aria-hidden="true">
+          <span class="pagination__link pagination__link--prev pagination__link--disabled">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true" focusable="false">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <span>Prev</span>
+          </span>
+        </li>
+      {%- endif -%}
+
+      {%- comment -%} ── Page numbers ───────────────────────────────────── {%- endcomment -%}
+      {%- for part in paginate.parts -%}
+        {%- if part.is_link -%}
+          <li class="pagination__item">
+            <a
+              href="{{ part.url }}"
+              class="pagination__link pagination__link--number"
+              aria-label="Page {{ part.title }}"
+            >
+              {{- part.title -}}
+            </a>
+          </li>
+        {%- else -%}
+          {%- if part.title == paginate.current_page -%}
+            <li class="pagination__item">
+              <span
+                class="pagination__link pagination__link--number pagination__link--current"
+                aria-current="page"
+                aria-label="Page {{ part.title }}, current page"
+              >
+                {{- part.title -}}
+              </span>
+            </li>
+          {%- else -%}
+            {%- comment -%} Ellipsis (…) separator {%- endcomment -%}
+            <li class="pagination__item pagination__item--ellipsis" aria-hidden="true">
+              <span class="pagination__ellipsis">{{ part.title }}</span>
+            </li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- comment -%} ── Next page ──────────────────────────────────────── {%- endcomment -%}
+      {%- if paginate.next -%}
+        <li class="pagination__item">
+          <a
+            href="{{ paginate.next.url }}"
+            class="pagination__link pagination__link--next"
+            aria-label="Next page"
+          >
+            <span>Next</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true" focusable="false">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </li>
+      {%- else -%}
+        <li class="pagination__item pagination__item--disabled" aria-hidden="true">
+          <span class="pagination__link pagination__link--next pagination__link--disabled">
+            <span>Next</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true" focusable="false">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </span>
+        </li>
+      {%- endif -%}
+
+    </ul>
+  </nav>
+
+  <style>
+    /* ── Pagination ─────────────────────────────────────────────────────── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 56px;
+      padding-bottom: 8px;
+    }
+
+    .pagination__list {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pagination__item {
+      list-style: none;
+    }
+
+    /* Base link / button */
+    .pagination__link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 40px;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--color-border, #EBEBEB);
+      border-radius: var(--radius-btn, 8px);
+      background-color: var(--color-bg, #FAF9F6);
+      color: var(--color-text, #3D3D3D);
+      font-family: var(--font-body, 'Open Sans', sans-serif);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    /* Number links */
+    .pagination__link--number {
+      min-width: 40px;
+      padding: 0 8px;
+    }
+
+    /* Active / current page */
+    .pagination__link--current {
+      background-color: var(--color-heading, #000000);
+      border-color: var(--color-heading, #000000);
+      color: var(--color-bg, #FAF9F6);
+      font-weight: 700;
+      cursor: default;
+    }
+
+    /* Hover states (not for current or disabled) */
+    .pagination__link:not(.pagination__link--current):not(.pagination__link--disabled):hover {
+      background-color: var(--color-accent, #F5E1E1);
+      border-color: var(--color-accent, #F5E1E1);
+      color: var(--color-heading, #000000);
+    }
+
+    /* Disabled prev/next */
+    .pagination__link--disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Focus ring */
+    .pagination__link:focus-visible {
+      outline: 3px solid #005FCC;
+      outline-offset: 2px;
+    }
+
+    /* Ellipsis */
+    .pagination__ellipsis {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 40px;
+      color: var(--color-text-secondary, #A8A8A8);
+      font-size: 14px;
+    }
+
+    /* Mobile: hide ellipsis and intermediate numbers to save space */
+    @media (max-width: 479px) {
+      .pagination__link--number:not(.pagination__link--current) {
+        display: none;
+      }
+      .pagination__item--ellipsis {
+        display: none;
+      }
+      .pagination__link--prev,
+      .pagination__link--next {
+        padding: 0 16px;
+      }
+    }
+  </style>
+{%- endif -%}

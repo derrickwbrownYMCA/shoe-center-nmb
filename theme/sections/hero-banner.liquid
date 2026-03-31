@@ -1,0 +1,677 @@
+{% comment %}
+  sections/hero-banner.liquid
+  ──────────────────────────────────────────────────────────────────
+  Flagship full-width hero section for Shoe Center NMB.
+
+  ARCHITECTURE OVERVIEW
+  ──────────────────────
+  Three stacking layers inside a single flex container:
+
+    ┌─────────────────────────────────────┐
+    │ .hero (position: relative, flex)    │
+    │  ├── .hero__media (absolute, z:0)   │  ← image + overlay
+    │  └── .hero__content (relative, z:2) │  ← all readable content
+    └─────────────────────────────────────┘
+
+  The .hero element's min-height is driven by a CSS custom property
+  (--hero-min-height) set inline from the Liquid height preset.
+  No JS is needed for any part of this section.
+
+  PERFORMANCE
+  ────────────
+  The hero <img> MUST use loading="eager" + fetchpriority="high".
+  It is the LCP (Largest Contentful Paint) element on the homepage.
+  Changing either attribute to lazy/low will tank the Lighthouse score.
+
+  Shopify's image_url filter serves WebP/AVIF automatically based on
+  Accept headers — no extra config needed.
+
+  srcset with five width breakpoints + sizes="100vw" lets the browser
+  pick the ideal resolution for every device + DPR combination.
+
+  ACCESSIBILITY
+  ─────────────
+  • <section aria-labelledby> + <h1 id> = proper landmark naming.
+  • .hero__media has aria-hidden="true" — the <img> alt text is the
+    only image description exposed to assistive technology.
+  • Staggered fade-up animation is gated on prefers-reduced-motion:
+    no-preference — never plays for users who opt out of motion.
+  • Default cream overlay at 50% creates an effective background of
+    ~rgb(215,213,208), giving ≈10:1 contrast ratio against #000000
+    — well above the WCAG 2.2 AA requirement of 4.5:1.
+{% endcomment %}
+
+{%- liquid
+  assign image         = section.settings.image
+  assign image_mobile  = section.settings.image_mobile
+  assign overlay_alpha = section.settings.overlay_opacity | divided_by: 100.0
+
+  case section.settings.section_height
+    when 'small'
+      assign hero_height = '480px'
+    when 'medium'
+      assign hero_height = '620px'
+    when 'large'
+      assign hero_height = '780px'
+    when 'fullscreen'
+      assign hero_height = '100svh'
+    else
+      assign hero_height = '780px'
+  endcase
+
+  assign has_primary_cta   = false
+  assign has_secondary_cta = false
+  if section.settings.cta_primary_text != blank
+    assign has_primary_cta = true
+  endif
+  if section.settings.cta_secondary_text != blank
+    assign has_secondary_cta = true
+  endif
+-%}
+
+<section
+  class="hero"
+  aria-labelledby="HeroHeading-{{ section.id }}"
+  style="--hero-min-height: {{ hero_height }};"
+>
+
+  <!-- ── Media layer (image + overlay) ─────────────────────────────
+    aria-hidden="true" on the wrapper means AT skips the div entirely
+    and only reads the <img> alt text inside.
+  ──────────────────────────────────────────────────────────────── -->
+  <div class="hero__media" aria-hidden="true">
+
+    {%- if image != blank -%}
+      <picture>
+
+        {%- comment -%}
+          Mobile source: portrait-cropped for narrow viewports.
+          Only rendered when the merchant uploads a separate mobile image.
+          If absent, the browser falls through to the desktop <img>.
+        {%- endcomment -%}
+        {%- if image_mobile != blank -%}
+          <source
+            media="(max-width: 767px)"
+            srcset="
+              {{ image_mobile | image_url: width: 550 }} 550w,
+              {{ image_mobile | image_url: width: 750 }} 750w,
+              {{ image_mobile | image_url: width: 1000 }} 1000w
+            "
+            sizes="100vw"
+            width="{{ image_mobile.width }}"
+            height="{{ image_mobile.height }}"
+          >
+        {%- endif -%}
+
+        {%- comment -%}
+          Desktop image — five srcset steps cover every screen size from
+          a small phone to a 4K monitor. Shopify's CDN serves WebP/AVIF
+          automatically when the browser supports it.
+        {%- endcomment -%}
+        <img
+          class="hero__img"
+          src="{{ image | image_url: width: 1600 }}"
+          srcset="
+            {{ image | image_url: width: 550  }} 550w,
+            {{ image | image_url: width: 750  }} 750w,
+            {{ image | image_url: width: 1100 }} 1100w,
+            {{ image | image_url: width: 1600 }} 1600w,
+            {{ image | image_url: width: 1920 }} 1920w,
+            {{ image | image_url: width: 2400 }} 2400w
+          "
+          sizes="100vw"
+          alt="{{ section.settings.image_alt | escape }}"
+          width="{{ image.width }}"
+          height="{{ image.height }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      </picture>
+
+      {%- comment -%}
+        Overlay: rgba cream tinted by the merchant-set opacity.
+        #FAF9F6 = rgb(250, 249, 246).
+        At the default 50% opacity this still shows the photo clearly
+        while giving the text a soft, dreamy surface to sit on.
+        Setting opacity to 0 removes it entirely for full-bleed impact.
+      {%- endcomment -%}
+      <div
+        class="hero__overlay"
+        style="background-color: rgba(250, 249, 246, {{ overlay_alpha }});"
+      ></div>
+
+    {%- else -%}
+      {%- comment -%}
+        No image uploaded yet: show a curated coastal lifestyle photo so
+        the hero looks premium from first install. Replace with the
+        merchant's own photography via the Image setting above.
+      {%- endcomment -%}
+      <img
+        class="hero__img"
+        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&h=1080&fit=crop&crop=bottom&auto=format&q=80"
+        alt="{{ section.settings.image_alt | escape }}"
+        width="1920"
+        height="1080"
+        loading="eager"
+        fetchpriority="high"
+      >
+      <div
+        class="hero__overlay"
+        style="background-color: rgba(250, 249, 246, {{ overlay_alpha }});"
+      ></div>
+    {%- endif -%}
+
+  </div><!-- /.hero__media -->
+
+  <!-- ── Content layer ────────────────────────────────────────────
+    data-align and data-color drive CSS variations cleanly without
+    extra class names that would require separate schema-to-class logic.
+  ──────────────────────────────────────────────────────────────── -->
+  <div
+    class="hero__content container"
+    data-align="{{ section.settings.text_align }}"
+    data-color="{{ section.settings.text_color }}"
+  >
+    <div class="hero__text">
+
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="hero__eyebrow">
+          {{- section.settings.eyebrow | escape -}}
+        </p>
+      {%- endif -%}
+
+      {%- comment -%}
+        H1 is the primary page heading — always an h1 on the homepage.
+        The id matches the aria-labelledby on <section> above.
+      {%- endcomment -%}
+      <h1
+        class="hero__heading"
+        id="HeroHeading-{{ section.id }}"
+      >
+        {{- section.settings.heading | escape -}}
+      </h1>
+
+      {%- if section.settings.subheading != blank -%}
+        <p class="hero__subheading">
+          {{- section.settings.subheading | escape -}}
+        </p>
+      {%- endif -%}
+
+      {%- if has_primary_cta or has_secondary_cta -%}
+        <div class="hero__ctas" role="list">
+
+          {%- if has_primary_cta -%}
+            <a
+              href="{{ section.settings.cta_primary_url | default: routes.collections_url }}"
+              class="btn hero__btn"
+              role="listitem"
+            >
+              {{- section.settings.cta_primary_text | escape -}}
+            </a>
+          {%- endif -%}
+
+          {%- if has_secondary_cta -%}
+            <a
+              href="{{ section.settings.cta_secondary_url | default: routes.collections_url }}"
+              class="btn btn--secondary hero__btn hero__btn--sec"
+              role="listitem"
+            >
+              {{- section.settings.cta_secondary_text | escape -}}
+            </a>
+          {%- endif -%}
+
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.story_text != blank -%}
+        <a
+          href="{{ section.settings.story_url | default: '/pages/about' }}"
+          class="hero__story-link"
+          aria-label="{{ section.settings.story_text | escape }} — learn about Shoe Center"
+        >
+          {{- section.settings.story_text | escape -}}
+        </a>
+      {%- endif -%}
+
+    </div><!-- /.hero__text -->
+  </div><!-- /.hero__content -->
+
+</section>
+
+<style>
+  /* ── Hero: sizing & base layout ─────────────────────────────────
+    The section is a flex container so the content div always fills
+    the full height and centers vertically — no height:100% hacks.
+  ──────────────────────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: var(--hero-min-height, 780px);
+    overflow: hidden;
+    /* Branded gradient shows when no image is uploaded */
+    background: linear-gradient(
+      145deg,
+      var(--color-accent) 0%,
+      var(--color-bg) 55%,
+      var(--color-card) 100%
+    );
+  }
+
+  /* ── Media layer ─────────────────────────────────────────────── */
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /*
+      object-position: center 25% frames subjects in the upper portion
+      of the image — keeps faces/action visible when the container height
+      crops the bottom. Merchant can adjust via the image upload itself.
+    */
+    object-position: center 25%;
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    /* background-color applied via inline style from Liquid */
+  }
+
+  /* Gradient placeholder — visible only when no image is set */
+  .hero__placeholder {
+    position: absolute;
+    inset: 0;
+    background: inherit; /* Inherits the gradient from .hero */
+  }
+
+  /* ── Content layer ────────────────────────────────────────────── */
+  .hero__content {
+    position: relative;
+    z-index: 2;   /* Sits above the overlay (z:0) */
+    display: flex;
+    width: 100%;
+    padding-block: 80px;
+  }
+
+  /* Alignment variants */
+  .hero__content[data-align="center"] {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero__content[data-align="left"] {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  /* Text color modes */
+  .hero__content[data-color="dark"]  { color: var(--color-heading); }
+  .hero__content[data-color="light"] { color: #ffffff; }
+
+  /* ── Text stack ───────────────────────────────────────────────── */
+  .hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 700px;
+  }
+
+  .hero__content[data-align="center"] .hero__text {
+    align-items: center;
+  }
+
+  /* Eyebrow — location / context line above the headline */
+  .hero__eyebrow {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    line-height: 1;
+  }
+
+  /* Headline — the LCP text element */
+  .hero__heading {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    /*
+      clamp() creates fluid type: reads at the full 48–64px on desktop
+      but gracefully scales on mid-range viewports, with a 34px floor
+      so it never becomes unreadably small on phones.
+    */
+    font-size: clamp(34px, 5.5vw, 64px);
+    letter-spacing: var(--heading-letter-spacing);
+    line-height: 1.08;
+    color: inherit;
+  }
+
+  /* Subheadline */
+  .hero__subheading {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: clamp(15px, 1.6vw, 18px);
+    font-weight: 400;
+    line-height: 1.65;
+    max-width: 560px;
+    opacity: 0.88;
+  }
+
+  /* ── CTA row ──────────────────────────────────────────────────── */
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .hero__content[data-align="center"] .hero__ctas {
+    justify-content: center;
+  }
+
+  /*
+    Primary button inherits the global .btn styles (blush background).
+    No overrides needed — it works straight from theme.liquid's .btn class.
+  */
+
+  /*
+    Secondary button — adjust for light-text mode (white outline on dark).
+    In the default dark-text mode the standard .btn--secondary is correct.
+  */
+  .hero__content[data-color="light"] .hero__btn--sec {
+    border-color: rgba(255, 255, 255, 0.65);
+    color: #ffffff;
+  }
+
+  .hero__content[data-color="light"] .hero__btn--sec:hover,
+  .hero__content[data-color="light"] .hero__btn--sec:focus-visible {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #ffffff;
+    box-shadow: none;
+  }
+
+  /* ── Story link ───────────────────────────────────────────────── */
+  .hero__story-link {
+    display: inline-block;
+    margin-top: 4px;
+    font-family: var(--font-body);
+    font-size: var(--font-size-small);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: inherit;
+    text-decoration: none;
+    /* Soft underline is more refined than the default browser underline */
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    opacity: 0.65;
+    transition: opacity var(--transition);
+  }
+
+  .hero__story-link:hover,
+  .hero__story-link:focus-visible {
+    opacity: 1;
+  }
+
+  /* ── Staggered entrance animation ────────────────────────────────
+    Each element fades up with a small offset — feels editorial.
+    The entire block is inside a prefers-reduced-motion media query
+    so it is completely absent for users who have enabled that preference.
+    Elements are visible from the start (opacity:1 / transform:none in
+    their un-animated state) so no content is hidden if the query matches.
+  ──────────────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__eyebrow    { animation: hero-rise 0.75s ease both; animation-delay: 0.05s; }
+    .hero__heading    { animation: hero-rise 0.75s ease both; animation-delay: 0.18s; }
+    .hero__subheading { animation: hero-rise 0.75s ease both; animation-delay: 0.30s; }
+    .hero__ctas       { animation: hero-rise 0.75s ease both; animation-delay: 0.42s; }
+    .hero__story-link { animation: hero-rise 0.75s ease both; animation-delay: 0.52s; }
+
+    @keyframes hero-rise {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  /* ── Mobile ───────────────────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hero {
+      /*
+        On mobile, min-height shortens regardless of the desktop setting
+        to prevent a huge blank gap when there is no portrait image.
+        The content padding ensures comfortable breathing room.
+      */
+      min-height: min(var(--hero-min-height, 780px), 80svh);
+      /* Image focuses slightly lower on mobile — shows feet/shoes */
+    }
+
+    .hero__img {
+      object-position: center 35%;
+    }
+
+    .hero__content {
+      /* Less padding on mobile — the min-height is already shorter */
+      padding-block: 56px;
+      /* Always center text on mobile regardless of desktop setting */
+      justify-content: center;
+      text-align: center;
+    }
+
+    .hero__text {
+      max-width: 100%;
+      gap: 16px;
+      align-items: center;
+    }
+
+    /*
+      Stack buttons vertically on mobile and make them full-width —
+      easier to tap and looks more intentional than two small buttons.
+    */
+    .hero__ctas {
+      flex-direction: column;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .hero__btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* ── Reduced height for smaller preset on mobile ─────────────── */
+  @media (max-width: 767px) {
+    .hero[style*="480px"] { min-height: 420px; }
+    .hero[style*="620px"] { min-height: 520px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hero banner",
+  "tag": "section",
+  "class": "hero-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Desktop image",
+      "info": "Recommended: 1920×1080px (16:9) or wider. Coastal lifestyle photography — happy people, natural light, soft colors. The cream overlay softens any image."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile image (optional)",
+      "info": "Recommended: 750×1000px portrait (3:4). If left blank, the desktop image is used and cropped to fit. Upload a portrait crop for best results on phones."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image description (alt text)",
+      "default": "Happy customers wearing comfortable shoes near the beach in North Myrtle Beach, SC",
+      "info": "Describes the image for screen readers and search engines. Be specific and natural."
+    },
+
+    {
+      "type": "header",
+      "content": "Headline & text"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow (small text above headline)",
+      "default": "North Myrtle Beach, SC",
+      "info": "Optional. Leave blank to hide. Great for a location tagline or seasonal message."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline",
+      "default": "We Make Your Feet Happy"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheadline",
+      "default": "Family-owned in North Myrtle Beach for 48 years · Comfort shoes for every step of life"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        { "value": "center", "label": "Centered" },
+        { "value": "left",   "label": "Left-aligned" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "options": [
+        { "value": "dark",  "label": "Dark — for cream or light overlays" },
+        { "value": "light", "label": "Light — for dark or moody images" }
+      ],
+      "default": "dark",
+      "info": "Dark text on the default cream overlay gives ~10:1 contrast. Switch to Light if using a very dark image with low overlay opacity."
+    },
+
+    {
+      "type": "header",
+      "content": "Primary button"
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_text",
+      "label": "Button label",
+      "default": "Shop Women's"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Button link"
+    },
+
+    {
+      "type": "header",
+      "content": "Secondary button"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_text",
+      "label": "Button label",
+      "default": "Shop Men's",
+      "info": "Leave blank to hide the secondary button."
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Button link"
+    },
+
+    {
+      "type": "header",
+      "content": "Story link"
+    },
+    {
+      "type": "text",
+      "id": "story_text",
+      "label": "Link text",
+      "default": "Discover Our Story",
+      "info": "Subtle underlined text link below the buttons. Leave blank to hide."
+    },
+    {
+      "type": "url",
+      "id": "story_url",
+      "label": "Link URL",
+      "info": "Defaults to /pages/about if left blank."
+    },
+
+    {
+      "type": "header",
+      "content": "Style & height"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Cream overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "The soft cream veil over the photo. Higher = more cream, softer image. Lower = photo shows through more vividly. 0 = no overlay."
+    },
+    {
+      "type": "select",
+      "id": "section_height",
+      "label": "Hero height",
+      "options": [
+        { "value": "small",      "label": "Small — 480px" },
+        { "value": "medium",     "label": "Medium — 620px" },
+        { "value": "large",      "label": "Large — 780px (recommended)" },
+        { "value": "fullscreen", "label": "Full screen" }
+      ],
+      "default": "large"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero banner",
+      "settings": {
+        "heading": "We Make Your Feet Happy",
+        "subheading": "Family-owned in North Myrtle Beach for 48 years · Comfort shoes for every step of life",
+        "eyebrow": "North Myrtle Beach, SC",
+        "cta_primary_text": "Shop Women's",
+        "cta_secondary_text": "Shop Men's",
+        "story_text": "Discover Our Story",
+        "overlay_opacity": 50,
+        "section_height": "large",
+        "text_align": "center",
+        "text_color": "dark"
+      }
+    }
+  ]
+}
+{% endschema %}

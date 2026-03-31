@@ -1,0 +1,408 @@
+{% comment %} templates/customers/order.liquid {% endcomment %}
+
+<style>
+  /* ── Order detail layout ──────────────────────────────────────────────── */
+  .order-detail {
+    max-width: 760px;
+  }
+
+  .order-detail__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: 28px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .order-detail__back:hover {
+    color: var(--color-text);
+    opacity: 1;
+  }
+
+  .order-detail__header {
+    margin-bottom: 32px;
+  }
+
+  .order-detail__header h1 {
+    font-size: var(--font-size-h2);
+    margin-bottom: 8px;
+  }
+
+  .order-detail__meta {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    margin-top: 8px;
+  }
+
+  /* ── Status badges ────────────────────────────────────────────────────── */
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: capitalize;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .status-badge--paid,
+  .status-badge--fulfilled {
+    background-color: #D4EDDA;
+    color: #155724;
+  }
+
+  .status-badge--pending,
+  .status-badge--unfulfilled {
+    background-color: #FFF3CD;
+    color: #856404;
+  }
+
+  .status-badge--refunded,
+  .status-badge--voided {
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+  }
+
+  /* ── Line items ───────────────────────────────────────────────────────── */
+  .order-items {
+    margin-bottom: 32px;
+  }
+
+  .order-items__header {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  .order-items__header span:nth-child(2),
+  .order-items__header span:nth-child(3) {
+    text-align: right;
+  }
+
+  .order-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto auto;
+    gap: 0 16px;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .order-item__img-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background-color: var(--color-surface);
+    flex-shrink: 0;
+  }
+
+  .order-item__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .order-item__img--placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+  }
+
+  .order-item__vendor {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .order-item__title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .order-item__title a:hover {
+    opacity: 0.7;
+  }
+
+  .order-item__variant {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+  }
+
+  .order-item__qty,
+  .order-item__line-price {
+    font-size: 14px;
+    text-align: right;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .order-item__line-price {
+    font-weight: 600;
+  }
+
+  /* ── Totals ───────────────────────────────────────────────────────────── */
+  .order-totals {
+    margin-left: auto;
+    width: 280px;
+    max-width: 100%;
+  }
+
+  .order-totals__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .order-totals__row--total {
+    padding-top: 12px;
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .order-totals__label {
+    color: var(--color-text-secondary);
+  }
+
+  .order-totals__row--total .order-totals__label {
+    color: var(--color-text);
+  }
+
+  /* ── Two-column bottom section ────────────────────────────────────────── */
+  .order-detail__bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .order-detail__address h2,
+  .order-detail__billing h2 {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .order-detail__address address,
+  .order-detail__billing address {
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 599px) {
+    .order-item {
+      grid-template-columns: 64px 1fr auto;
+    }
+
+    .order-item__line-price {
+      grid-column: 2 / -1;
+      text-align: left;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .order-detail__bottom {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .order-totals {
+      width: 100%;
+    }
+
+    .order-items__header {
+      display: none;
+    }
+  }
+</style>
+
+<main id="MainContent" class="section-padding" role="main" tabindex="-1">
+  <div class="container order-detail">
+
+    <!-- Back link -->
+    <a href="{{ routes.account_url }}" class="order-detail__back">
+      ← Back to account
+    </a>
+
+    <!-- Header -->
+    <div class="order-detail__header">
+      <h1>Order {{ order.name }}</h1>
+      <div class="order-detail__meta">
+        <span>{{ order.created_at | date: '%B %-d, %Y' }}</span>
+        {%- assign financial_class = 'status-badge--' | append: order.financial_status -%}
+        {%- assign fulfillment_class = 'status-badge--' | append: order.fulfillment_status -%}
+        <span class="status-badge {{ financial_class }}">
+          {{ order.financial_status | replace: '_', ' ' }}
+        </span>
+        <span class="status-badge {{ fulfillment_class }}">
+          {{ order.fulfillment_status | replace: '_', ' ' | default: 'Unfulfilled' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Line items -->
+    <div class="order-items">
+      <div class="order-items__header" aria-hidden="true">
+        <span>Product</span>
+        <span>Qty</span>
+        <span>Total</span>
+      </div>
+
+      {%- for line_item in order.line_items -%}
+        <div class="order-item">
+
+          <!-- Image -->
+          <div class="order-item__img-wrap">
+            {%- if line_item.image != blank -%}
+              {%- assign li_alt = line_item.image.alt | default: line_item.title -%}
+              {{
+                line_item.image
+                | image_url: width: 160
+                | image_tag:
+                  loading: 'lazy',
+                  decoding: 'async',
+                  class: 'order-item__img',
+                  alt: li_alt,
+                  width: 80,
+                  height: 80
+              }}
+            {%- else -%}
+              <div class="order-item__img--placeholder" aria-hidden="true">
+                {%- render 'icons', icon: 'product-placeholder' -%}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <!-- Details -->
+          <div>
+            {%- if line_item.vendor != blank -%}
+              <p class="order-item__vendor">{{ line_item.vendor | escape }}</p>
+            {%- endif -%}
+            <p class="order-item__title">
+              {%- if line_item.product.url != blank -%}
+                <a href="{{ line_item.product.url }}">{{ line_item.product_title | escape }}</a>
+              {%- else -%}
+                {{ line_item.product_title | escape }}
+              {%- endif -%}
+            </p>
+            {%- if line_item.variant_title != blank and line_item.variant_title != 'Default Title' -%}
+              <p class="order-item__variant">{{ line_item.variant_title | escape }}</p>
+            {%- endif -%}
+          </div>
+
+          <!-- Qty -->
+          <p class="order-item__qty" aria-label="Quantity: {{ line_item.quantity }}">
+            × {{ line_item.quantity }}
+          </p>
+
+          <!-- Line total -->
+          <p class="order-item__line-price">{{ line_item.line_price | money }}</p>
+
+        </div>
+      {%- endfor -%}
+    </div><!-- /.order-items -->
+
+    <!-- Totals -->
+    <div class="order-totals" aria-label="Order totals">
+      <div class="order-totals__row">
+        <span class="order-totals__label">Subtotal</span>
+        <span>{{ order.subtotal_price | money }}</span>
+      </div>
+      {%- if order.shipping_price > 0 -%}
+        <div class="order-totals__row">
+          <span class="order-totals__label">Shipping</span>
+          <span>{{ order.shipping_price | money }}</span>
+        </div>
+      {%- else -%}
+        <div class="order-totals__row">
+          <span class="order-totals__label">Shipping</span>
+          <span>Free</span>
+        </div>
+      {%- endif -%}
+      {%- if order.total_tax > 0 -%}
+        <div class="order-totals__row">
+          <span class="order-totals__label">Tax</span>
+          <span>{{ order.total_tax | money }}</span>
+        </div>
+      {%- endif -%}
+      <div class="order-totals__row order-totals__row--total">
+        <span class="order-totals__label">Total</span>
+        <span>{{ order.total_price | money }}</span>
+      </div>
+    </div>
+
+    <!-- Addresses -->
+    <div class="order-detail__bottom">
+      {%- if order.shipping_address != blank -%}
+        <div class="order-detail__address">
+          <h2>Ship to</h2>
+          <address>
+            {{ order.shipping_address.name | escape }}<br>
+            {%- if order.shipping_address.company != blank -%}
+              {{ order.shipping_address.company | escape }}<br>
+            {%- endif -%}
+            {{ order.shipping_address.address1 | escape }}<br>
+            {%- if order.shipping_address.address2 != blank -%}
+              {{ order.shipping_address.address2 | escape }}<br>
+            {%- endif -%}
+            {{ order.shipping_address.city }},
+            {{ order.shipping_address.province_code }}
+            {{ order.shipping_address.zip }}<br>
+            {{ order.shipping_address.country }}
+          </address>
+        </div>
+      {%- endif -%}
+
+      {%- if order.billing_address != blank -%}
+        <div class="order-detail__billing">
+          <h2>Bill to</h2>
+          <address>
+            {{ order.billing_address.name | escape }}<br>
+            {%- if order.billing_address.company != blank -%}
+              {{ order.billing_address.company | escape }}<br>
+            {%- endif -%}
+            {{ order.billing_address.address1 | escape }}<br>
+            {%- if order.billing_address.address2 != blank -%}
+              {{ order.billing_address.address2 | escape }}<br>
+            {%- endif -%}
+            {{ order.billing_address.city }},
+            {{ order.billing_address.province_code }}
+            {{ order.billing_address.zip }}<br>
+            {{ order.billing_address.country }}
+          </address>
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</main>

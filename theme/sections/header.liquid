@@ -1,0 +1,1185 @@
+{% comment %}
+  sections/header.liquid
+  ──────────────────────────────────────────────────────────────────
+  Scout & Molly's-inspired premium header for Shoe Center NMB.
+
+  DESIGN APPROACH
+  ───────────────
+  • Soft, feminine aesthetic: blush pill hovers, generous whitespace,
+    cream background, Montserrat Bold logo.
+  • Full-width mega menu with a blush (#F5E1E1) background — the panel
+    feels like a brand moment, not just a dropdown list.
+  • CSS-only mega menu on desktop: :hover + :focus-within handle
+    show/hide with zero JS. :focus-within keeps the panel open when
+    a keyboard user tabs through links inside it.
+  • position: sticky in pure CSS — no JS needed for the sticky behavior.
+    A single passive scroll listener adds a soft shadow once scrolled.
+
+  MEGA MENU POSITIONING
+  ──────────────────────
+  The mega panel is position: absolute with left: 0 / right: 0
+  relative to the <header> element (the nearest positioned ancestor —
+  position: sticky establishes a containing block). Intermediate
+  wrappers (.header__inner, .header__nav, .header__nav-item) are all
+  position: static so the containing block is always <header>.
+  Result: the panel is always full-width regardless of which nav item
+  triggers it.
+
+  JS IS LIMITED TO FOUR JOBS
+  ──────────────────────────
+  1. Scroll shadow toggle (1 passive listener — no layout thrash).
+  2. Mobile nav open / close with focus management + body-scroll lock.
+  3. Mobile submenu accordion (grid-template-rows CSS animation via
+     an .is-open class toggle — no max-height hack).
+  4. Desktop Escape key — moves focus back to the nav trigger so the
+     :focus-within mega panel closes naturally.
+  5. Cart count badge update (listens for custom 'cart:updated' event).
+{% endcomment %}
+
+{%- assign nav = linklists[section.settings.menu] -%}
+
+<!-- ── HEADER ──────────────────────────────────────────────────── -->
+<header
+  class="header"
+  id="SiteHeader"
+  role="banner"
+>
+  <div class="header__inner container">
+
+    <!-- Logo ─────────────────────────────────────────────────────── -->
+    <div class="header__logo">
+      <a
+        href="{{ routes.root_url }}"
+        class="header__logo-link"
+        aria-label="{{ shop.name }} — return to homepage"
+      >
+        {%- if section.settings.logo_type == 'image' and section.settings.logo_image != blank -%}
+          {{
+            section.settings.logo_image
+            | image_url: width: section.settings.logo_max_width
+            | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              alt: shop.name,
+              width: section.settings.logo_max_width,
+              class: 'header__logo-img'
+          }}
+        {%- else -%}
+          <span class="header__logo-text">
+            {{- section.settings.logo_text | default: shop.name -}}
+          </span>
+        {%- endif -%}
+      </a>
+    </div>
+
+    <!-- Desktop navigation ────────────────────────────────────────
+      position: static on every wrapper so the mega panel's
+      position: absolute resolves to the <header> as its containing block.
+    ─────────────────────────────────────────────────────────────── -->
+    <nav class="header__nav" aria-label="Main navigation">
+      <ul class="header__nav-list" role="list">
+
+        {%- for link in nav.links -%}
+          {%- assign link_handle = link.title | handleize -%}
+          {%- assign has_children = false -%}
+          {%- if link.links.size > 0 -%}{%- assign has_children = true -%}{%- endif -%}
+
+          <li class="header__nav-item{% if has_children %} has-dropdown{% endif %}">
+
+            {%- if has_children -%}
+
+              <!-- Parent link — navigates AND reveals the mega panel.
+                   aria-haspopup="true" tells screen readers a popup exists.
+                   aria-expanded is managed by JS only on keyboard interaction;
+                   CSS :focus-within handles the visual state automatically. -->
+              <a
+                href="{{ link.url }}"
+                class="header__nav-link"
+                aria-haspopup="true"
+                {% if link.active %}aria-current="page"{% endif %}
+              >
+                {{- link.title -}}
+                <svg class="header__nav-chevron" aria-hidden="true" focusable="false" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+
+              <!-- Full-width mega menu panel ──────────────────────── -->
+              <div
+                class="megamenu"
+                id="Megamenu-{{ link_handle }}"
+                role="region"
+                aria-label="{{ link.title }} categories"
+              >
+                <div class="megamenu__inner container">
+
+                  <!-- Category links column -->
+                  <div class="megamenu__links">
+                    <p class="megamenu__label">{{ link.title }}</p>
+                    <ul role="list">
+                      {%- for child in link.links -%}
+                        <li>
+                          <a
+                            href="{{ child.url }}"
+                            class="megamenu__link{% if child.active %} is-active{% endif %}"
+                          >
+                            {{- child.title -}}
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+
+                  <!-- Lifestyle image tiles from schema blocks ───────
+                    Blocks are matched by comparing block.settings.nav_handle
+                    against the handleized link title (e.g. "Women's" → "womens").
+                    If no blocks match, only the links column renders.
+                  ─────────────────────────────────────────────────── -->
+                  {%- assign tile_count = 0 -%}
+                  {%- for block in section.blocks -%}
+                    {%- if block.type == 'mega_image' and block.settings.nav_handle == link_handle -%}
+                      {%- if tile_count == 0 -%}<div class="megamenu__tiles">{%- endif -%}
+
+                      <a
+                        href="{{ block.settings.url | default: link.url }}"
+                        class="megamenu__tile"
+                        {{ block.shopify_attributes }}
+                      >
+                        {%- if block.settings.image != blank -%}
+                          {%- assign mega_img_alt = block.settings.title | default: link.title -%}
+                          {{
+                            block.settings.image
+                            | image_url: width: 360
+                            | image_tag:
+                              loading: 'lazy',
+                              alt: mega_img_alt,
+                              width: 360,
+                              class: 'megamenu__tile-img'
+                          }}
+                        {%- else -%}
+                          <div class="megamenu__tile-placeholder"></div>
+                        {%- endif -%}
+                        {%- if block.settings.title != blank -%}
+                          <span class="megamenu__tile-label">{{ block.settings.title }}</span>
+                        {%- endif -%}
+                      </a>
+
+                      {%- assign tile_count = tile_count | plus: 1 -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  {%- if tile_count > 0 -%}</div>{%- endif -%}
+
+                </div><!-- /.megamenu__inner -->
+              </div><!-- /.megamenu -->
+
+            {%- else -%}
+
+              <a
+                href="{{ link.url }}"
+                class="header__nav-link"
+                {% if link.active %}aria-current="page"{% endif %}
+              >
+                {{- link.title -}}
+              </a>
+
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+
+      </ul>
+    </nav>
+
+    <!-- Action icons: Search, Account, Cart, Hamburger ─────────── -->
+    <div class="header__actions">
+
+      {%- if section.settings.show_search -%}
+        <button
+          class="header__icon-btn"
+          type="button"
+          aria-label="Open search"
+          aria-expanded="false"
+          aria-controls="SearchDrawer"
+          id="SearchToggle"
+        >
+          <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 19 19" fill="none">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      {%- endif -%}
+
+      <a
+        href="{{ routes.account_url }}"
+        class="header__icon-btn"
+        aria-label="{% if customer %}My account — {{ customer.first_name }}{% else %}Sign in{% endif %}"
+      >
+        <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M3 18c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </a>
+
+      <button
+        class="header__icon-btn header__cart-btn"
+        type="button"
+        aria-label="Open cart, {{ cart.item_count }} {{ cart.item_count | pluralize: 'item', 'items' }}"
+        id="CartDrawerToggle"
+        data-cart-toggle
+      >
+        <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 20 20" fill="none">
+          <path d="M2.5 3.5h2.1l2.3 9h8.7l1.9-6.5H6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="8.5" cy="16.5" r="1.2" fill="currentColor"/>
+          <circle cx="14.5" cy="16.5" r="1.2" fill="currentColor"/>
+        </svg>
+        <span
+          class="header__cart-count{% if cart.item_count == 0 %} is-hidden{% endif %}"
+          aria-hidden="true"
+          data-cart-count
+        >
+          {{- cart.item_count -}}
+        </span>
+      </button>
+
+      <!-- Hamburger — shown only on mobile via CSS -->
+      <button
+        class="header__hamburger"
+        type="button"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="MobileNav"
+        id="HamburgerBtn"
+      >
+        <span class="header__bar" aria-hidden="true"></span>
+        <span class="header__bar" aria-hidden="true"></span>
+        <span class="header__bar" aria-hidden="true"></span>
+      </button>
+
+    </div><!-- /.header__actions -->
+  </div><!-- /.header__inner -->
+</header>
+
+<!-- ── MOBILE NAVIGATION DRAWER ─────────────────────────────────
+  role="dialog" + aria-modal="true" creates a modal region.
+  Screen readers restrict navigation to content inside the dialog
+  while it is open. Combined with the JS focus trap, focus is
+  completely contained until the user explicitly closes the panel.
+─────────────────────────────────────────────────────────────── -->
+<nav
+  class="mobile-nav"
+  id="MobileNav"
+  aria-label="Mobile navigation menu"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+>
+
+  <div class="mobile-nav__header">
+    <span class="mobile-nav__store-name" aria-hidden="true">
+      {{- section.settings.logo_text | default: shop.name -}}
+    </span>
+    <button
+      class="mobile-nav__close"
+      type="button"
+      aria-label="Close navigation menu"
+      id="MobileNavClose"
+    >
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 18 18" fill="none">
+        <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <ul class="mobile-nav__list" role="list">
+    {%- for link in nav.links -%}
+      {%- assign mob_handle = link.title | handleize -%}
+      <li class="mobile-nav__item">
+
+        {%- if link.links.size > 0 -%}
+          <button
+            class="mobile-nav__link mobile-nav__expand"
+            type="button"
+            aria-expanded="false"
+            aria-controls="MobileSubmenu-{{ mob_handle }}"
+          >
+            {{- link.title -}}
+            <svg class="mobile-nav__chevron" aria-hidden="true" focusable="false" width="10" height="6" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+
+          <!-- CSS grid animation: height 0 → auto without max-height hack -->
+          <div
+            class="mobile-nav__submenu-wrap"
+            id="MobileSubmenu-{{ mob_handle }}"
+          >
+            <ul class="mobile-nav__submenu" role="list">
+              <!-- "All [Category]" first — lets user navigate the full page -->
+              <li>
+                <a href="{{ link.url }}" class="mobile-nav__sublink mobile-nav__sublink--all">
+                  All {{ link.title }}
+                </a>
+              </li>
+              {%- for child in link.links -%}
+                <li>
+                  <a
+                    href="{{ child.url }}"
+                    class="mobile-nav__sublink"
+                    {% if child.active %}aria-current="page"{% endif %}
+                  >
+                    {{- child.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+
+        {%- else -%}
+          <a
+            href="{{ link.url }}"
+            class="mobile-nav__link"
+            {% if link.active %}aria-current="page"{% endif %}
+          >
+            {{- link.title -}}
+          </a>
+        {%- endif -%}
+
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  <!-- Utility links at the bottom of the drawer -->
+  <div class="mobile-nav__footer">
+    <a href="{{ routes.account_url }}" class="mobile-nav__util-link">
+      <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M3 18c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      {% if customer %}My Account{% else %}Sign In{% endif %}
+    </a>
+    <a href="{{ routes.cart_url }}" class="mobile-nav__util-link">
+      <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 20 20" fill="none">
+        <path d="M2.5 3.5h2.1l2.3 9h8.7l1.9-6.5H6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="8.5" cy="16.5" r="1.2" fill="currentColor"/>
+        <circle cx="14.5" cy="16.5" r="1.2" fill="currentColor"/>
+      </svg>
+      Cart
+      {%- if cart.item_count > 0 -%}
+        &nbsp;({{ cart.item_count }})
+      {%- endif -%}
+    </a>
+  </div>
+
+</nav>
+
+<!-- Darkens page behind open mobile nav -->
+<div
+  class="mobile-nav__backdrop"
+  id="MobileNavBackdrop"
+  aria-hidden="true"
+></div>
+
+<!-- ───────────────────────────────────────────────────────────────
+  STYLES
+  ─────────────────────────────────────────────────────────────── -->
+<style>
+  /* ── Header shell ──────────────────────────────────────────────── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--color-bg);
+    /* No bottom border by default — appears with scroll shadow below */
+    transition: box-shadow 0.25s ease;
+  }
+
+  /* Subtle shadow + border once user scrolls past the top edge */
+  .header--scrolled {
+    box-shadow:
+      0 1px 0 var(--color-border),
+      0 4px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  /* ── Inner — three-column flex ────────────────────────────────── */
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    height: 80px; /* Generous height for a premium feel */
+  }
+
+  /* ── Logo ────────────────────────────────────────────────────── */
+  .header__logo { flex-shrink: 0; }
+
+  .header__logo-link {
+    display: block;
+    text-decoration: none;
+  }
+  /* Override the global a:hover opacity rule — logo should stay crisp */
+  .header__logo-link:hover { opacity: 1; }
+
+  .header__logo-img {
+    display: block;
+    height: auto;
+    max-width: {{ section.settings.logo_max_width }}px;
+  }
+
+  .header__logo-text {
+    /* Montserrat Bold — the vision spec heading font */
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: 20px;
+    letter-spacing: 0.18em; /* Wide tracking = boutique elegance */
+    text-transform: uppercase;
+    color: var(--color-heading);
+    white-space: nowrap;
+  }
+
+  /* ── Desktop nav ───────────────────────────────────────────────
+    Hidden on mobile; revealed at 1024px.
+    position: static — do not change. The mega menu's full-width
+    absolute positioning depends on <header> as its containing block.
+  ──────────────────────────────────────────────────────────────── */
+  .header__nav {
+    display: none;
+    flex: 1;
+    /* position: static is the default — intentionally not overridden */
+  }
+
+  .header__nav-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  /* Also position: static — see note above */
+  .header__nav-item { list-style: none; }
+
+  .header__nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-heading);
+    text-decoration: none;
+    border-radius: 20px; /* Pill shape — soft and feminine */
+    white-space: nowrap;
+    transition:
+      background-color var(--transition),
+      color var(--transition);
+  }
+
+  .header__nav-link:hover,
+  .header__nav-link:focus-visible {
+    background-color: var(--color-accent); /* Blush pill hover */
+    color: var(--color-heading);
+    opacity: 1; /* Override global a:hover opacity */
+  }
+
+  /* Active page — blush pill + underline so it's visually distinct from hover */
+  .header__nav-link[aria-current="page"] {
+    background-color: var(--color-accent);
+    color: var(--color-heading);
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+  }
+
+  /* Chevron rotates when the mega is open */
+  .header__nav-chevron {
+    flex-shrink: 0;
+    transition: transform var(--transition);
+  }
+
+  .has-dropdown:hover .header__nav-chevron,
+  .has-dropdown:focus-within .header__nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Mega menu ─────────────────────────────────────────────────
+    Full-width panel — left: 0 / right: 0 relative to <header>.
+    Blush background makes it feel like a branded editorial moment.
+    opacity + visibility transition (not display) keeps links in
+    the tab order when visible and allows smooth CSS animation.
+  ──────────────────────────────────────────────────────────────── */
+  .megamenu {
+    position: absolute;
+    top: 100%; /* Flush below the header's bottom edge */
+    left: 0;
+    right: 0;
+    background-color: var(--color-accent); /* Blush */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    /* Hidden state */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition:
+      opacity 0.2s ease,
+      visibility 0.2s ease,
+      transform 0.2s ease;
+    z-index: 200;
+  }
+
+  /*
+    :hover — mouse users
+    :focus-within — keyboard users (panel stays open while any
+    child element has focus; closes when Tab moves past the last link)
+  */
+  .has-dropdown:hover .megamenu,
+  .has-dropdown:focus-within .megamenu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  /* Content area: constrained to page-width, centred */
+  .megamenu__inner {
+    display: flex;
+    gap: 48px;
+    padding-block: 40px;
+  }
+
+  /* Overline label above the links list */
+  .megamenu__label {
+    margin: 0 0 14px;
+    font-family: var(--font-heading);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  /* Links column — fixed width, left-aligned */
+  .megamenu__links {
+    flex: 0 0 180px;
+  }
+
+  .megamenu__links ul {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .megamenu__link {
+    display: block;
+    padding: 7px 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-heading);
+    text-decoration: none;
+    border-radius: 4px;
+    transition:
+      background-color var(--transition),
+      padding-left var(--transition);
+  }
+
+  .megamenu__link:hover,
+  .megamenu__link:focus-visible,
+  .megamenu__link.is-active {
+    background-color: rgba(255, 255, 255, 0.55);
+    padding-left: 16px;
+    opacity: 1;
+  }
+
+  /* Lifestyle image tiles column — fills remaining space */
+  .megamenu__tiles {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .megamenu__tile {
+    flex: 1;
+    position: relative;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .megamenu__tile-img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3; /* Portrait — editorial, fashion-forward */
+    object-fit: cover;
+    transition: transform 0.45s ease;
+  }
+
+  .megamenu__tile:hover .megamenu__tile-img,
+  .megamenu__tile:focus-visible .megamenu__tile-img {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+
+  /* Placeholder shown when no image is uploaded */
+  .megamenu__tile-placeholder {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-card);
+  }
+
+  /* Label overlaid on the image — dark gradient for readability */
+  .megamenu__tile-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 32px 14px 16px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.52) 0%, transparent 100%);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  /* ── Action icons ──────────────────────────────────────────────── */
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .header__icon-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: var(--color-heading);
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition);
+  }
+
+  .header__icon-btn:hover,
+  .header__icon-btn:focus-visible {
+    background-color: var(--color-accent); /* Blush circle hover */
+    opacity: 1;
+  }
+
+  /* Cart count badge */
+  .header__cart-count {
+    position: absolute;
+    top: 5px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    background-color: var(--color-heading);
+    color: var(--color-bg);
+    font-family: var(--font-body);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .header__cart-count.is-hidden { display: none; }
+
+  /* ── Hamburger ─────────────────────────────────────────────────── */
+  .header__hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 0 10px;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition);
+  }
+
+  .header__hamburger:hover,
+  .header__hamburger:focus-visible {
+    background-color: var(--color-accent);
+  }
+
+  .header__bar {
+    display: block;
+    height: 1.5px;
+    background-color: var(--color-heading);
+    border-radius: 1px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  /* Morph 3 bars → × when mobile nav is open */
+  body.nav-open .header__bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  body.nav-open .header__bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  body.nav-open .header__bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+  /* ── Mobile navigation drawer ─────────────────────────────────── */
+  .mobile-nav {
+    position: fixed;
+    inset-block: 0;
+    right: 0;
+    width: min(360px, 92vw);
+    background-color: var(--color-bg);
+    border-left: 1px solid var(--color-border);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* Off-screen to the right; JS adds body.nav-open to slide it in */
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body.nav-open .mobile-nav { transform: translateX(0); }
+
+  .mobile-nav__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 20px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+
+  .mobile-nav__store-name {
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-heading);
+  }
+
+  .mobile-nav__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-heading);
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition);
+  }
+
+  .mobile-nav__close:hover,
+  .mobile-nav__close:focus-visible {
+    background-color: var(--color-accent);
+  }
+
+  .mobile-nav__list {
+    flex: 1;
+    padding-block: 8px;
+  }
+
+  .mobile-nav__item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobile-nav__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px 24px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-heading);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: background-color var(--transition);
+  }
+
+  .mobile-nav__link:hover,
+  .mobile-nav__link:focus-visible {
+    background-color: var(--color-accent);
+    opacity: 1;
+  }
+
+  .mobile-nav__link[aria-current="page"] { font-weight: 700; }
+
+  /* Chevron rotates on accordion open */
+  .mobile-nav__chevron {
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+  }
+
+  .mobile-nav__expand[aria-expanded="true"] .mobile-nav__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Mobile submenu accordion (CSS grid animation) ─────────────
+    grid-template-rows: 0fr → 1fr animates height 0 → auto.
+    No max-height hack; no layout jank.
+    The inner <ul> needs overflow: hidden to clip during animation.
+  ──────────────────────────────────────────────────────────────── */
+  .mobile-nav__submenu-wrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.28s ease;
+  }
+
+  .mobile-nav__submenu-wrap.is-open {
+    grid-template-rows: 1fr;
+  }
+
+  .mobile-nav__submenu {
+    overflow: hidden;
+    background-color: var(--color-card);
+  }
+
+  .mobile-nav__sublink {
+    display: block;
+    padding: 14px 24px 14px 36px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: background-color var(--transition), color var(--transition);
+  }
+
+  .mobile-nav__sublink:hover,
+  .mobile-nav__sublink:focus-visible {
+    background-color: var(--color-accent);
+    color: var(--color-heading);
+    opacity: 1;
+  }
+
+  .mobile-nav__sublink--all {
+    font-weight: 600;
+    color: var(--color-heading);
+    padding-inline-start: 24px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Utility links at drawer base */
+  .mobile-nav__footer {
+    border-top: 1px solid var(--color-border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .mobile-nav__util-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+
+  .mobile-nav__util-link:hover,
+  .mobile-nav__util-link:focus-visible {
+    color: var(--color-heading);
+    opacity: 1;
+  }
+
+  /* Page backdrop behind mobile nav */
+  .mobile-nav__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 390;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  body.nav-open .mobile-nav__backdrop {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Prevent background scroll while drawer is open */
+  body.nav-open { overflow: hidden; }
+
+  /* ── Breakpoints ───────────────────────────────────────────────── */
+  @media (min-width: 1024px) {
+    .header__nav       { display: flex; }
+    .header__hamburger { display: none; }
+  }
+
+  @media (max-width: 1023px) {
+    .header__inner { height: 64px; }
+  }
+</style>
+
+<!-- ───────────────────────────────────────────────────────────────
+  JAVASCRIPT — Minimal and purposeful.
+  Wrapped in an IIFE to avoid polluting the global scope.
+─────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+
+  const header    = document.getElementById('SiteHeader');
+  const hamburger = document.getElementById('HamburgerBtn');
+  const mobileNav = document.getElementById('MobileNav');
+  const closeBtn  = document.getElementById('MobileNavClose');
+  const backdrop  = document.getElementById('MobileNavBackdrop');
+
+  if (!header) return;
+
+  // ── 1. Scroll shadow ────────────────────────────────────────────
+  // Single passive listener — toggles a class for a CSS box-shadow.
+  // { passive: true } guarantees this never blocks scroll performance.
+  window.addEventListener('scroll', function () {
+    header.classList.toggle('header--scrolled', window.scrollY > 4);
+  }, { passive: true });
+
+  // ── 2. Mobile nav open / close ──────────────────────────────────
+  if (!hamburger || !mobileNav || !closeBtn || !backdrop) return;
+
+  const FOCUSABLE_SEL = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  // Returns visible focusable elements, excluding hidden submenu content
+  function getFocusable() {
+    return [...mobileNav.querySelectorAll(FOCUSABLE_SEL)].filter(function (el) {
+      return !el.closest('.mobile-nav__submenu-wrap:not(.is-open)');
+    });
+  }
+
+  function openNav() {
+    document.body.classList.add('nav-open');
+    mobileNav.removeAttribute('aria-hidden');
+    hamburger.setAttribute('aria-expanded', 'true');
+    hamburger.setAttribute('aria-label', 'Close navigation menu');
+    // Defer focus move one frame so the slide-in transition has started
+    requestAnimationFrame(function () {
+      var first = getFocusable()[0];
+      if (first) first.focus();
+    });
+  }
+
+  function closeNav() {
+    document.body.classList.remove('nav-open');
+    mobileNav.setAttribute('aria-hidden', 'true');
+    hamburger.setAttribute('aria-expanded', 'false');
+    hamburger.setAttribute('aria-label', 'Open navigation menu');
+    hamburger.focus(); // Return focus to the trigger
+  }
+
+  hamburger.addEventListener('click', function () {
+    hamburger.getAttribute('aria-expanded') === 'true' ? closeNav() : openNav();
+  });
+  closeBtn.addEventListener('click', closeNav);
+  backdrop.addEventListener('click', closeNav);
+
+  // Focus trap + Escape inside the mobile nav
+  mobileNav.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeNav(); return; }
+    if (e.key !== 'Tab') return;
+
+    var focusable = getFocusable();
+    if (!focusable.length) return;
+
+    var first = focusable[0];
+    var last  = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  // ── 3. Mobile submenu accordion ────────────────────────────────
+  // Toggles .is-open on the wrapper div (drives CSS grid animation)
+  // and updates aria-expanded on the trigger button.
+  mobileNav.querySelectorAll('.mobile-nav__expand').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isOpen = this.getAttribute('aria-expanded') === 'true';
+      var panel  = document.getElementById(this.getAttribute('aria-controls'));
+      if (!panel) return;
+      this.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      panel.classList.toggle('is-open', !isOpen);
+    });
+  });
+
+  // ── 4. Desktop Escape key ───────────────────────────────────────
+  // CSS :focus-within keeps mega panels open while focus is inside.
+  // Pressing Escape moves focus back to the parent nav link, which
+  // removes :focus-within and closes the panel naturally.
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var openItem = document.querySelector('.has-dropdown:focus-within');
+    if (openItem) {
+      var trigger = openItem.querySelector('.header__nav-link');
+      if (trigger) trigger.focus();
+    }
+  });
+
+  // ── 5. Cart count badge sync ────────────────────────────────────
+  // The cart drawer dispatches 'cart:updated' with { count } after
+  // any add / remove. All [data-cart-count] badges update instantly.
+  document.addEventListener('cart:updated', function (e) {
+    var count  = (e.detail && e.detail.count) || 0;
+    var label  = count + ' ' + (count === 1 ? 'item' : 'items');
+
+    document.querySelectorAll('[data-cart-count]').forEach(function (el) {
+      el.textContent = count > 0 ? count : '';
+      el.classList.toggle('is-hidden', count === 0);
+    });
+
+    var cartBtn = document.getElementById('CartDrawerToggle');
+    if (cartBtn) cartBtn.setAttribute('aria-label', 'Open cart, ' + label);
+  });
+
+}());
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "tag": "section",
+  "class": "header-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "select",
+      "id": "logo_type",
+      "label": "Logo style",
+      "options": [
+        { "value": "text", "label": "Text (store name)" },
+        { "value": "image", "label": "Image (upload below)" }
+      ],
+      "default": "text",
+      "info": "Text uses the heading font (Montserrat Bold) automatically."
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo text",
+      "default": "Shoe Center",
+      "info": "Used for both the text logo and the mobile nav store name."
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo image",
+      "info": "SVG or PNG. Upload at 2× the display width for sharp retina rendering."
+    },
+    {
+      "type": "range",
+      "id": "logo_max_width",
+      "label": "Logo max width",
+      "min": 80,
+      "max": 280,
+      "step": 10,
+      "unit": "px",
+      "default": 160
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Main menu",
+      "default": "main-menu",
+      "info": "Add child links in the Shopify navigation editor to enable mega menu dropdowns."
+    },
+    {
+      "type": "header",
+      "content": "Header options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search icon",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_image",
+      "name": "Mega menu image tile",
+      "limit": 9,
+      "settings": [
+        {
+          "type": "text",
+          "id": "nav_handle",
+          "label": "Menu item handle",
+          "info": "Lowercase version of the parent nav item title. Shopify converts it automatically: 'Women\\'s' → 'womens', 'Men\\'s Shoes' → 'mens-shoes', 'Brands' → 'brands'. Check by hovering over your nav item in the editor.",
+          "placeholder": "womens"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Lifestyle image",
+          "info": "Portrait orientation (2:3 ratio) looks best."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tile label",
+          "placeholder": "Comfort Sandals"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Tile link",
+          "info": "Optional. Leave blank to link to the parent nav page."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,231 @@
+{% comment %}
+  snippets/product-card.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Reusable product card. Extracted from featured-products.liquid so collection,
+  search, and other grids can share identical markup.
+
+  Parameters:
+    product     {object}  Required. The product object.
+    show_badges {boolean} Optional. Show New/Sale/Best Seller badge. Default: true.
+    lazy_load   {boolean} Optional. Use loading="lazy" on image. Default: true.
+                          Set false for the first card in a collection (LCP image).
+
+  CSS classes are defined in sections/featured-products.liquid which is always
+  loaded before any grid that uses this snippet.
+
+  BADGE LOGIC (priority order — only one badge per card):
+    1. Tag "best-seller" or "bestseller"  → "Best Seller" (dark badge)
+    2. Tag "new"                          → "New"          (blush badge)
+    3. Sold out                           → "Sold Out"     (dark badge)
+    4. Published within 60 days           → "New"          (blush badge, auto)
+    5. compare_at_price > price           → "Sale"         (dark badge)
+{% endcomment %}
+
+{%- liquid
+  # ── Defaults ──────────────────────────────────────────────────────────────
+  if show_badges == nil
+    assign show_badges = true
+  endif
+  if lazy_load == nil
+    assign lazy_load = true
+  endif
+
+  # ── Image loading strategy ────────────────────────────────────────────────
+  # First card on collection pages can pass lazy_load: false for the LCP image
+  if lazy_load
+    assign img_loading  = 'lazy'
+    assign img_decoding = 'async'
+    assign img_priority = ''
+  else
+    assign img_loading  = 'eager'
+    assign img_decoding = 'auto'
+    assign img_priority = 'high'
+  endif
+
+  # ── Badge resolution ──────────────────────────────────────────────────────
+  assign badge_text  = ''
+  assign badge_class = ''
+
+  if show_badges
+    if product.tags contains 'best-seller' or product.tags contains 'bestseller'
+      assign badge_text  = 'Best Seller'
+      assign badge_class = 'product-card__badge--dark'
+    elsif product.tags contains 'new'
+      assign badge_text  = 'New'
+    elsif product.available == false
+      assign badge_text  = 'Sold Out'
+      assign badge_class = 'product-card__badge--dark'
+    else
+      # Auto-badge: published within the last 60 days → "New"
+      # 60 days = 60 × 24 × 60 × 60 = 5,184,000 seconds
+      assign sixty_days_ago = 'now' | date: '%s' | times: 1 | minus: 5184000
+      assign published_ts   = product.published_at | date: '%s' | times: 1
+      if published_ts > sixty_days_ago
+        assign badge_text = 'New'
+      elsif product.compare_at_price > product.price
+        assign badge_text  = 'Sale'
+        assign badge_class = 'product-card__badge--dark'
+      endif
+    endif
+  endif
+
+  # ── Image availability ────────────────────────────────────────────────────
+  assign primary_img   = product.featured_image
+  assign secondary_img = product.images[1]
+  assign has_secondary = false
+  if secondary_img != blank and secondary_img != primary_img
+    assign has_secondary = true
+  endif
+
+  # ── Sale state for price display ──────────────────────────────────────────
+  assign is_on_sale = false
+  if product.compare_at_price > product.price
+    assign is_on_sale = true
+  endif
+-%}
+
+<article
+  class="product-card"
+  aria-label="{{ product.title | escape }}{% if badge_text != blank %} — {{ badge_text }}{% endif %}"
+>
+
+  {%- comment -%} ── Media area (image + badge) ─────────────────────────── {%- endcomment -%}
+  <a
+    href="{{ product.url }}"
+    class="product-card__media-link"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="product-card__media">
+
+      {%- if primary_img != blank -%}
+        {%- assign pc_primary_alt = primary_img.alt | default: product.title -%}
+        {{
+          primary_img
+          | image_url: width: 800
+          | image_tag:
+            loading: img_loading,
+            decoding: img_decoding,
+            fetchpriority: img_priority,
+            class: 'product-card__img product-card__img--primary',
+            alt: pc_primary_alt,
+            width: primary_img.width,
+            height: primary_img.height,
+            widths: '400, 600, 800, 1000',
+            sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
+        }}
+      {%- else -%}
+        <div class="product-card__img product-card__img--primary product-card__img--placeholder">
+          {{- 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
+        </div>
+      {%- endif -%}
+
+      {%- if has_secondary -%}
+        {%- assign pc_secondary_alt = secondary_img.alt | default: product.title -%}
+        {{
+          secondary_img
+          | image_url: width: 800
+          | image_tag:
+            loading: 'lazy',
+            decoding: 'async',
+            class: 'product-card__img product-card__img--secondary',
+            alt: pc_secondary_alt,
+            width: secondary_img.width,
+            height: secondary_img.height,
+            widths: '400, 600, 800, 1000',
+            sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
+        }}
+      {%- endif -%}
+
+      {%- if badge_text != blank -%}
+        <span class="product-card__badge {{ badge_class }}" aria-hidden="true">
+          {{- badge_text -}}
+        </span>
+      {%- endif -%}
+
+    </div><!-- /.product-card__media -->
+  </a>
+
+  {%- comment -%} ── Card body ──────────────────────────────────────────── {%- endcomment -%}
+  <div class="product-card__body">
+
+    {%- if product.vendor != blank -%}
+      <p class="product-card__vendor">{{- product.vendor | escape -}}</p>
+    {%- endif -%}
+
+    <h3 class="product-card__title">
+      <a href="{{ product.url }}" class="product-card__title-link">
+        {{- product.title | escape -}}
+      </a>
+    </h3>
+
+    <div class="product-card__footer">
+
+      {%- comment -%} Price ─────────────────────────────────────────────── {%- endcomment -%}
+      <div class="product-card__prices">
+        {%- if is_on_sale -%}
+          <span class="product-card__price product-card__price--sale">
+            {{- product.price | money -}}
+          </span>
+          <s class="product-card__price product-card__price--compare">
+            {{- product.compare_at_price | money -}}
+          </s>
+        {%- else -%}
+          <span class="product-card__price">
+            {{- product.price | money -}}
+          </span>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}
+        CTA button — linked when available, inert span when sold out.
+        The sold-out state uses opacity + cursor:not-allowed to communicate
+        unavailability without removing the element from the DOM (which would
+        cause layout shift between hover and non-hover states).
+      {%- endcomment -%}
+      {%- if product.available -%}
+        <a
+          href="{{ product.url }}"
+          class="product-card__btn"
+          aria-label="Shop {{ product.title | escape }}"
+        >
+          Shop Now
+        </a>
+      {%- else -%}
+        <span class="product-card__btn product-card__btn--sold-out">
+          Sold Out
+        </span>
+      {%- endif -%}
+
+    </div><!-- /.product-card__footer -->
+  </div><!-- /.product-card__body -->
+
+</article><!-- /.product-card -->
+
+<style>
+  /* ── Sold-out button state ─────────────────────────────────────────────
+     Intentionally not pointer-events: none — screen readers can still
+     focus the element and read "Sold Out". Visual users see the cursor change.
+  ─────────────────────────────────────────────────────────────────────── */
+  .product-card__btn--sold-out {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 9px 16px;
+    background-color: var(--color-accent, #F5E1E1);
+    color: var(--color-heading, #000000);
+    border: none;
+    border-radius: var(--radius-btn, 8px);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    line-height: 1;
+  }
+</style>

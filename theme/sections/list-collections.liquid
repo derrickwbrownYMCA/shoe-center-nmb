@@ -1,0 +1,253 @@
+{% comment %}
+  sections/list-collections.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Renders the /collections page — a grid of all store collections.
+
+  Shopify automatically passes `collections` to this template. The built-in
+  "all" and "frontpage" handles are filtered out since they aren't real
+  shopping categories.
+
+  LAYOUT
+  ───────
+  Same 3-column grid as the homepage category tiles. Each card shows the
+  collection image (or a placeholder SVG), title, and product count.
+
+  PERFORMANCE
+  ────────────
+  First 6 images: eager/high-priority (above the fold).
+  Remaining: lazy.
+{% endcomment %}
+
+<style>
+  /* ── Page header ──────────────────────────────────────────────────────── */
+  .list-collections__header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .list-collections__header h1 {
+    margin-bottom: 10px;
+  }
+
+  .list-collections__header p {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+
+  /* ── Collection grid ──────────────────────────────────────────────────── */
+  .collections-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* ── Collection card ──────────────────────────────────────────────────── */
+  .collection-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-card);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition:
+      box-shadow 0.28s ease,
+      transform  0.28s ease;
+  }
+
+  .collection-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .collection-card__link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* ── Image area ───────────────────────────────────────────────────────── */
+  .collection-card__media {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background-color: var(--color-surface);
+  }
+
+  .collection-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.42s ease;
+  }
+
+  .collection-card:hover .collection-card__img {
+    transform: scale(1.03);
+  }
+
+  .collection-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .collection-card__placeholder-svg {
+    display: block;
+    width: 60%;
+    height: 60%;
+    fill: #C8C8C8;
+  }
+
+  /* ── Card body ────────────────────────────────────────────────────────── */
+  .collection-card__body {
+    flex: 1;
+    padding: 20px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .collection-card__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: var(--font-size-h3);
+    color: var(--color-heading);
+    letter-spacing: var(--heading-letter-spacing);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .collection-card__count {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  /* ── Pagination spacing ───────────────────────────────────────────────── */
+  .list-collections .pagination-wrap {
+    margin-top: 48px;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .collections-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 479px) {
+    .collections-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .collection-card__media {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .collection-card { transition: box-shadow 0.28s ease; }
+    .collection-card:hover { transform: none; }
+    .collection-card__img { transition: none; }
+  }
+</style>
+
+{%- paginate collections by 24 -%}
+
+<div class="list-collections section-padding">
+  <div class="container">
+
+    <!-- Page header -->
+    <div class="list-collections__header">
+      <h1>Shop by Category</h1>
+      <p>{{ collections.size }} collections</p>
+    </div>
+
+    <ul class="collections-grid" role="list">
+      {%- for collection in collections -%}
+
+        {%- comment -%}
+          Skip Shopify's built-in utility collections — these are internal
+          and don't represent real shopping categories.
+        {%- endcomment -%}
+        {%- unless collection.handle == 'all' or collection.handle == 'frontpage' -%}
+
+          {%- liquid
+            if forloop.index <= 6
+              assign img_loading  = 'eager'
+              assign img_priority = 'high'
+            else
+              assign img_loading  = 'lazy'
+              assign img_priority = ''
+            endif
+            assign coll_alt = collection.title | escape
+          -%}
+
+          <li>
+            <article class="collection-card">
+              <a href="{{ collection.url }}" class="collection-card__link" aria-label="{{ collection.title | escape }}">
+
+                <!-- Image -->
+                <div class="collection-card__media">
+                  {%- if collection.image != blank -%}
+                    {{
+                      collection.image
+                      | image_url: width: 800
+                      | image_tag:
+                        loading: img_loading,
+                        fetchpriority: img_priority,
+                        decoding: 'auto',
+                        class: 'collection-card__img',
+                        alt: coll_alt,
+                        width: collection.image.width,
+                        height: collection.image.height,
+                        widths: '400, 600, 800',
+                        sizes: '(max-width: 479px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 20px), calc((min(100vw, 1280px) - 96px - 48px) / 3)'
+                    }}
+                  {%- else -%}
+                    <div class="collection-card__placeholder" aria-hidden="true">
+                      {{- 'collection-' | append: forloop.index | placeholder_svg_tag: 'collection-card__placeholder-svg' -}}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <!-- Body -->
+                <div class="collection-card__body">
+                  <h2 class="collection-card__title">{{ collection.title | escape }}</h2>
+                  <p class="collection-card__count">
+                    {{ collection.products_count }}
+                    {%- if collection.products_count == 1 %} product{%- else %} products{%- endif %}
+                  </p>
+                </div>
+
+              </a>
+            </article>
+          </li>
+
+        {%- endunless -%}
+      {%- endfor -%}
+    </ul>
+
+    {%- if paginate.pages > 1 -%}
+      {%- render 'pagination', paginate: paginate -%}
+    {%- endif -%}
+
+  </div>
+</div>
+
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collections list",
+  "tag": "section",
+  "class": "list-collections-section"
+}
+{% endschema %}

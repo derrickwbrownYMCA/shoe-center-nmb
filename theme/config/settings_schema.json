@@ -1,0 +1,372 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "ShoeCenterNMB Premium",
+    "theme_version": "1.0.0",
+    "theme_author": "Shoe Center NMB",
+    "theme_documentation_url": "",
+    "theme_support_url": ""
+  },
+
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "These six colors are the complete brand palette from the Shoe Center NMB Vision Document. Header and footer tones are derived automatically — no separate overrides needed."
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Background",
+        "default": "#FAF9F6",
+        "info": "Soft cream — primary canvas for every page."
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Accent (CTAs & hover states)",
+        "default": "#F5E1E1",
+        "info": "Blush — used for primary buttons, hover fills, and highlight bands."
+      },
+      {
+        "type": "color",
+        "id": "color_accent_hover",
+        "label": "Accent hover",
+        "default": "#E8C8C8",
+        "info": "Slightly deeper blush for button hover/active states. Darken if contrast is insufficient."
+      },
+      {
+        "type": "color",
+        "id": "color_card",
+        "label": "Card / alternate section background",
+        "default": "#EDEDED",
+        "info": "Used for product cards and alternating content rows."
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "Border & secondary text",
+        "default": "#A8A8A8",
+        "info": "Applies to dividers, input borders, captions, and metadata."
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Body text",
+        "default": "#333333"
+      },
+      {
+        "type": "color",
+        "id": "color_heading",
+        "label": "Heading text",
+        "default": "#000000",
+        "info": "Also used as the footer background (inverted palette). Buttons use this as text color on the blush background."
+      }
+    ]
+  },
+
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Fonts"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_header_font",
+        "label": "Heading font",
+        "default": "montserrat_n7",
+        "info": "Vision spec: Montserrat Bold. Applied to H1–H4 and all display text."
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "Body font",
+        "default": "open_sans_n4",
+        "info": "Vision spec: Open Sans Regular. Applied to paragraphs, labels, nav links."
+      },
+
+      {
+        "type": "header",
+        "content": "Heading sizes"
+      },
+      {
+        "type": "paragraph",
+        "content": "Choose from curated presets — each step maintains the visual hierarchy from the Vision Document."
+      },
+      {
+        "type": "select",
+        "id": "font_size_h1",
+        "label": "H1 — Hero & page title",
+        "options": [
+          { "value": "36px", "label": "Compact — 36px" },
+          { "value": "40px", "label": "Small — 40px" },
+          { "value": "48px", "label": "Default — 48px (Vision spec)" },
+          { "value": "56px", "label": "Large — 56px" },
+          { "value": "64px", "label": "Display — 64px" }
+        ],
+        "default": "48px"
+      },
+      {
+        "type": "select",
+        "id": "font_size_h2",
+        "label": "H2 — Section heading",
+        "options": [
+          { "value": "24px", "label": "Compact — 24px" },
+          { "value": "28px", "label": "Small — 28px" },
+          { "value": "32px", "label": "Medium — 32px" },
+          { "value": "36px", "label": "Default — 36px (Vision spec)" },
+          { "value": "42px", "label": "Large — 42px" }
+        ],
+        "default": "36px"
+      },
+      {
+        "type": "select",
+        "id": "font_size_h3",
+        "label": "H3 — Card & subsection heading",
+        "options": [
+          { "value": "18px", "label": "Small — 18px" },
+          { "value": "20px", "label": "Medium — 20px" },
+          { "value": "24px", "label": "Default — 24px (Vision spec)" },
+          { "value": "28px", "label": "Large — 28px" }
+        ],
+        "default": "24px"
+      },
+      {
+        "type": "select",
+        "id": "heading_letter_spacing",
+        "label": "Heading letter spacing",
+        "options": [
+          { "value": "0",      "label": "None — 0" },
+          { "value": "0.03em", "label": "Subtle — 0.03em" },
+          { "value": "0.06em", "label": "Default — 0.06em" },
+          { "value": "0.1em",  "label": "Airy — 0.1em" }
+        ],
+        "default": "0.06em"
+      },
+
+      {
+        "type": "header",
+        "content": "Body size"
+      },
+      {
+        "type": "select",
+        "id": "font_size_body",
+        "label": "Body text size",
+        "options": [
+          { "value": "14px", "label": "Small — 14px" },
+          { "value": "15px", "label": "Compact — 15px" },
+          { "value": "16px", "label": "Default — 16px (Vision spec)" },
+          { "value": "17px", "label": "Comfortable — 17px" },
+          { "value": "18px", "label": "Large — 18px" }
+        ],
+        "default": "16px"
+      }
+    ]
+  },
+
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "select",
+        "id": "page_width",
+        "label": "Max page width",
+        "options": [
+          { "value": "1100", "label": "Narrow — 1100px" },
+          { "value": "1280", "label": "Default — 1280px (Vision spec)" },
+          { "value": "1440", "label": "Wide — 1440px" },
+          { "value": "1600", "label": "Full wide — 1600px" }
+        ],
+        "default": "1280",
+        "info": "Content container max-width. Images and hero banners always span full-width."
+      },
+      {
+        "type": "select",
+        "id": "section_vertical_spacing",
+        "label": "Section spacing — desktop",
+        "options": [
+          { "value": "64",  "label": "Compact — 64px" },
+          { "value": "80",  "label": "Standard — 80px" },
+          { "value": "96",  "label": "Default — 96px (Vision spec)" },
+          { "value": "120", "label": "Generous — 120px" }
+        ],
+        "default": "96",
+        "info": "Top and bottom padding applied to every content section."
+      },
+      {
+        "type": "select",
+        "id": "section_vertical_spacing_mobile",
+        "label": "Section spacing — mobile",
+        "options": [
+          { "value": "40", "label": "Compact — 40px" },
+          { "value": "48", "label": "Standard — 48px" },
+          { "value": "64", "label": "Default — 64px (Vision spec)" },
+          { "value": "80", "label": "Generous — 80px" }
+        ],
+        "default": "64"
+      },
+      {
+        "type": "select",
+        "id": "grid_gap",
+        "label": "Card grid gap",
+        "options": [
+          { "value": "12", "label": "Tight — 12px" },
+          { "value": "16", "label": "Snug — 16px" },
+          { "value": "24", "label": "Default — 24px" },
+          { "value": "32", "label": "Relaxed — 32px" }
+        ],
+        "default": "24"
+      }
+    ]
+  },
+
+  {
+    "name": "Buttons & CTAs",
+    "settings": [
+      {
+        "type": "select",
+        "id": "border_radius_button",
+        "label": "Button corner radius",
+        "options": [
+          { "value": "0",  "label": "Sharp — 0px" },
+          { "value": "4",  "label": "Slight — 4px" },
+          { "value": "8",  "label": "Default — 8px (Vision spec)" },
+          { "value": "12", "label": "Rounded — 12px" },
+          { "value": "24", "label": "Pill — 24px" }
+        ],
+        "default": "8",
+        "info": "Applies to primary and secondary buttons."
+      },
+      {
+        "type": "select",
+        "id": "border_radius_card",
+        "label": "Card & image corner radius",
+        "options": [
+          { "value": "0",  "label": "Sharp — 0px" },
+          { "value": "4",  "label": "Slight — 4px" },
+          { "value": "8",  "label": "Default — 8px" },
+          { "value": "12", "label": "Rounded — 12px" }
+        ],
+        "default": "8"
+      },
+      {
+        "type": "checkbox",
+        "id": "button_uppercase",
+        "label": "Uppercase button labels",
+        "default": true
+      },
+      {
+        "type": "select",
+        "id": "button_letter_spacing",
+        "label": "Button letter spacing",
+        "options": [
+          { "value": "0",      "label": "None" },
+          { "value": "0.05em", "label": "Subtle — 0.05em" },
+          { "value": "0.1em",  "label": "Standard — 0.1em" },
+          { "value": "0.15em", "label": "Wide — 0.15em" }
+        ],
+        "default": "0.1em"
+      }
+    ]
+  },
+
+  {
+    "name": "General",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Cart"
+      },
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart style",
+        "options": [
+          { "value": "drawer", "label": "Slide-in drawer (recommended)" },
+          { "value": "page",   "label": "Dedicated cart page" }
+        ],
+        "default": "drawer",
+        "info": "Drawer keeps shoppers on the page — better for conversion."
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_note_enable",
+        "label": "Enable order note field",
+        "default": false
+      },
+
+      {
+        "type": "header",
+        "content": "Search"
+      },
+      {
+        "type": "checkbox",
+        "id": "predictive_search_enabled",
+        "label": "Enable predictive (live) search",
+        "default": true
+      },
+
+      {
+        "type": "header",
+        "content": "Social Media"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook_link",
+        "label": "Facebook URL"
+      },
+      {
+        "type": "url",
+        "id": "social_instagram_link",
+        "label": "Instagram URL"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok_link",
+        "label": "TikTok URL"
+      },
+      {
+        "type": "url",
+        "id": "social_pinterest_link",
+        "label": "Pinterest URL"
+      },
+
+      {
+        "type": "header",
+        "content": "Favicon"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "32×32px PNG. Displays in browser tabs and bookmarks."
+      },
+
+      {
+        "type": "header",
+        "content": "Custom code"
+      },
+      {
+        "type": "paragraph",
+        "content": "Inject trusted third-party scripts only. Both fields are deferred — they never block page rendering."
+      },
+      {
+        "type": "textarea",
+        "id": "custom_head_scripts",
+        "label": "Custom <head> code",
+        "default": "",
+        "info": "Runs before </head>. Use for meta tags or preload hints."
+      },
+      {
+        "type": "textarea",
+        "id": "custom_body_end_scripts",
+        "label": "Custom end-of-body code",
+        "default": "",
+        "info": "Runs before </body>. Use for analytics or chat widgets."
+      }
+    ]
+  }
+]

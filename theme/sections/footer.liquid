@@ -1,0 +1,1051 @@
+{% comment %}
+  sections/footer.liquid
+  ──────────────────────────────────────────────────────────────────────────────
+  Premium footer for Shoe Center NMB.
+
+  LAYOUT — Four-column CSS Grid
+  ──────────────────────────────
+  Desktop (≥ 1024px): one row, four columns
+    [Brand + Social]  |  [Shop nav]  |  [About/Explore nav]  |  [Newsletter]
+    (2fr)                 (1fr)           (1fr)                  (2fr)
+
+  Tablet (768–1023px): 2 × 2 grid
+    [Brand]      [Newsletter]
+    [Shop nav]   [About nav]
+
+  Mobile (< 768px): single column
+    Brand → Newsletter → Shop → About → Bottom bar
+
+  COLUMNS
+  ───────
+  Brand      — Logo (image_picker or store-name fallback), italic tagline,
+               short description, Facebook + Instagram social icons
+  Shop       — Shopify link_list navigation menu (Women's, Men's, Brands, etc.)
+  About      — Second link_list navigation menu (Our Story, Visit Us, Contact)
+  Newsletter — Warm sign-up copy + Shopify {% form 'customer' %} email input
+               with posted_successfully? success state
+
+  BOTTOM BAR
+  ──────────
+  Left:   © [year] [copyright text]
+  Center: Privacy Policy · Terms of Service  (auto-falls back to shop.privacy_policy
+          and shop.terms_of_service if no custom URLs are provided)
+  Right:  Location string with pin icon
+
+  NAVIGATION
+  ──────────
+  Uses Shopify's built-in link_list type — merchants select menus they've
+  already created in Online Store → Navigation. Shows a helpful hint in the
+  Theme Editor when no menu is selected so the section is never confusing.
+
+  NEWSLETTER
+  ──────────
+  Shopify native {% form 'customer' %} tag.
+    • Submits contact[email] + contact[tags]="newsletter,email-subscriber"
+    • form.posted_successfully? swaps to a blush success message
+    • form.errors renders inline validation copy
+    • No third-party app required for basic email capture
+    • aria-live="polite" announces state changes to screen readers
+
+  SOCIAL ICONS
+  ────────────
+  Inline SVG — zero extra HTTP requests.
+    • Facebook: filled path icon
+    • Instagram: outline rect + circle + dot, matches platform aesthetic
+  Both hidden (blank URL = icon not rendered) so unused channels stay tidy.
+
+  PERFORMANCE
+  ────────────
+  • Logo: image_url + image_tag → WebP/AVIF, lazy, srcset
+  • Social icons: inline SVG
+  • No JS; no external libraries; no icon fonts
+
+  ACCESSIBILITY
+  ──────────────
+  • <footer role="contentinfo"> — explicit landmark (needed since section
+    renders inside a <div class="shopify-section"> wrapper, not directly
+    as a child of <body>)
+  • Each nav column wrapped in <nav aria-label="...">
+  • Social links: aria-label="Follow … on Facebook/Instagram"
+  • SVG icons: aria-hidden="true" focusable="false"
+  • Newsletter email: visually-hidden <label> linked by id
+  • Newsletter form: aria-live="polite" on wrapper for state announcements
+  • :focus-visible rings: 3px solid #005FCC, offset 2–3px, on every
+    interactive element
+  • prefers-reduced-motion: transitions use var(--transition) which can be
+    overridden globally; no transforms involved
+{% endcomment %}
+
+{%- liquid
+  assign footer_logo  = section.settings.logo
+  assign shop_menu    = linklists[section.settings.shop_menu]
+  assign about_menu   = linklists[section.settings.about_menu]
+  assign current_year = 'now' | date: '%Y'
+-%}
+
+<footer
+  class="footer"
+  role="contentinfo"
+>
+  <div class="container">
+
+    <!-- ── Main four-column grid ─────────────────────────────────────── -->
+    <div class="footer__main">
+
+      <!-- ① Brand column ─────────────────────────────────────────────── -->
+      <div class="footer__brand">
+
+        <!-- Logo ── image_picker result or store-name fallback ───────── -->
+        <div class="footer__logo-wrap">
+          {%- if footer_logo != blank -%}
+            {%- assign footer_logo_alt = footer_logo.alt | default: shop.name -%}
+            {%- assign footer_logo_style = 'max-width:' | append: section.settings.logo_max_width | append: 'px' -%}
+            {{
+              footer_logo
+              | image_url: width: 320
+              | image_tag:
+                loading: 'lazy',
+                decoding: 'async',
+                class: 'footer__logo',
+                alt: footer_logo_alt,
+                width: footer_logo.width,
+                height: footer_logo.height,
+                widths: '120, 160, 240, 320',
+                sizes: '(max-width: 599px) 140px, 180px',
+                style: footer_logo_style
+            }}
+          {%- else -%}
+            <p class="footer__store-name">{{ shop.name }}</p>
+          {%- endif -%}
+        </div>
+
+        <!-- Tagline -->
+        {%- if section.settings.tagline != blank -%}
+          <p class="footer__tagline">
+            {{- section.settings.tagline | escape -}}
+          </p>
+        {%- endif -%}
+
+        <!-- Brand description -->
+        {%- if section.settings.description != blank -%}
+          <p class="footer__description">
+            {{- section.settings.description | escape -}}
+          </p>
+        {%- endif -%}
+
+        <!-- Social icons ─────────────────────────────────────────────── -->
+        {%- if section.settings.social_facebook != blank or section.settings.social_instagram != blank -%}
+          <div class="footer__social" aria-label="Follow us on social media">
+
+            {%- if section.settings.social_facebook != blank -%}
+              <a
+                href="{{ section.settings.social_facebook }}"
+                class="footer__social-link"
+                aria-label="Follow {{ shop.name }} on Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <!-- Facebook — filled path -->
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  width="19"
+                  height="19"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3V2z"/>
+                </svg>
+              </a>
+            {%- endif -%}
+
+            {%- if section.settings.social_instagram != blank -%}
+              <a
+                href="{{ section.settings.social_instagram }}"
+                class="footer__social-link"
+                aria-label="Follow {{ shop.name }} on Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <!-- Instagram — outline rect + circle + dot -->
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  width="19"
+                  height="19"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+              </a>
+            {%- endif -%}
+
+          </div>
+        {%- endif -%}
+
+      </div><!-- /.footer__brand -->
+
+      <!-- ② Shop navigation column ──────────────────────────────────── -->
+      <div class="footer__nav-col footer__nav-col--shop">
+
+        {%- if section.settings.shop_heading != blank -%}
+          <h3 class="footer__nav-heading" id="footer-shop-heading-{{ section.id }}">
+            {{- section.settings.shop_heading | escape -}}
+          </h3>
+        {%- endif -%}
+
+        {%- if shop_menu.links.size > 0 -%}
+          <nav aria-labelledby="footer-shop-heading-{{ section.id }}">
+            <ul class="footer__nav-list" role="list">
+              {%- for link in shop_menu.links -%}
+                <li>
+                  <a
+                    href="{{ link.url }}"
+                    class="footer__nav-link"
+                    {%- if link.active %} aria-current="page"{%- endif %}
+                  >
+                    {{- link.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- else -%}
+          {%- comment -%}
+            Theme Editor fallback — shown when no menu is selected yet
+            so the section never looks empty or broken during setup.
+          {%- endcomment -%}
+          <p class="footer__nav-hint">
+            Select a navigation menu above to populate this column.
+          </p>
+        {%- endif -%}
+
+      </div><!-- /.footer__nav-col--shop -->
+
+      <!-- ③ About / Explore navigation column ───────────────────────── -->
+      <div class="footer__nav-col footer__nav-col--about">
+
+        {%- if section.settings.about_heading != blank -%}
+          <h3 class="footer__nav-heading" id="footer-about-heading-{{ section.id }}">
+            {{- section.settings.about_heading | escape -}}
+          </h3>
+        {%- endif -%}
+
+        {%- if about_menu.links.size > 0 -%}
+          <nav aria-labelledby="footer-about-heading-{{ section.id }}">
+            <ul class="footer__nav-list" role="list">
+              {%- for link in about_menu.links -%}
+                <li>
+                  <a
+                    href="{{ link.url }}"
+                    class="footer__nav-link"
+                    {%- if link.active %} aria-current="page"{%- endif %}
+                  >
+                    {{- link.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- else -%}
+          {%- comment -%}
+            Hardcoded fallback links — shown until the merchant assigns
+            a menu in Online Store → Navigation → Footer About menu.
+          {%- endcomment -%}
+          <nav aria-labelledby="footer-about-heading-{{ section.id }}">
+            <ul class="footer__nav-list" role="list">
+              <li><a href="/pages/about" class="footer__nav-link">Our Story</a></li>
+              <li><a href="/pages/contact" class="footer__nav-link">Contact Us</a></li>
+              <li><a href="/pages/shipping-returns" class="footer__nav-link">Shipping &amp; Returns</a></li>
+              <li><a href="/pages/size-guide" class="footer__nav-link">Size Guide</a></li>
+              <li><a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}" class="footer__nav-link">Privacy Policy</a></li>
+            </ul>
+          </nav>
+        {%- endif -%}
+
+      </div><!-- /.footer__nav-col--about -->
+
+      <!-- ④ Newsletter column ───────────────────────────────────────── -->
+      <div class="footer__newsletter-col">
+
+        {%- if section.settings.newsletter_heading != blank -%}
+          <h3 class="footer__nav-heading">
+            {{- section.settings.newsletter_heading | escape -}}
+          </h3>
+        {%- endif -%}
+
+        {%- if section.settings.newsletter_copy != blank -%}
+          <p class="footer__newsletter-copy">
+            {{- section.settings.newsletter_copy | escape -}}
+          </p>
+        {%- endif -%}
+
+        {%- comment -%}
+          Shopify native customer form — handles CSRF, submission, and
+          state automatically. contact[tags]="newsletter" marks the
+          customer/contact as a newsletter subscriber.
+        {%- endcomment -%}
+        {%- form 'customer', id: 'footer-newsletter-form-{{ section.id }}' -%}
+
+          <input type="hidden" name="contact[tags]" value="newsletter,email-subscriber">
+
+          <div
+            class="footer__newsletter-form"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+
+            {%- if form.posted_successfully? -%}
+              <!-- ── Success state ──────────────────────────────────── -->
+              <p class="footer__newsletter-success">
+                {%- if section.settings.newsletter_success != blank -%}
+                  {{- section.settings.newsletter_success | escape -}}
+                {%- else -%}
+                  You're on the list — welcome to the Shoe Center NMB family.
+                {%- endif -%}
+              </p>
+
+            {%- else -%}
+              <!-- ── Form state ─────────────────────────────────────── -->
+
+              {%- if form.errors -%}
+                <p class="footer__newsletter-error" role="alert">
+                  {%- assign email_errors = form.errors.messages['email'] -%}
+                  {%- if email_errors -%}
+                    {{- form.errors.translated_fields['email'] | capitalize }}
+                    {{- ' ' -}}{{- email_errors -}}.
+                  {%- else -%}
+                    Something went wrong — please try again.
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+
+              <div class="footer__newsletter-field">
+
+                <label
+                  for="newsletter-email-{{ section.id }}"
+                  class="footer__visually-hidden"
+                >
+                  Email address
+                </label>
+
+                <input
+                  type="email"
+                  name="contact[email]"
+                  id="newsletter-email-{{ section.id }}"
+                  class="footer__newsletter-input"
+                  placeholder="{{ section.settings.newsletter_placeholder | default: 'Your email address' | escape }}"
+                  autocomplete="email"
+                  required
+                  aria-required="true"
+                >
+
+                <button
+                  type="submit"
+                  class="footer__newsletter-btn"
+                  name="commit"
+                >
+                  {{- section.settings.newsletter_button | default: 'Subscribe' | escape -}}
+                </button>
+
+              </div><!-- /.footer__newsletter-field -->
+
+            {%- endif -%}
+          </div><!-- /.footer__newsletter-form -->
+
+        {%- endform -%}
+
+      </div><!-- /.footer__newsletter-col -->
+
+    </div><!-- /.footer__main -->
+
+    <!-- ── Bottom bar ────────────────────────────────────────────────── -->
+    <div class="footer__bottom">
+
+      <!-- Copyright -->
+      <p class="footer__copyright">
+        &copy; {{ current_year }}
+        {%- if section.settings.copyright_text != blank -%}
+          {{- ' ' -}}{{- section.settings.copyright_text | escape -}}
+        {%- else -%}
+          {{- ' ' -}}{{ shop.name }}. All rights reserved.
+        {%- endif -%}
+      </p>
+
+      <!-- Legal links — falls back to Shopify auto-generated policy pages -->
+      {%- liquid
+        assign has_privacy = false
+        assign has_terms   = false
+        if section.settings.privacy_url != blank
+          assign has_privacy = true
+        elsif shop.privacy_policy != nil
+          assign has_privacy = true
+        endif
+        if section.settings.terms_url != blank
+          assign has_terms = true
+        elsif shop.terms_of_service != nil
+          assign has_terms = true
+        endif
+      -%}
+
+      {%- if has_privacy or has_terms -%}
+        <nav class="footer__legal" aria-label="Legal links">
+          {%- if has_privacy -%}
+            <a
+              href="{{ section.settings.privacy_url | default: shop.privacy_policy.url }}"
+              class="footer__legal-link"
+            >
+              Privacy Policy
+            </a>
+          {%- endif -%}
+          {%- if has_terms -%}
+            <a
+              href="{{ section.settings.terms_url | default: shop.terms_of_service.url }}"
+              class="footer__legal-link"
+            >
+              Terms of Service
+            </a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+
+      <!-- Location -->
+      {%- if section.settings.location_text != blank -%}
+        <p class="footer__location">
+          <!-- Pin icon — aria-hidden, decorative -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            width="12"
+            height="12"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {{- section.settings.location_text | escape -}}
+        </p>
+      {%- endif -%}
+
+    </div><!-- /.footer__bottom -->
+
+  </div><!-- /.container -->
+</footer>
+
+<style>
+  /* ── Visually-hidden utility ────────────────────────────────────────────
+    Hides content visually while keeping it available to screen readers.
+    Used for the newsletter email <label>.
+  ─────────────────────────────────────────────────────────────────────── */
+  .footer__visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* ── Footer wrapper ─────────────────────────────────────────────────── */
+  .footer {
+    background-color: var(--color-bg, #FAF9F6);
+    border-top: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  /* ── Main four-column grid ───────────────────────────────────────────── */
+  .footer__main {
+    display: grid;
+    /*
+      2fr    brand column    — logo, tagline, social (generous but not dominant)
+      1.1fr  shop nav        — slightly wider than 1fr for comfortable link targets
+      1.1fr  about nav       — matches shop column for visual symmetry
+      1.8fr  newsletter      — roomy enough for copy + stacked input + button
+    */
+    grid-template-columns: 2fr 1.1fr 1.1fr 1.8fr;
+    grid-template-areas: "brand shop about newsletter";
+    gap: 56px;
+    padding: 88px 0 72px;
+    align-items: start;
+  }
+
+  /* Named grid areas */
+  .footer__brand                { grid-area: brand; }
+  .footer__nav-col--shop        { grid-area: shop; }
+  .footer__nav-col--about       { grid-area: about; }
+  .footer__newsletter-col       { grid-area: newsletter; }
+
+  /* ── Brand column ────────────────────────────────────────────────────── */
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .footer__logo-wrap {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .footer__logo {
+    display: block;
+    width: auto;
+    height: auto;
+    max-height: 56px; /* Hard cap so a tall logo never dominates the footer */
+  }
+
+  /* Store-name fallback when no logo image is uploaded */
+  .footer__store-name {
+    margin: 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: var(--font-heading-weight, 700);
+    font-size: 18px;
+    color: var(--color-heading, #000000);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .footer__tagline {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.5;
+  }
+
+  .footer__description {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.75;
+    max-width: 28ch;
+  }
+
+  /* ── Social icons ────────────────────────────────────────────────────── */
+  .footer__social {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .footer__social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--color-text-secondary, #A8A8A8);
+    text-decoration: none;
+    /*
+      Hover: blush fill + dark icon — warm, brand-consistent treatment
+      rather than a heavy dark background.
+    */
+    transition:
+      color            var(--transition, 0.2s ease),
+      background-color var(--transition, 0.2s ease);
+  }
+
+  .footer__social-link:hover {
+    color: var(--color-heading, #000000);
+    background-color: var(--color-accent, #F5E1E1);
+    /*
+      Inset white overlay softens the blush fill without a separate colour
+      token — the result reads as a paler, calmer version of --color-accent.
+    */
+    box-shadow: inset 0 0 0 36px rgba(255, 255, 255, 0.22);
+  }
+
+  .footer__social-link:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+    border-radius: 50%;
+  }
+
+  /* ── Navigation columns (shared) ─────────────────────────────────────── */
+  .footer__nav-col {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* Column heading — same all-caps style as the section eyebrows */
+  .footer__nav-heading {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+    line-height: 1;
+  }
+
+  .footer__nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .footer__nav-link {
+    position: relative;
+    display: inline-block;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13.5px;
+    color: var(--color-text, #3D3D3D);
+    text-decoration: none;
+    line-height: 1;
+    transition: color var(--transition, 0.2s ease);
+  }
+
+  /*
+    Animated blush underline — slides in from the left on hover.
+    More refined than a solid underline; matches the editorial aesthetic.
+  */
+  .footer__nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 1px;
+    background-color: var(--color-accent-hover, #E8C8C8);
+    transition: width var(--transition, 0.22s ease);
+  }
+
+  .footer__nav-link:hover {
+    color: var(--color-heading, #000000);
+  }
+
+  .footer__nav-link:hover::after {
+    width: 100%;
+  }
+
+  .footer__nav-link:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Theme Editor hint — shown when no menu is selected */
+  .footer__nav-hint {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 12px;
+    font-style: italic;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.5;
+  }
+
+  /* ── Newsletter column ───────────────────────────────────────────────── */
+  .footer__newsletter-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .footer__newsletter-copy {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.7;
+  }
+
+  .footer__newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer__newsletter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer__newsletter-input {
+    display: block;
+    width: 100%;
+    padding: 13px 16px;
+    background-color: var(--color-card, #FFFFFF);
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-btn, 8px);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 14px;
+    color: var(--color-text, #3D3D3D);
+    line-height: 1;
+    appearance: none;
+    transition:
+      border-color var(--transition, 0.2s ease),
+      box-shadow   var(--transition, 0.2s ease);
+    box-sizing: border-box;
+  }
+
+  .footer__newsletter-input::placeholder {
+    color: var(--color-text-secondary, #A8A8A8);
+  }
+
+  .footer__newsletter-input:focus {
+    outline: none;
+    border-color: var(--color-accent-hover, #E8C8C8);
+    box-shadow: 0 0 0 3px var(--color-accent, #F5E1E1);
+  }
+
+  .footer__newsletter-btn {
+    display: block;
+    width: 100%;
+    padding: 13px 20px;
+    background-color: var(--color-accent, #F5E1E1);
+    color: var(--color-heading, #000000);
+    border: none;
+    border-radius: var(--radius-btn, 8px);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    line-height: 1;
+    transition:
+      background-color var(--transition, 0.2s ease),
+      box-shadow       var(--transition, 0.2s ease);
+  }
+
+  .footer__newsletter-btn:hover {
+    background-color: var(--color-accent-hover, #E8C8C8);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+  }
+
+  .footer__newsletter-btn:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 3px;
+  }
+
+  /* Success confirmation — blush band, matches badge / stat accent tone */
+  .footer__newsletter-success {
+    margin: 0;
+    padding: 18px 20px;
+    background-color: var(--color-accent, #F5E1E1);
+    border-radius: var(--radius-btn, 8px);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 14px;
+    color: var(--color-heading, #000000);
+    line-height: 1.6;
+  }
+
+  /* Inline validation error */
+  .footer__newsletter-error {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: #A83232; /* Warm red, matches sale price in featured-products */
+    line-height: 1.45;
+  }
+
+  /* ── Bottom bar ──────────────────────────────────────────────────────── */
+  .footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding: 20px 0 28px;
+    border-top: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  .footer__copyright {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.45;
+  }
+
+  /* Legal links — hairline separators between items */
+  .footer__legal {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer__legal-link {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: var(--color-text-secondary, #A8A8A8);
+    text-decoration: none;
+    padding: 0 14px;
+    border-right: 1px solid var(--color-border, #EBEBEB);
+    line-height: 1.45;
+    transition: color var(--transition, 0.2s ease);
+  }
+
+  .footer__legal-link:first-child {
+    padding-left: 0;
+  }
+
+  .footer__legal-link:last-child {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .footer__legal-link:hover {
+    color: var(--color-heading, #000000);
+  }
+
+  .footer__legal-link:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Location — pin icon + text, right-aligned */
+  .footer__location {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.45;
+  }
+
+  /* ── Tablet (768–1023px) ─────────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .footer__main {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "brand       newsletter"
+        "shop        about";
+      gap: 48px 40px;
+      padding: 56px 0 48px;
+    }
+
+    .footer__description {
+      max-width: 36ch;
+    }
+  }
+
+  /* ── Mobile (< 768px) ────────────────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .footer__main {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "brand"
+        "newsletter"
+        "shop"
+        "about";
+      gap: 40px;
+      padding: 48px 0 40px;
+    }
+
+    .footer__description {
+      max-width: none;
+    }
+
+    /*
+      Stack bottom bar vertically on small screens.
+      Order: Copyright → Legal → Location reads naturally top-to-bottom.
+    */
+    .footer__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 32px;
+    }
+
+    /* Remove left padding from first legal link when stacked */
+    .footer__legal-link:first-child {
+      padding-left: 0;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+
+    {
+      "type": "header",
+      "content": "Brand"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image",
+      "info": "Recommended: SVG or PNG with a transparent background. Displays at max 56px height. If blank, your Shopify store name shows in the heading font instead."
+    },
+    {
+      "type": "range",
+      "id": "logo_max_width",
+      "label": "Logo maximum width",
+      "min": 80,
+      "max": 280,
+      "step": 8,
+      "unit": "px",
+      "default": 160
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "We Make Your Feet Happy",
+      "info": "Displays in italic directly beneath the logo."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Brand description",
+      "default": "Family-owned since 1976. Serving North Myrtle Beach with comfort, care, and the perfect pair — one happy customer at a time.",
+      "info": "1–2 short sentences. Keep it warm and personal, not corporate."
+    },
+
+    {
+      "type": "header",
+      "content": "Social media"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook page URL",
+      "info": "Leave blank to hide the Facebook icon entirely."
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram profile URL",
+      "info": "Leave blank to hide the Instagram icon entirely."
+    },
+
+    {
+      "type": "header",
+      "content": "Shop navigation column"
+    },
+    {
+      "type": "text",
+      "id": "shop_heading",
+      "label": "Column heading",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "shop_menu",
+      "label": "Shop menu",
+      "default": "main-menu",
+      "info": "Go to Online Store → Navigation in your Shopify admin and create a menu with links for Women's, Men's, Brands, New Arrivals, Sale, etc. Then select it here."
+    },
+
+    {
+      "type": "header",
+      "content": "About \/ Explore navigation column"
+    },
+    {
+      "type": "text",
+      "id": "about_heading",
+      "label": "Column heading",
+      "default": "Explore"
+    },
+    {
+      "type": "link_list",
+      "id": "about_menu",
+      "label": "About menu",
+      "default": "footer",
+      "info": "Create a second navigation menu with links for Our Story, Visit Us, Contact, FAQs, etc. Then select it here."
+    },
+
+    {
+      "type": "header",
+      "content": "Newsletter sign-up"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Column heading",
+      "default": "Stay in the Loop"
+    },
+    {
+      "type": "textarea",
+      "id": "newsletter_copy",
+      "label": "Sign-up copy",
+      "default": "New arrivals, comfort tips, and a little North Myrtle Beach sunshine — straight to your inbox. No spam, ever.",
+      "info": "1–2 sentences. Reassure customers you will not spam them."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Input placeholder",
+      "default": "Your email address"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button",
+      "label": "Button label",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_success",
+      "label": "Success message",
+      "default": "You're on the list — welcome to the Shoe Center NMB family.",
+      "info": "Shown after a successful subscription. Warm and personal works best."
+    },
+
+    {
+      "type": "header",
+      "content": "Bottom bar"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "default": "Shoe Center NMB. All rights reserved.",
+      "info": "The current year (e.g. '© 2025') is prepended automatically. Enter only the text that follows the year."
+    },
+    {
+      "type": "url",
+      "id": "privacy_url",
+      "label": "Privacy Policy URL",
+      "info": "Leave blank to use the Privacy Policy page automatically generated by Shopify (if enabled in Settings → Policies)."
+    },
+    {
+      "type": "url",
+      "id": "terms_url",
+      "label": "Terms of Service URL",
+      "info": "Leave blank to use the Terms of Service page automatically generated by Shopify (if enabled in Settings → Policies)."
+    },
+    {
+      "type": "text",
+      "id": "location_text",
+      "label": "Location label",
+      "default": "North Myrtle Beach, SC",
+      "info": "Appears on the right of the bottom bar with a small map-pin icon. Leave blank to hide."
+    }
+
+  ]
+}
+{% endschema %}

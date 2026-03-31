@@ -1,0 +1,209 @@
+{% comment %}
+  sections/announcement-bar.liquid
+  ─────────────────────────────────────────────────────────
+  Slim promotional strip rendered above the header via
+  sections/groups/header-group.json.
+
+  Supports up to 3 rotating messages with a CSS fade transition.
+  When only one message is filled in, no rotation occurs.
+
+  Color strategy: inline CSS custom properties (--ann-bg /
+  --ann-text) override the global palette per-section only.
+  Defaults fall back to brand accent (blush) and heading (black)
+  so the bar works out-of-the-box without any merchant setup.
+{% endcomment %}
+
+{%- liquid
+  assign messages = '' | split: ''
+  if section.settings.message_1 != blank
+    assign messages = messages | push: section.settings.message_1
+  endif
+  if section.settings.message_2 != blank
+    assign messages = messages | push: section.settings.message_2
+  endif
+  if section.settings.message_3 != blank
+    assign messages = messages | push: section.settings.message_3
+  endif
+-%}
+
+{%- if section.settings.show_bar and messages.size > 0 -%}
+<div
+  class="announcement-bar"
+  role="region"
+  aria-label="Site announcement"
+  style="--ann-bg: {{ section.settings.color_bg }}; --ann-text: {{ section.settings.color_text }};"
+  data-announcement-bar
+>
+  <div class="announcement-bar__inner">
+    {%- for msg in messages -%}
+      <p
+        class="announcement-bar__text{% if forloop.first %} is-visible{% endif %}"
+        aria-hidden="{% unless forloop.first %}true{% endunless %}"
+        data-ann-message
+      >
+        {{- msg | escape -}}
+      </p>
+    {%- endfor -%}
+  </div>
+</div>
+
+{%- if messages.size > 1 -%}
+<script>
+(function () {
+  'use strict';
+
+  /* Respect prefers-reduced-motion — skip rotation entirely */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var bar      = document.querySelector('[data-announcement-bar]');
+  if (!bar) return;
+
+  var msgs     = Array.from(bar.querySelectorAll('[data-ann-message]'));
+  if (msgs.length < 2) return;
+
+  var current  = 0;
+  var interval = {{ section.settings.rotate_interval | default: 4000 }};
+
+  function next() {
+    var prev = current;
+    current  = (current + 1) % msgs.length;
+
+    msgs[prev].classList.remove('is-visible');
+    msgs[prev].setAttribute('aria-hidden', 'true');
+
+    msgs[current].classList.add('is-visible');
+    msgs[current].removeAttribute('aria-hidden');
+  }
+
+  setInterval(next, interval);
+}());
+</script>
+{%- endif -%}
+
+{%- endif -%}
+
+<style>
+  .announcement-bar {
+    background-color: var(--ann-bg, var(--color-accent));
+    color: var(--ann-text, var(--color-heading));
+    width: 100%;
+  }
+
+  .announcement-bar__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 9px var(--page-padding);
+  }
+
+  .announcement-bar__text {
+    position: absolute;
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--font-size-small);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.4;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+    /* Reserve vertical space so the bar doesn't collapse */
+    visibility: hidden;
+  }
+
+  .announcement-bar__text.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  /* When there's only one message (no JS rotation), show it statically */
+  .announcement-bar__text:only-child {
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-bar__text { transition: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": "section",
+  "class": "announcement-bar-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_bar",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Messages"
+    },
+    {
+      "type": "text",
+      "id": "message_1",
+      "label": "Message 1",
+      "default": "Free in-store pickup available in North Myrtle Beach, SC",
+      "info": "Keep it to one short line — wrapping looks cramped on mobile."
+    },
+    {
+      "type": "text",
+      "id": "message_2",
+      "label": "Message 2",
+      "placeholder": "Free shipping on orders over $75",
+      "info": "Leave blank to disable rotation."
+    },
+    {
+      "type": "text",
+      "id": "message_3",
+      "label": "Message 3",
+      "placeholder": "Expert fit since 1985 — come see us on Main Street"
+    },
+    {
+      "type": "range",
+      "id": "rotate_interval",
+      "label": "Rotation speed (ms)",
+      "min": 2000,
+      "max": 8000,
+      "step": 500,
+      "default": 4000,
+      "info": "How long each message is displayed. Only used when 2+ messages are filled in."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#F5E1E1",
+      "info": "Defaults to the brand accent (blush). Change for seasonal promos without touching global theme colors."
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar"
+    }
+  ]
+}
+{% endschema %}

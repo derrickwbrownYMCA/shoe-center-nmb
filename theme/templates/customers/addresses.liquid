@@ -1,0 +1,407 @@
+{% comment %} templates/customers/addresses.liquid {% endcomment %}
+{% comment %}
+  Address forms use Shopify's native form tag:
+    - {% form 'customer_address', customer.new_address %} for new addresses
+    - {% form 'customer_address', address %}              for editing
+    - Hidden _method="delete" submits a DELETE to remove an address
+    - Hidden _method="put"    submits a PUT to update an address
+
+  Edit/add panels are hidden by default and shown via JS when the
+  matching button is clicked. No library required — vanilla toggle.
+{% endcomment %}
+
+<style>
+  /* ── Page layout ──────────────────────────────────────────────────────── */
+  .addresses {
+    max-width: 760px;
+  }
+
+  .addresses__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 36px;
+  }
+
+  .addresses__header h1 {
+    margin: 0;
+  }
+
+  .addresses__back {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .addresses__back:hover {
+    color: var(--color-text);
+    opacity: 1;
+  }
+
+  /* ── Add form panel ───────────────────────────────────────────────────── */
+  .address-form-panel {
+    background-color: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: 28px;
+    margin-bottom: 36px;
+    display: none;
+  }
+
+  .address-form-panel.is-open {
+    display: block;
+  }
+
+  .address-form-panel h2 {
+    font-size: var(--font-size-h3);
+    margin-bottom: 20px;
+  }
+
+  /* ── Address form fields ──────────────────────────────────────────────── */
+  .address-form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .address-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .address-form__field--full {
+    grid-column: 1 / -1;
+  }
+
+  .address-form__field label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .address-form__field input,
+  .address-form__field select {
+    padding: 11px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input, 4px);
+    font-family: var(--font-body);
+    font-size: 15px;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    width: 100%;
+  }
+
+  .address-form__field input:focus,
+  .address-form__field select:focus {
+    outline: none;
+    border-color: var(--color-heading);
+  }
+
+  .address-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .address-form__cancel {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+  }
+
+  .address-form__cancel:hover {
+    color: var(--color-text);
+  }
+
+  /* ── Address cards grid ───────────────────────────────────────────────── */
+  .address-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .address-card {
+    background-color: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+  }
+
+  .address-card--default {
+    border: 2px solid var(--color-accent);
+  }
+
+  .address-card__default-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-heading);
+    background-color: var(--color-accent);
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-bottom: 4px;
+  }
+
+  .address-card address {
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-text);
+    flex: 1;
+  }
+
+  .address-card__actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .address-card__edit-btn {
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    color: var(--color-text);
+  }
+
+  .address-card__edit-btn:hover {
+    opacity: 0.7;
+  }
+
+  .address-card__delete-btn {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+  }
+
+  .address-card__delete-btn:hover {
+    color: #C0392B;
+  }
+
+  /* ── Edit panel (inline, per card) ───────────────────────────────────── */
+  .address-card__edit-panel {
+    display: none;
+    grid-column: 1 / -1;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: 28px;
+    border: 1px solid var(--color-border);
+  }
+
+  .address-card__edit-panel.is-open {
+    display: block;
+  }
+
+  .address-card__edit-panel h2 {
+    font-size: var(--font-size-h3);
+    margin-bottom: 20px;
+  }
+
+  /* ── Empty state ──────────────────────────────────────────────────────── */
+  .addresses__empty {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    padding: 8px 0 32px;
+  }
+
+  @media (max-width: 599px) {
+    .address-form__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .address-form__field--full {
+      grid-column: 1;
+    }
+  }
+</style>
+
+<main id="MainContent" class="section-padding" role="main" tabindex="-1">
+  <div class="container addresses">
+
+    <!-- Header -->
+    <div class="addresses__header">
+      <h1>Your Addresses</h1>
+      <a href="{{ routes.account_url }}" class="addresses__back">← Back to account</a>
+    </div>
+
+    <!-- Add address button + form panel -->
+    <button
+      class="btn btn--secondary"
+      style="margin-bottom:24px;"
+      data-address-toggle="add-new"
+      aria-expanded="false"
+      aria-controls="AddressFormNew"
+    >
+      Add a new address
+    </button>
+
+    <div class="address-form-panel" id="AddressFormNew" role="region" aria-label="New address form">
+      <h2>Add Address</h2>
+      {% form 'customer_address', customer.new_address %}
+        {{ form.errors | default_errors }}
+        {%- render 'address-form-fields', address: customer.new_address, form_id: 'new' -%}
+        <div class="address-form__actions">
+          <button type="submit" class="btn">Save Address</button>
+          <button type="button" class="address-form__cancel" data-address-toggle="add-new">Cancel</button>
+        </div>
+      {% endform %}
+    </div>
+
+    <!-- Existing addresses -->
+    {%- if customer.addresses.size > 0 -%}
+      {%- paginate customer.addresses by 10 -%}
+        <div class="address-list">
+          {%- for address in customer.addresses -%}
+            {%- assign is_default = false -%}
+            {%- if address.id == customer.default_address.id -%}
+              {%- assign is_default = true -%}
+            {%- endif -%}
+
+            <!-- Address card -->
+            <div class="address-card{% if is_default %} address-card--default{% endif %}">
+
+              {%- if is_default -%}
+                <span class="address-card__default-badge">Default</span>
+              {%- endif -%}
+
+              <address>
+                {{ address.name | escape }}<br>
+                {%- if address.company != blank -%}
+                  {{ address.company | escape }}<br>
+                {%- endif -%}
+                {{ address.address1 | escape }}<br>
+                {%- if address.address2 != blank -%}
+                  {{ address.address2 | escape }}<br>
+                {%- endif -%}
+                {{ address.city }},
+                {{ address.province_code }}
+                {{ address.zip }}<br>
+                {{ address.country }}<br>
+                {%- if address.phone != blank -%}
+                  {{ address.phone | escape }}
+                {%- endif -%}
+              </address>
+
+              <div class="address-card__actions">
+                <button
+                  type="button"
+                  class="address-card__edit-btn"
+                  data-address-toggle="edit-{{ address.id }}"
+                  aria-expanded="false"
+                  aria-controls="AddressEdit-{{ address.id }}"
+                >
+                  Edit
+                </button>
+
+                <!-- Delete form -->
+                {% form 'customer_address', address %}
+                  <input type="hidden" name="_method" value="delete">
+                  <button
+                    type="submit"
+                    class="address-card__delete-btn"
+                    onclick="return confirm('Remove this address?')"
+                  >
+                    Delete
+                  </button>
+                {% endform %}
+
+                {%- unless is_default -%}
+                  <!-- Set as default form -->
+                  {% form 'customer_address', address %}
+                    <input type="hidden" name="_method" value="put">
+                    <input type="hidden" name="address[default]" value="true">
+                    <button type="submit" class="address-card__delete-btn">Set as default</button>
+                  {% endform %}
+                {%- endunless -%}
+              </div>
+
+            </div><!-- /.address-card -->
+
+            <!-- Inline edit panel (sits outside the card in the grid flow) -->
+            <div
+              class="address-card__edit-panel"
+              id="AddressEdit-{{ address.id }}"
+              role="region"
+              aria-label="Edit address"
+            >
+              <h2>Edit Address</h2>
+              {% form 'customer_address', address %}
+                <input type="hidden" name="_method" value="put">
+                {{ form.errors | default_errors }}
+                {%- render 'address-form-fields', address: address, form_id: address.id -%}
+                <div class="address-form__actions">
+                  <button type="submit" class="btn">Update Address</button>
+                  <button type="button" class="address-form__cancel" data-address-toggle="edit-{{ address.id }}">Cancel</button>
+                </div>
+              {% endform %}
+            </div>
+
+          {%- endfor -%}
+        </div><!-- /.address-list -->
+
+        {%- if paginate.pages > 1 -%}
+          {%- render 'pagination', paginate: paginate -%}
+        {%- endif -%}
+
+      {%- endpaginate -%}
+    {%- else -%}
+      <p class="addresses__empty">No addresses saved yet.</p>
+    {%- endif -%}
+
+  </div>
+</main>
+
+<script>
+  // Toggle add/edit address panels
+  // Finds the panel by matching the button's data-address-toggle value to either
+  // id="AddressFormNew" (for "add-new") or id="AddressEdit-{id}" (for "edit-{id}").
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-address-toggle]');
+    if (!btn) return;
+
+    var key    = btn.dataset.addressToggle;
+    var panelId = key === 'add-new'
+      ? 'AddressFormNew'
+      : 'AddressEdit-' + key.replace('edit-', '');
+    var panel  = document.getElementById(panelId);
+    if (!panel) return;
+
+    var isOpen = panel.classList.contains('is-open');
+    panel.classList.toggle('is-open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+
+    // Scroll panel into view when opening
+    if (!isOpen) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+</script>

@@ -1,0 +1,197 @@
+{% comment %} templates/customers/account.liquid {% endcomment %}
+
+<style>
+  /* ── Account layout ───────────────────────────────────────────────────── */
+  .account {
+    max-width: 860px;
+  }
+
+  .account__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 36px;
+  }
+
+  .account__header h1 {
+    margin: 0;
+  }
+
+  .account__signout {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .account__signout:hover {
+    color: var(--color-text);
+    opacity: 1;
+  }
+
+  /* ── Section headings ─────────────────────────────────────────────────── */
+  .account__section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .account__section-heading h2 {
+    font-size: var(--font-size-h3);
+  }
+
+  /* ── Orders table ─────────────────────────────────────────────────────── */
+  .order-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .order-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    padding: 0 16px 10px 0;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  .order-table td {
+    padding: 14px 16px 14px 0;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .order-table__number a {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .order-table__number a:hover {
+    opacity: 0.7;
+  }
+
+  /* ── Status badges ────────────────────────────────────────────────────── */
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: capitalize;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .status-badge--paid,
+  .status-badge--fulfilled {
+    background-color: #D4EDDA;
+    color: #155724;
+  }
+
+  .status-badge--pending,
+  .status-badge--unfulfilled {
+    background-color: #FFF3CD;
+    color: #856404;
+  }
+
+  .status-badge--refunded,
+  .status-badge--voided {
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+  }
+
+  /* ── Empty state ──────────────────────────────────────────────────────── */
+  .account__empty {
+    padding: 48px 0;
+    text-align: center;
+    color: var(--color-text-secondary);
+  }
+
+  .account__empty p {
+    margin-bottom: 20px;
+  }
+
+  /* ── Mobile: hide less important columns ──────────────────────────────── */
+  @media (max-width: 599px) {
+    .order-table .hide-mobile {
+      display: none;
+    }
+  }
+</style>
+
+<main id="MainContent" class="section-padding" role="main" tabindex="-1">
+  <div class="container account">
+
+    <!-- Header -->
+    <div class="account__header">
+      <h1>Hi, {{ customer.first_name | escape }}</h1>
+      <a href="{{ routes.account_logout_url }}" class="account__signout">Sign out</a>
+    </div>
+
+    <!-- Order history -->
+    <div class="account__section-heading">
+      <h2>Order History</h2>
+      <a href="{{ routes.account_addresses_url }}" class="btn btn--secondary" style="font-size:13px;padding:0.5em 1.2em;">
+        Manage Addresses
+      </a>
+    </div>
+
+    {%- if customer.orders.size > 0 -%}
+      <table class="order-table" role="table">
+        <thead>
+          <tr>
+            <th scope="col">Order</th>
+            <th scope="col" class="hide-mobile">Date</th>
+            <th scope="col">Payment</th>
+            <th scope="col" class="hide-mobile">Fulfillment</th>
+            <th scope="col" style="text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for order in customer.orders -%}
+            {%- assign financial_class = 'status-badge--' | append: order.financial_status -%}
+            {%- assign fulfillment_class = 'status-badge--' | append: order.fulfillment_status -%}
+            <tr>
+              <td class="order-table__number">
+                <a href="{{ order.customer_url }}">{{ order.name }}</a>
+              </td>
+              <td class="hide-mobile">
+                {{ order.created_at | date: '%b %-d, %Y' }}
+              </td>
+              <td>
+                <span class="status-badge {{ financial_class }}">
+                  {{ order.financial_status | replace: '_', ' ' }}
+                </span>
+              </td>
+              <td class="hide-mobile">
+                <span class="status-badge {{ fulfillment_class }}">
+                  {{ order.fulfillment_status | replace: '_', ' ' | default: 'Unfulfilled' }}
+                </span>
+              </td>
+              <td style="text-align:right;font-weight:600;">
+                {{ order.total_price | money }}
+              </td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
+    {%- else -%}
+      <div class="account__empty">
+        <p>You haven't placed any orders yet.</p>
+        <a href="{{ routes.root_url }}" class="btn">Start Shopping</a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</main>

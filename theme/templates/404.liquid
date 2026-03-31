@@ -1,0 +1,54 @@
+{% comment %} templates/404.liquid — Not Found page {% endcomment %}
+<main id="MainContent" class="not-found section-padding" role="main" tabindex="-1">
+  <div class="container not-found__inner">
+    <p class="not-found__eyebrow">404</p>
+    <h1 class="not-found__heading">Page Not Found</h1>
+    <p class="not-found__body">
+      We couldn't find that page — it may have moved or no longer exists.
+      Let's get you back to something comfortable.
+    </p>
+    <div class="not-found__actions">
+      <a href="{{ routes.root_url }}" class="btn">Back to Home</a>
+      <a href="{{ routes.collections_url }}" class="btn btn--secondary">Shop All Shoes</a>
+    </div>
+  </div>
+</main>
+
+<style>
+  .not-found { text-align: center; }
+  .not-found__inner {
+    max-width: 560px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .not-found__eyebrow {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #A8A8A8);
+  }
+  .not-found__heading {
+    margin: 0;
+    font-size: clamp(28px, 5vw, 48px);
+  }
+  .not-found__body {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-text, #3D3D3D);
+    max-width: 42ch;
+  }
+  .not-found__actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+</style>

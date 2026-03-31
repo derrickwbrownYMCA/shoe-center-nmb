@@ -1,0 +1,356 @@
+{% comment %}
+  sections/testimonials.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  "What Our Customers Say" — social proof section.
+  3-column grid on desktop, single column on mobile.
+  Each block: decorative quote mark · quote text · author · star rating.
+
+  Pre-populated with 3 believable testimonials about comfort and personal
+  service from North Myrtle Beach shoe shoppers.
+{% endcomment %}
+
+{%- liquid
+  assign bg_style  = section.settings.background_style | default: 'cream'
+  assign heading   = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign section_id = 'TestimonialsHeading-' | append: section.id
+-%}
+
+<section
+  class="testimonials section-padding testimonials--bg-{{ bg_style }}"
+  aria-labelledby="{{ section_id }}"
+>
+  <div class="container">
+
+    <!-- ── Section header ──────────────────────────────────────────────── -->
+    {%- if heading != blank or subheading != blank -%}
+      <header class="testimonials__header">
+        {%- if heading != blank -%}
+          <h2 class="testimonials__heading" id="{{ section_id }}">
+            {{- heading | escape -}}
+          </h2>
+        {%- endif -%}
+        {%- if subheading != blank -%}
+          <p class="testimonials__subheading">{{- subheading | escape -}}</p>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <!-- ── Testimonial grid ────────────────────────────────────────────── -->
+    {%- if section.blocks.size > 0 -%}
+      <div class="testimonials__grid" role="list">
+
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'testimonial' -%}
+            {%- liquid
+              assign rating = block.settings.rating | default: 5 | plus: 0
+            -%}
+            <article
+              class="testimonial-card{% if bg_style == 'card' %} testimonial-card--card{% endif %}"
+              role="listitem"
+              {{ block.shopify_attributes }}
+            >
+              <!-- Decorative opening quote mark -->
+              <span class="testimonial-card__quote-mark" aria-hidden="true">&ldquo;</span>
+
+              <!-- Star rating -->
+              <div
+                class="testimonial-card__stars"
+                aria-label="{{ rating }} out of 5 stars"
+                role="img"
+              >
+                {%- for i in (1..5) -%}
+                  {%- if i <= rating -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                      fill="currentColor" stroke="currentColor" stroke-width="0.5"
+                      class="testimonial-card__star testimonial-card__star--filled"
+                      aria-hidden="true" focusable="false">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  {%- else -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="1.5"
+                      class="testimonial-card__star"
+                      aria-hidden="true" focusable="false">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+
+              <!-- Quote text -->
+              {%- if block.settings.quote != blank -%}
+                <blockquote class="testimonial-card__text">
+                  <p>{{- block.settings.quote | escape -}}</p>
+                </blockquote>
+              {%- endif -%}
+
+              <!-- Author -->
+              {%- if block.settings.author != blank -%}
+                <footer class="testimonial-card__author">
+                  {{- block.settings.author | escape -}}
+                </footer>
+              {%- endif -%}
+
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  /* ── Background variants ─────────────────────────────────────────────── */
+  .testimonials--bg-cream {
+    background-color: var(--color-bg, #FAF9F6);
+  }
+
+  .testimonials--bg-card {
+    background-color: var(--color-card, #FFFFFF);
+  }
+
+  /* ── Section header ──────────────────────────────────────────────────── */
+  .testimonials__header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 56px;
+  }
+
+  .testimonials__heading {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 36px);
+    color: var(--color-heading, #000000);
+    letter-spacing: var(--heading-letter-spacing, 0.03em);
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .testimonials__subheading {
+    font-size: clamp(14px, 1.4vw, 16px);
+    color: var(--color-text-secondary, #A8A8A8);
+    max-width: 480px;
+    margin: 0;
+    line-height: 1.65;
+  }
+
+  /* ── Grid ────────────────────────────────────────────────────────────── */
+  .testimonials__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+
+  /* ── Testimonial card ────────────────────────────────────────────────── */
+  .testimonial-card {
+    background-color: var(--color-card, #FFFFFF);
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-card, 12px);
+    padding: 32px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  /* When the section bg is already card white, use cream for the cards */
+  .testimonials--bg-card .testimonial-card {
+    background-color: var(--color-bg, #FAF9F6);
+  }
+
+  /* The "card" modifier (explicitly card bg) keeps white cards */
+  .testimonial-card--card {
+    background-color: var(--color-card, #FFFFFF);
+  }
+
+  .testimonial-card:hover {
+    box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.08));
+    transform: translateY(-2px);
+  }
+
+  /* Decorative quote mark */
+  .testimonial-card__quote-mark {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 64px;
+    line-height: 0.6;
+    color: var(--color-accent, #F5E1E1);
+    display: block;
+    height: 28px;
+    margin-bottom: 4px;
+    user-select: none;
+  }
+
+  /* Stars */
+  .testimonial-card__stars {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .testimonial-card__star {
+    color: var(--color-text-secondary, #A8A8A8);
+  }
+
+  .testimonial-card__star--filled {
+    /* Warm amber-blush — reads as gold without being garish on the cream palette */
+    color: #C48B3B;
+  }
+
+  /* Quote text */
+  .testimonial-card__text {
+    margin: 0;
+    flex: 1;
+  }
+
+  .testimonial-card__text p {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-text, #3D3D3D);
+    margin: 0;
+    font-style: italic;
+  }
+
+  /* Author */
+  .testimonial-card__author {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .testimonials__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 599px) {
+    .testimonials__grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .testimonials__header {
+      margin-bottom: 36px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonial-card { transition: box-shadow 0.25s ease; transform: none; }
+    .testimonial-card:hover { transform: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "testimonials-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What Our Customers Say"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real comfort. Real people. Real North Myrtle Beach.",
+      "info": "Optional. Appears below the heading in muted text."
+    },
+    {
+      "type": "select",
+      "id": "background_style",
+      "label": "Background",
+      "options": [
+        { "value": "cream", "label": "Cream (default)" },
+        { "value": "card",  "label": "White / Card" }
+      ],
+      "default": "cream"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "I've been shopping here for years. They took the time to measure my feet and found me the perfect pair of HOKAs. My plantar fasciitis is finally under control."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Customer name",
+          "default": "Margaret L., North Myrtle Beach"
+        },
+        {
+          "type": "select",
+          "id": "rating",
+          "label": "Star rating",
+          "options": [
+            { "value": "1", "label": "1 star" },
+            { "value": "2", "label": "2 stars" },
+            { "value": "3", "label": "3 stars" },
+            { "value": "4", "label": "4 stars" },
+            { "value": "5", "label": "5 stars" }
+          ],
+          "default": "5"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "settings": {
+        "heading": "What Our Customers Say",
+        "subheading": "Real comfort. Real people. Real North Myrtle Beach.",
+        "background_style": "cream"
+      },
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I've been coming to Shoe Center for fifteen years. They took the time to measure my feet properly and recommended HOKAs for my plantar fasciitis — I can walk the beach boardwalk again without any pain. You simply can't get that kind of service at a big-box store.",
+            "author": "Margaret L., North Myrtle Beach",
+            "rating": "5"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "My husband and I stopped in on a whim during our vacation and left with two pairs of Birkenstocks we've been wearing every day since. The staff is genuinely knowledgeable — they asked about our lifestyle, not just our size. We're already planning to come back next summer.",
+            "author": "Donna & Frank R., Visitors from Charlotte",
+            "rating": "5"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "As a nurse who's on her feet twelve hours a day, I need shoes that actually work. The team here fitted me in New Balance 990s and I honestly wish I'd found this place ten years ago. They know their product inside and out — a rare thing these days.",
+            "author": "Keisha M., Little River",
+            "rating": "5"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

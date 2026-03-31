@@ -1,0 +1,1002 @@
+{% comment %}
+  sections/story-legacy.liquid
+  ──────────────────────────────────────────────────────────────────────────────
+  "48 Years of Happy Feet" — Brand story, family legacy, and milestone timeline.
+
+  LAYOUT
+  ───────
+  Desktop (≥ 1024px): Two-column CSS Grid
+    • Left column  — lifestyle / family photo (sticky, aligned to top)
+    • Right column — eyebrow label, large heading, body copy,
+                     vertical milestone timeline, blush CTA button
+
+  Below both columns: full-width stats band with 3 figures (48 Years · 50+
+  Brands · 1 Location) separated by hairline dividers.
+
+  Tablet / Mobile (< 1024px): single column — content stacks vertically.
+  Photo moves above the copy on mobile so the story reads naturally top-to-bottom.
+
+  When no image is selected in the editor, the section gracefully collapses to a
+  centered single column with a wider max-width — never looks broken.
+
+  TIMELINE
+  ─────────
+  • <ol role="list"> — milestones are sequential; ordered-list semantics are correct
+  • Vertical blush accent line via CSS ::before pseudo-element on each <li>
+  • Blush circle dots mark each milestone anchor point
+  • Milestones are {% schema %} blocks — fully reorderable / editable in Theme Editor
+  • Scroll-triggered fade-in via a self-contained IntersectionObserver snippet
+  • Graceful no-JS fallback — JS adds .sl-hidden before observing; without JS,
+    no class is added and all content is always visible
+
+  STATS BAND
+  ───────────
+  • <dl> / <dt> / <dd> wrapped in <div> — valid HTML5, semantically correct for
+    label + value pairs
+  • Numbers use large Montserrat Bold; a blush accent rule sits beneath each number
+    as a subtle brand-colour tie-in
+  • Responsive: 3-column on tablet/desktop, single column stacked on mobile
+
+  PERFORMANCE
+  ────────────
+  • Photo uses Shopify image_url + image_tag — WebP/AVIF, lazy, proper srcset
+  • Scroll-reveal uses only compositor-safe properties (opacity + transform)
+  • No external libraries, no additional HTTP requests
+
+  ACCESSIBILITY
+  ──────────────
+  • <section aria-labelledby=""> linked to the <h2 id="">
+  • Timeline <ol role="list"> — VoiceOver removes list semantics on list-style:none;
+    role="list" restores it
+  • Stats <dl> with proper <dt> (number) / <dd> (label) pairs
+  • :focus-visible rings on the CTA (3px #005FCC, offset 3px)
+  • prefers-reduced-motion: IntersectionObserver early-returns; no transforms applied
+  • Timeline dot divs are aria-hidden="true" — decorative only
+{% endcomment %}
+
+{%- liquid
+  assign sl_id        = 'StoryHeading-' | append: section.id
+  assign sl_sec_id    = 'StoryLegacy-'  | append: section.id
+  assign sl_image     = section.settings.image
+  assign sl_has_image = false
+  if sl_image != blank
+    assign sl_has_image = true
+  endif
+-%}
+
+<section
+  class="story-legacy section-padding{% unless sl_has_image %} story-legacy--no-image{% endunless %}"
+  id="{{ sl_sec_id }}"
+  aria-labelledby="{{ sl_id }}"
+>
+  <div class="container">
+
+    <!-- ── Two-column layout (photo + story content) ──────────────────── -->
+    <div class="story-legacy__layout">
+
+      <!-- LEFT: Lifestyle / family photo ─────────────────────────────── -->
+      {%- if sl_has_image -%}
+        <div class="story-legacy__photo-col" data-sl-reveal>
+          <figure class="story-legacy__figure">
+
+            {%- assign sl_img_alt = section.settings.image_alt | default: 'The Brown family at Shoe Center NMB' -%}
+            {{
+              sl_image
+              | image_url: width: 900
+              | image_tag:
+                loading: 'lazy',
+                decoding: 'async',
+                class: 'story-legacy__photo',
+                alt: sl_img_alt,
+                width: sl_image.width,
+                height: sl_image.height,
+                widths: '400, 600, 800, 900',
+                sizes: '(max-width: 767px) 100vw, (max-width: 1023px) 100vw, calc(50vw - 80px)'
+            }}
+
+            {%- if section.settings.image_caption != blank -%}
+              <figcaption class="story-legacy__caption">
+                {{- section.settings.image_caption | escape -}}
+              </figcaption>
+            {%- endif -%}
+
+          </figure>
+        </div>
+      {%- endif -%}
+
+      <!-- RIGHT: Story header + timeline + CTA ────────────────────────── -->
+      <div class="story-legacy__content">
+
+        <!-- Eyebrow · Heading · Body copy ─────────────────────────────── -->
+        <header class="story-legacy__header">
+
+          {%- if section.settings.eyebrow != blank -%}
+            <p class="story-legacy__eyebrow" data-sl-reveal>
+              {{- section.settings.eyebrow | escape -}}
+            </p>
+          {%- endif -%}
+
+          <h2
+            class="story-legacy__heading"
+            id="{{ sl_id }}"
+            data-sl-reveal
+            data-sl-delay="60"
+          >
+            {{- section.settings.heading | default: '48 Years of Happy Feet' | escape -}}
+          </h2>
+
+          {%- if section.settings.body_copy != blank -%}
+            {%- comment -%}
+              body_copy is a richtext field — rendered without | escape so
+              Shopify's paragraph/bold/link markup is preserved.
+            {%- endcomment -%}
+            <div class="story-legacy__body" data-sl-reveal data-sl-delay="120">
+              {{- section.settings.body_copy -}}
+            </div>
+          {%- endif -%}
+
+        </header>
+
+        <!-- Vertical milestone timeline ─────────────────────────────── -->
+        {%- if section.blocks.size > 0 -%}
+          <ol
+            class="story-legacy__timeline"
+            role="list"
+            aria-label="Our milestones"
+          >
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'milestone' -%}
+                <li
+                  class="story-legacy__milestone"
+                  data-sl-reveal
+                  data-sl-delay="{{ forloop.index | times: 90 | plus: 80 }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- comment -%}
+                    Decorative circle dot on the timeline line.
+                    aria-hidden keeps screen readers from announcing
+                    a meaningless empty element.
+                  {%- endcomment -%}
+                  <div class="story-legacy__dot" aria-hidden="true"></div>
+
+                  <div class="story-legacy__milestone-body">
+
+                    {%- if block.settings.year != blank -%}
+                      <span class="story-legacy__year">
+                        {{- block.settings.year | escape -}}
+                      </span>
+                    {%- endif -%}
+
+                    {%- if block.settings.title != blank -%}
+                      <h3 class="story-legacy__milestone-title">
+                        {{- block.settings.title | escape -}}
+                      </h3>
+                    {%- endif -%}
+
+                    {%- if block.settings.description != blank -%}
+                      <p class="story-legacy__milestone-desc">
+                        {{- block.settings.description | escape -}}
+                      </p>
+                    {%- endif -%}
+
+                  </div>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ol>
+        {%- endif -%}
+
+        <!-- CTA button ────────────────────────────────────────────────── -->
+        {%- if section.settings.cta_text != blank -%}
+          <div class="story-legacy__cta-wrap" data-sl-reveal data-sl-delay="200">
+            <a
+              href="{{ section.settings.cta_url | default: '#' }}"
+              class="story-legacy__cta"
+            >
+              {{- section.settings.cta_text | escape -}}
+            </a>
+          </div>
+        {%- endif -%}
+
+      </div><!-- /.story-legacy__content -->
+    </div><!-- /.story-legacy__layout -->
+
+    <!-- ── Stats band ────────────────────────────────────────────────── -->
+    {%- if section.settings.show_stats -%}
+      <dl class="story-legacy__stats" aria-label="By the numbers">
+
+        <div class="story-legacy__stat" data-sl-reveal>
+          <dt class="story-legacy__stat-number">
+            {{- section.settings.stat_1_number | default: '48' | escape -}}
+          </dt>
+          <dd class="story-legacy__stat-label">
+            {{- section.settings.stat_1_label | default: 'Years of Happy Feet' | escape -}}
+          </dd>
+        </div>
+
+        <div class="story-legacy__stat" data-sl-reveal data-sl-delay="100">
+          <dt class="story-legacy__stat-number">
+            {{- section.settings.stat_2_number | default: '50+' | escape -}}
+          </dt>
+          <dd class="story-legacy__stat-label">
+            {{- section.settings.stat_2_label | default: 'Trusted Brands' | escape -}}
+          </dd>
+        </div>
+
+        <div class="story-legacy__stat" data-sl-reveal data-sl-delay="200">
+          <dt class="story-legacy__stat-number">
+            {{- section.settings.stat_3_number | default: '1' | escape -}}
+          </dt>
+          <dd class="story-legacy__stat-label">
+            {{- section.settings.stat_3_label | default: 'North Myrtle Beach Home' | escape -}}
+          </dd>
+        </div>
+
+      </dl>
+    {%- endif -%}
+
+  </div><!-- /.container -->
+</section>
+
+<style>
+  /* ── Scroll-reveal utility ──────────────────────────────────────────────
+    Elements with [data-sl-reveal] are visible by default (no-JS fallback).
+    The IntersectionObserver script below adds .sl-hidden before observing;
+    when an element enters the viewport it adds .sl-visible to transition in.
+    If JS is unavailable, no class is ever added — content stays visible.
+  ─────────────────────────────────────────────────────────────────────── */
+  .sl-hidden {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity  0.65s ease,
+      transform 0.65s ease;
+  }
+
+  .sl-hidden.sl-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /*
+    Honour the user's reduced-motion preference — show everything immediately,
+    no animation. The script also returns early for this preference, but this
+    CSS rule is a belt-and-suspenders guarantee.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .sl-hidden,
+    .sl-hidden.sl-visible {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* ── Section ─────────────────────────────────────────────────────────── */
+  .story-legacy {
+    /*
+      Cream background — this section intentionally matches the hero / page
+      background to create a calm, editorial band rather than a visual break.
+      Paired with generous vertical padding from .section-padding.
+    */
+    background-color: var(--color-bg, #FAF9F6);
+  }
+
+  /* ── Two-column layout ───────────────────────────────────────────────── */
+  .story-legacy__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  /*
+    When no image is selected: collapse to a centered single column.
+    680px keeps long lines readable — a comfortable ~65-character measure
+    at the 17px body copy size.
+  */
+  .story-legacy--no-image .story-legacy__layout {
+    grid-template-columns: 1fr;
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  /* ── Photo column ──────────────────────────────────────────────────── */
+  .story-legacy__photo-col {
+    /*
+      Sticky positioning keeps the photo in view as the user scrolls through
+      the timeline on the right. Only active on desktop where both columns
+      are side by side. Falls back to static on mobile.
+    */
+    position: sticky;
+    top: 2rem;
+  }
+
+  .story-legacy__figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .story-legacy__photo {
+    display: block;
+    width: 100%;
+    /*
+      Portrait 3:4 ratio — shows a full person comfortably and keeps
+      the image tall enough to hold visual balance against the timeline
+      content on the right, even with 5+ milestones.
+    */
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 16px;
+    /*
+      Two-layer shadow: a wide diffused layer for depth,
+      a tighter layer for the edge lift — feels warm and three-dimensional.
+    */
+    box-shadow:
+      0 10px 40px rgba(0, 0, 0, 0.07),
+      0 2px 8px  rgba(0, 0, 0, 0.05);
+  }
+
+  .story-legacy__caption {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 12px;
+    font-style: italic;
+    color: var(--color-text-secondary, #A8A8A8);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ── Content column ────────────────────────────────────────────────── */
+  .story-legacy__content {
+    display: flex;
+    flex-direction: column;
+    gap: 68px;
+  }
+
+  /* ── Section header ────────────────────────────────────────────────── */
+  .story-legacy__header {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .story-legacy__eyebrow {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1;
+  }
+
+  .story-legacy__heading {
+    margin: 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: var(--font-heading-weight, 700);
+    /*
+      Very large — this is an emotional statement, not just a section label.
+      clamp keeps it proportional without a breakpoint hack.
+    */
+    font-size: clamp(34px, 5vw, 58px);
+    line-height: 1.06;
+    letter-spacing: 0.01em;
+    color: var(--color-heading, #000000);
+  }
+
+  .story-legacy__body {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: clamp(15px, 1.35vw, 17px);
+    line-height: 1.8;
+    color: var(--color-text, #3D3D3D);
+    max-width: 52ch;
+  }
+
+  /* Richtext <p> tags — reset margin, let last-child have no bottom space */
+  .story-legacy__body p {
+    margin: 0 0 1.1em;
+  }
+  .story-legacy__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── Vertical milestone timeline ───────────────────────────────────── */
+  .story-legacy__timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .story-legacy__milestone {
+    position: relative;
+    /*
+      padding-left creates space for the dot (22px) + breathing room (20px)
+      between the dot's right edge and the milestone text.
+    */
+    padding-left: 42px;
+    padding-bottom: 44px;
+  }
+
+  .story-legacy__milestone:last-child {
+    padding-bottom: 0;
+  }
+
+  /*
+    Vertical connector line — runs from just below the dot of this milestone
+    to the top of the next milestone's dot. Hidden on the last item so the
+    line doesn't dangle below the final milestone.
+  */
+  .story-legacy__milestone:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    /*
+      left: 10px — center of the 22px dot is 11px from the left edge,
+      minus 0.75px so the 1.5px-wide line is centered on that axis.
+    */
+    left: 10px;
+    top: 30px; /* Below the bottom edge of the dot (top: 1px + height: 22px + 7px clearance) */
+    bottom: 0;
+    width: 1.5px;
+    /*
+      Gradient fades to transparent at the bottom so the line
+      gracefully leads into the next dot without a hard stop.
+    */
+    background: linear-gradient(
+      to bottom,
+      var(--color-accent, #F5E1E1) 0%,
+      var(--color-accent, #F5E1E1) 75%,
+      transparent 100%
+    );
+  }
+
+  /* Blush circle dot — the visual anchor of each milestone */
+  .story-legacy__dot {
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    /*
+      Warm blush fill — fallback sits one step deeper into rose so the dot
+      reads as personal and warm rather than clinical.
+    */
+    background-color: var(--color-accent, #F2D8D8);
+    /*
+      Double-ring: inner cream border lifts the dot visually off the line;
+      outer halo ring echoes the fill colour. The drop shadow is kept very
+      diffuse and warm-tinted so it feels soft and organic, never heavy.
+    */
+    border: 3px solid var(--color-bg, #FAF9F6);
+    box-shadow:
+      0 0 0 2.5px var(--color-accent, #F2D8D8),
+      0 4px 18px rgba(210, 140, 140, 0.12);
+    z-index: 1;
+  }
+
+  /* Milestone content block */
+  .story-legacy__milestone-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .story-legacy__year {
+    display: inline-block;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1;
+  }
+
+  .story-legacy__milestone-title {
+    margin: 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: var(--font-heading-weight, 700);
+    font-size: clamp(15px, 1.4vw, 18px);
+    color: var(--color-heading, #000000);
+    line-height: 1.25;
+  }
+
+  .story-legacy__milestone-desc {
+    margin: 4px 0 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-text, #3D3D3D);
+    max-width: 46ch;
+  }
+
+  /* ── CTA button ─────────────────────────────────────────────────────── */
+  .story-legacy__cta-wrap {
+    display: flex;
+  }
+
+  /*
+    Blush accent style — matches the "View All" and card buttons for a
+    consistent brand language throughout the homepage.
+  */
+  .story-legacy__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 36px;
+    background-color: var(--color-accent, #F5E1E1);
+    color: var(--color-heading, #000000);
+    border: none;
+    border-radius: var(--radius-btn, 8px);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color var(--transition, 0.2s ease),
+      box-shadow       var(--transition, 0.2s ease),
+      transform        var(--transition, 0.2s ease);
+  }
+
+  .story-legacy__cta:hover {
+    background-color: var(--color-accent-hover, #E8C8C8);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+    transform: translateY(-1px);
+  }
+
+  .story-legacy__cta:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 3px;
+  }
+
+  /* ── Stats band ──────────────────────────────────────────────────────── */
+  .story-legacy__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /*
+      Top margin + border-top create a generous visual pause between
+      the story column layout and the stats band below it.
+    */
+    margin-top: 80px;
+    padding-top: 56px;
+    border-top: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  .story-legacy__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 0 24px;
+    /* Hairline dividers between stats */
+    border-right: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  .story-legacy__stat:last-child {
+    border-right: none;
+  }
+
+  .story-legacy__stat-number {
+    margin: 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: var(--font-heading-weight, 700);
+    font-size: clamp(38px, 5.5vw, 56px);
+    color: var(--color-heading, #000000);
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  /*
+    Small blush rule beneath each number — a quiet brand-colour accent
+    that ties the stat band back to the timeline palette without shouting.
+  */
+  .story-legacy__stat-number::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-accent, #F5E1E1);
+    border-radius: 2px;
+    margin: 10px auto 0;
+  }
+
+  .story-legacy__stat-label {
+    margin: 0; /* Reset browser <dd> default margin-left */
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.3;
+  }
+
+  /* ── Tablet (≤ 1023px) ───────────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .story-legacy__layout {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+
+    .story-legacy__photo-col {
+      /*
+        Unstick the photo — sticky only makes sense in a two-column context.
+        Also cap width and center so a portrait image doesn't span edge-to-edge.
+      */
+      position: static;
+      max-width: 560px;
+      margin-inline: auto;
+      width: 100%;
+    }
+
+    .story-legacy__photo {
+      /*
+        Switch to landscape ratio on tablet — a portrait crop at full width
+        would push the story content too far down the page.
+      */
+      aspect-ratio: 4 / 3;
+    }
+
+    .story-legacy__content {
+      gap: 36px;
+    }
+
+    .story-legacy__stats {
+      margin-top: 56px;
+      padding-top: 44px;
+    }
+  }
+
+  /* ── Mobile (≤ 599px) ────────────────────────────────────────────────── */
+  @media (max-width: 599px) {
+    .story-legacy__layout {
+      gap: 32px;
+    }
+
+    .story-legacy__photo {
+      aspect-ratio: 3 / 2;
+      border-radius: 12px;
+    }
+
+    .story-legacy__content {
+      gap: 28px;
+    }
+
+    .story-legacy__body {
+      max-width: none;
+    }
+
+    .story-legacy__milestone {
+      padding-bottom: 32px;
+    }
+
+    .story-legacy__milestone-desc {
+      max-width: none;
+    }
+
+    .story-legacy__cta {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /*
+      Stack stats vertically on mobile — a 3-col layout at 375px
+      would make the numbers too small to feel impactful.
+    */
+    .story-legacy__stats {
+      grid-template-columns: 1fr;
+      margin-top: 44px;
+      padding-top: 36px;
+    }
+
+    .story-legacy__stat {
+      border-right: none;
+      border-bottom: 1px solid var(--color-border, #EBEBEB);
+      padding: 28px 0;
+    }
+
+    .story-legacy__stat:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+</style>
+
+<script>
+  /*
+    Scroll-reveal for sections/story-legacy.liquid
+    ────────────────────────────────────────────────────────────────────────
+    Technique: JS adds .sl-hidden to each [data-sl-reveal] element before
+    the observer starts watching. When the element crosses the viewport
+    threshold, .sl-visible is added (with an optional staggered delay from
+    data-sl-delay="ms"). This means:
+
+    ✓ No-JS: no class is ever added → content always visible
+    ✓ Old browsers without IntersectionObserver: same (early return)
+    ✓ prefers-reduced-motion: early return → content visible immediately
+    ✓ Multiple section instances: scoped by unique section ID → no conflicts
+  */
+  (function () {
+    'use strict';
+
+    /* Guard: IntersectionObserver unavailable (very old browsers) */
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    /* Guard: user has requested reduced motion — skip animation entirely */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    /* Scope to this specific section instance to support multiple instances */
+    var sectionEl = document.getElementById('{{ sl_sec_id }}');
+    if (!sectionEl) return;
+
+    var revealEls = sectionEl.querySelectorAll('[data-sl-reveal]');
+    if (!revealEls.length) return;
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+
+          var el    = entry.target;
+          var delay = parseInt(el.dataset.slDelay || '0', 10);
+
+          if (delay > 0) {
+            setTimeout(function () {
+              el.classList.add('sl-visible');
+            }, delay);
+          } else {
+            el.classList.add('sl-visible');
+          }
+
+          /* Stop watching once revealed — no need to re-animate */
+          observer.unobserve(el);
+        });
+      },
+      {
+        /*
+          threshold: 0.12 — trigger when 12% of the element is visible.
+          rootMargin bottom offset keeps the animation feeling natural —
+          elements animate in as they enter mid-screen, not at the very bottom.
+        */
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      }
+    );
+
+    /* Add initial hidden state via JS, then begin observing */
+    revealEls.forEach(function (el) {
+      el.classList.add('sl-hidden');
+      observer.observe(el);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Story & Legacy",
+  "tag": "section",
+  "class": "story-legacy-section",
+  "max_blocks": 8,
+  "settings": [
+
+    {
+      "type": "header",
+      "content": "Section text"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "OUR STORY",
+      "info": "Small all-caps text above the heading. Optional — leave blank to hide."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "48 Years of Happy Feet",
+      "info": "Displayed as an H2. This is your emotional hook — keep it warm and personal."
+    },
+    {
+      "type": "richtext",
+      "id": "body_copy",
+      "label": "Story copy",
+      "default": "<p>Shoe Center NMB has been part of North Myrtle Beach since 1976, and that kind of history means something to us. For nearly five decades, this store has been more than a place to buy shoes. It has been a place where people are greeted by name, where comfort matters, and where customers are treated like neighbors and friends instead of transactions. Many of the people who walk through our doors have been shopping here for years, even decades, and we do not take that trust lightly.</p><p>In 2024, the Brown family became the next chapter in that story, with a deep respect for what made this store special in the first place. Our goal is not to change the heart of Shoe Center NMB. It is to carry it forward. We believe the right pair of shoes can do more than fit well. They can bring relief, confidence, ease, and that feeling of shoes that truly hug your feet. That is why our philosophy is simple: We Make Your Feet Happy. From comfort footwear and expert fitting to honest, personal service, everything we do starts there.</p><p>We are proud to serve the people who have always loved this store, while also welcoming a new generation of customers discovering us for the first time. Locals, visitors, working professionals, families, and even our loyal community of Shag dancers all come here looking for comfort that feels good from the very first step. Whether you have been shopping with us for 30 years or you are just walking in for the first time, we want you to feel at home here.</p>",
+      "info": "2–3 short paragraphs works best. Keep it warm and personal, not corporate."
+    },
+
+    {
+      "type": "header",
+      "content": "Photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Family \/ lifestyle photo",
+      "info": "Recommended: portrait orientation (3:4 ratio), at least 900px wide. Sits alongside the story on desktop; stacks above the copy on mobile. Leave blank for a single-column centered layout."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "The Brown family at Shoe Center NMB",
+      "info": "Describe the image for screen readers and search engines. Be specific: 'The Brown family outside Shoe Center NMB, 2024'."
+    },
+    {
+      "type": "text",
+      "id": "image_caption",
+      "label": "Image caption",
+      "info": "Optional. Appears below the photo in small italic text. E.g. 'The Brown family, 2024 — three generations of happy feet.'"
+    },
+
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button label",
+      "default": "Read Our Full Story",
+      "info": "Leave blank to hide the button."
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button link",
+      "info": "Link to your About page, Meet the Team page, or a dedicated story page."
+    },
+
+    {
+      "type": "header",
+      "content": "Stats band"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stats",
+      "label": "Show stats band",
+      "default": true,
+      "info": "Displays three key figures below the story layout — e.g. years, brands, location."
+    },
+    {
+      "type": "text",
+      "id": "stat_1_number",
+      "label": "Stat 1 — Number",
+      "default": "48"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Stat 1 — Label",
+      "default": "Years of Happy Feet"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_number",
+      "label": "Stat 2 — Number",
+      "default": "50+"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Stat 2 — Label",
+      "default": "Trusted Brands"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_number",
+      "label": "Stat 3 — Number",
+      "default": "1"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Stat 3 — Label",
+      "default": "North Myrtle Beach Home"
+    }
+
+  ],
+
+  "blocks": [
+    {
+      "type": "milestone",
+      "name": "Timeline milestone",
+      "settings": [
+        {
+          "type": "text",
+          "id": "year",
+          "label": "Year",
+          "default": "1976",
+          "info": "Displayed above the title in small uppercase text."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Milestone title",
+          "default": "A Local Tradition Begins"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Shoe Center first opened its doors in North Myrtle Beach and quickly became known as a place where comfort, care, and personal service came first.",
+          "info": "1–2 sentences. Keep it conversational and specific — the more personal, the better."
+        }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Story & Legacy",
+      "settings": {
+        "eyebrow": "OUR STORY",
+        "heading": "48 Years of Happy Feet",
+        "body_copy": "<p>Shoe Center NMB has been part of North Myrtle Beach since 1976, and that kind of history means something to us. For nearly five decades, this store has been more than a place to buy shoes. It has been a place where people are greeted by name, where comfort matters, and where customers are treated like neighbors and friends instead of transactions. Many of the people who walk through our doors have been shopping here for years, even decades, and we do not take that trust lightly.</p><p>In 2024, the Brown family became the next chapter in that story, with a deep respect for what made this store special in the first place. Our goal is not to change the heart of Shoe Center NMB. It is to carry it forward. We believe the right pair of shoes can do more than fit well. They can bring relief, confidence, ease, and that feeling of shoes that truly hug your feet. That is why our philosophy is simple: We Make Your Feet Happy. From comfort footwear and expert fitting to honest, personal service, everything we do starts there.</p><p>We are proud to serve the people who have always loved this store, while also welcoming a new generation of customers discovering us for the first time. Locals, visitors, working professionals, families, and even our loyal community of Shag dancers all come here looking for comfort that feels good from the very first step. Whether you have been shopping with us for 30 years or you are just walking in for the first time, we want you to feel at home here.</p>",
+        "image_alt": "The Brown family at Shoe Center NMB",
+        "cta_text": "Read Our Full Story",
+        "show_stats": true,
+        "stat_1_number": "48",
+        "stat_1_label": "Years of Happy Feet",
+        "stat_2_number": "50+",
+        "stat_2_label": "Trusted Brands",
+        "stat_3_number": "1",
+        "stat_3_label": "North Myrtle Beach Home"
+      },
+      "blocks": [
+        {
+          "type": "milestone",
+          "settings": {
+            "year": "1976",
+            "title": "A Local Tradition Begins",
+            "description": "Shoe Center opened in 1976 with a simple belief: the right shoes matter, and so does the person wearing them. It became a place where you were greeted by name, fitted with care, and sent out the door feeling good."
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "year": "1980s – 1990s",
+            "title": "Growing with the Grand Strand",
+            "description": "As North Myrtle Beach grew, so did the store's reputation. Families kept coming back year after year — not just for the shoes, but for the feeling of walking out in the right pair."
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "year": "2000s",
+            "title": "A Favorite on the Dance Floor, Too",
+            "description": "The right pair of shoes matters on the dance floor as much as anywhere else. A loyal community of Shag dancers discovered that early and made Shoe Center a beloved part of their tradition."
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "year": "2024",
+            "title": "A New Chapter, the Same Heart",
+            "description": "In 2024, the Brown family stepped in with deep gratitude for what made this store special. The mission did not change — just the chapter: make people feel good, from the ground up."
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "year": "Today",
+            "title": "Still Making Every Step Feel Good",
+            "description": "We carry nearly 50 years of tradition forward with pride — honoring every customer who has trusted us for decades, and warmly welcoming everyone who walks through our door for the very first time."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

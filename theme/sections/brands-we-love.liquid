@@ -1,0 +1,586 @@
+{% comment %}
+  sections/brands-we-love.liquid
+  ──────────────────────────────────────────────────────────────────────────────
+  "Brands We Love" — Horizontal logo band section for the homepage.
+
+  LAYOUT
+  ───────
+  Desktop / Tablet (≥ 600px):
+    CSS Grid — grid-template-columns driven by --bwl-cols (4–6, set from schema).
+    All logo cells are the same height; images are constrained to a fixed 48px
+    height with object-fit: contain so landscape and portrait logos align cleanly.
+
+  Mobile (≤ 599px):
+    Switches to a horizontal flex scroll track with scroll-snap so the user can
+    swipe through logos one by one. CSS gradient mask-image fades both edges to
+    hint at off-screen logos. A thin 2px blush scrollbar replaces the default.
+
+  HOVER EFFECT
+  ─────────────
+  Logo images rest at grayscale(100%) opacity(0.50) — calm, editorial, recessive.
+  On hover / focus-visible:
+    • filter: grayscale(0%) opacity(0.95) — colour blooms back (0.50s, slowest)
+    • transform: translateY(-2px) scale(1.03) — gentle lift (0.34s, fastest)
+    • background-color: --color-accent on the containing link — warm blush halo
+  Staggered transitions: lift finishes first, then colour blooms after — a
+  layered, organic feel. filter is the slowest at 0.50s for a warm, unhurried glow.
+  prefers-reduced-motion: transform disabled; only the colour/opacity transition runs.
+
+  EMPTY & PLACEHOLDER STATES
+  ────────────────────────────
+  • When a logo block exists but no image is uploaded, a small-caps text placeholder
+    shows the brand name — the section never looks broken in the Theme Editor.
+  • When no blocks at all exist, a one-line editorial hint guides the merchant.
+
+  PERFORMANCE
+  ────────────
+  • image_url + image_tag → WebP/AVIF output, lazy loading, proper srcset.
+  • Max image width requested: 360px — logos don't need full-resolution variants.
+  • No JavaScript — grid, scroll, and hover are pure CSS.
+
+  ACCESSIBILITY
+  ──────────────
+  • <section aria-labelledby=""> linked to the <h2 id="">.
+  • Logo <ul> has role="list" to restore VoiceOver list semantics (stripped by
+    list-style: none in some browsers).
+  • Each <a> carries aria-label="{{ brand_name }}" for screen readers.
+  • Non-linked logos render as <span> with role="img" + aria-label.
+  • :focus-visible rings on all interactive elements (3px #005FCC).
+  • prefers-reduced-motion respected.
+{% endcomment %}
+
+{%- liquid
+  assign bwl_heading_id = 'BrandsHeading-' | append: section.id
+  assign bwl_cols       = section.settings.columns | default: '6'
+-%}
+
+<section
+  class="brands-we-love section-padding"
+  aria-labelledby="{{ bwl_heading_id }}"
+>
+  <div class="container">
+
+    <!-- ── Section header ─────────────────────────────────────────────── -->
+    {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+      <header class="brands__header">
+
+        {%- if section.settings.heading != blank -%}
+          <h2
+            class="brands__heading"
+            id="{{ bwl_heading_id }}"
+          >
+            {{- section.settings.heading | escape -}}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.subheading != blank -%}
+          <p class="brands__subheading">
+            {{- section.settings.subheading | escape -}}
+          </p>
+        {%- endif -%}
+
+      </header>
+    {%- endif -%}
+
+    <!-- ── Logo grid ──────────────────────────────────────────────────── -->
+    {%- if section.blocks.size > 0 -%}
+
+      <ul
+        class="brands__grid"
+        role="list"
+        aria-label="Brands we carry"
+        style="--bwl-cols: {{ bwl_cols }};"
+      >
+
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'logo' -%}
+
+            {%- liquid
+              assign has_link  = false
+              assign has_image = false
+              if block.settings.link_url != blank
+                assign has_link = true
+              endif
+              if block.settings.image != blank
+                assign has_image = true
+              endif
+              assign brand_label = block.settings.brand_name | default: 'Brand' | escape
+            -%}
+
+            <li
+              class="brands__logo-item"
+              {{ block.shopify_attributes }}
+            >
+
+              {%- comment -%}
+                Use <a> when a URL is provided, <span role="img"> when not.
+                Both elements share .brands__logo-link so hover CSS applies
+                identically in both cases — visual consistency regardless of
+                whether the merchant has linked the logo yet.
+              {%- endcomment -%}
+
+              {%- if has_link -%}
+                <a
+                  href="{{ block.settings.link_url }}"
+                  class="brands__logo-link"
+                  aria-label="{{ brand_label }}"
+                >
+              {%- else -%}
+                <span
+                  class="brands__logo-link brands__logo-link--static"
+                  role="img"
+                  aria-label="{{ brand_label }}"
+                >
+              {%- endif -%}
+
+                {%- if has_image -%}
+
+                  {{
+                    block.settings.image
+                    | image_url: width: 360
+                    | image_tag:
+                      loading: 'lazy',
+                      decoding: 'async',
+                      class: 'brands__logo-img',
+                      alt: brand_label,
+                      width: block.settings.image.width,
+                      height: block.settings.image.height,
+                      widths: '120, 180, 240, 360',
+                      sizes: '(max-width: 599px) 108px, (max-width: 1023px) 20vw, 180px'
+                  }}
+
+                {%- else -%}
+
+                  {%- comment -%}
+                    Text placeholder — visible in Theme Editor before the
+                    merchant uploads an image. aria-hidden keeps it invisible
+                    to screen readers; the parent's aria-label already names it.
+                  {%- endcomment -%}
+                  <span
+                    class="brands__logo-placeholder"
+                    aria-hidden="true"
+                  >
+                    {{- brand_label -}}
+                  </span>
+
+                {%- endif -%}
+
+              {%- if has_link -%}
+                </a>
+              {%- else -%}
+                </span>
+              {%- endif -%}
+
+            </li>
+
+          {%- endif -%}
+        {%- endfor -%}
+
+      </ul>
+
+    {%- else -%}
+
+      <!-- ── Theme Editor empty state ─────────────────────────────────── -->
+      <p class="brands__empty-hint">
+        Add brand logos using the block editor to the left.
+        Upload a logo image, enter the brand name, and optionally link to a
+        collection or page.
+      </p>
+
+    {%- endif -%}
+
+  </div><!-- /.container -->
+</section>
+
+<style>
+  /* ── Section ─────────────────────────────────────────────────────────── */
+  .brands-we-love {
+    background-color: var(--color-bg, #FAF9F6);
+  }
+
+  /* ── Section header ──────────────────────────────────────────────────── */
+  .brands__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .brands__heading {
+    margin: 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: var(--font-heading-weight, 700);
+    font-size: clamp(24px, 3vw, 38px);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: var(--color-heading, #000000);
+  }
+
+  .brands__subheading {
+    margin: 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: clamp(13px, 1.2vw, 15px);
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.65;
+    max-width: 44ch;
+  }
+
+  /* ── Logo grid ───────────────────────────────────────────────────────── */
+  .brands__grid {
+    --bwl-cols: 6; /* Overridden by inline style from schema setting */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--bwl-cols), 1fr);
+    /*
+      Row gap is tighter than column gap — logos are wider than tall, so
+      vertical rhythm needs less space than horizontal rhythm.
+    */
+    gap: 12px 24px;
+    align-items: center;
+  }
+
+  /* ── Individual logo item ─────────────────────────────────────────────── */
+  .brands__logo-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /*
+    Shared styles for the link (<a>) and static (<span>) wrappers.
+    Hover styles apply to both so the visual treatment is consistent
+    regardless of whether the merchant has added a URL.
+  */
+  .brands__logo-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px 12px;
+    border-radius: var(--radius-card, 12px);
+    text-decoration: none;
+    background-color: transparent;
+    transition:
+      background-color var(--transition, 0.35s ease);
+    cursor: pointer;
+  }
+
+  .brands__logo-link--static {
+    /*
+      Non-linked logos still show the hover for visual rhythm,
+      but they are not focusable (span has no tabindex) and are
+      announced only via the parent li's aria-label.
+    */
+    cursor: default;
+  }
+
+  /* Warmer, softer blush halo — slightly more pigment than the section bg */
+  .brands__logo-link:hover {
+    background-color: var(--color-accent, #EDD8D8);
+  }
+
+  .brands__logo-link:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 3px;
+    border-radius: var(--radius-card, 12px);
+  }
+
+  /* ── Logo image ──────────────────────────────────────────────────────── */
+  .brands__logo-img {
+    display: block;
+    width: 100%;
+    max-width: 160px;
+    /*
+      Fixed height + object-fit: contain gives every logo the same
+      vertical footprint regardless of aspect ratio — wide wordmarks
+      and tall badge logos line up cleanly in the same grid row.
+    */
+    height: 48px;
+    object-fit: contain;
+    /*
+      Grayscale + reduced opacity at rest: logos recede into the background,
+      feeling like a calm endorsement rather than a sales pitch.
+    */
+    filter: grayscale(100%) opacity(0.50);
+    /*
+      Staggered transition:
+        filter  0.50s — colour bloom is slowest, feels like a gentle warm-up
+        transform 0.34s — lift finishes first, then colour blooms after
+      Slower filter makes the effect feel more elegant and less mechanical.
+    */
+    transition:
+      filter    0.50s ease,
+      transform 0.34s ease;
+  }
+
+  /* Colour bloom + gentle lift on hover and keyboard focus */
+  .brands__logo-link:hover    .brands__logo-img,
+  .brands__logo-link:focus-visible .brands__logo-img {
+    filter: grayscale(0%) opacity(0.95);
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  /* Honour reduced-motion: colour transition stays, lift is disabled */
+  @media (prefers-reduced-motion: reduce) {
+    .brands__logo-img {
+      transition: filter 0.4s ease;
+    }
+    .brands__logo-link:hover    .brands__logo-img,
+    .brands__logo-link:focus-visible .brands__logo-img {
+      transform: none;
+    }
+  }
+
+  /* ── Text placeholder (shown in Theme Editor before image is uploaded) ── */
+  .brands__logo-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #A8A8A8);
+    opacity: 0.55;
+    white-space: nowrap;
+  }
+
+  /* ── Empty state ─────────────────────────────────────────────────────── */
+  .brands__empty-hint {
+    text-align: center;
+    margin: 0;
+    padding: 40px 0;
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-text-secondary, #A8A8A8);
+    line-height: 1.6;
+    max-width: 48ch;
+    margin-inline: auto;
+  }
+
+  /* ── Tablet (600px–1023px) ───────────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .brands__header {
+      margin-bottom: 48px;
+    }
+
+    /*
+      Force 4-column grid on tablet regardless of the desktop columns setting —
+      5-6 logos at this width would make each cell uncomfortably narrow.
+    */
+    .brands__grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px 18px;
+    }
+  }
+
+  /* ── Mobile (≤ 599px) — horizontal scroll track ──────────────────────── */
+  @media (max-width: 599px) {
+    .brands__header {
+      margin-bottom: 32px;
+      gap: 10px;
+    }
+
+    .brands__grid {
+      /*
+        Switch from grid to a horizontal flex scroll track.
+        scroll-snap keeps logos aligned to card boundaries as the user
+        swipes, preventing partial logos from sitting at the edge.
+      */
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap: 10px;
+      /* Extra bottom padding prevents scrollbar from overlapping content */
+      padding-bottom: 14px;
+      /*
+        Fade edges — a CSS gradient mask hints that more logos exist
+        off-screen without requiring extra markup or JavaScript.
+        The mask clips the scroll container's painted area while the
+        content itself continues to scroll freely behind the fade zones.
+      */
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        #000 20px,
+        #000 calc(100% - 20px),
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        #000 20px,
+        #000 calc(100% - 20px),
+        transparent 100%
+      );
+    }
+
+    /*
+      2px blush scrollbar — thinner than before, barely visible.
+      ::-webkit-scrollbar supported in Chrome, Safari, and Edge.
+      Firefox uses scrollbar-width + scrollbar-color (see below).
+    */
+    .brands__grid::-webkit-scrollbar {
+      height: 2px;
+    }
+    .brands__grid::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .brands__grid::-webkit-scrollbar-thumb {
+      background-color: var(--color-accent, #EDD8D8);
+      border-radius: 2px;
+    }
+    .brands__grid {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-accent, #EDD8D8) transparent;
+    }
+
+    .brands__logo-item {
+      /* Fixed width prevents flex items from collapsing; snap to grid */
+      flex: 0 0 100px;
+      scroll-snap-align: start;
+    }
+
+    .brands__logo-link {
+      padding: 14px 8px;
+    }
+
+    .brands__logo-img {
+      height: 36px;
+      max-width: 84px;
+    }
+
+    .brands__logo-placeholder {
+      height: 36px;
+      font-size: 9px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Brands We Love",
+  "tag": "section",
+  "class": "brands-we-love-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section text"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Brands We Love",
+      "info": "Displayed as an H2. Leave blank to hide the header entirely."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Brands we know, love, and stand behind — every step of the way.",
+      "info": "Short line beneath the heading. Optional — leave blank to hide."
+    },
+    {
+      "type": "header",
+      "content": "Grid layout"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Logos per row (desktop)",
+      "options": [
+        { "value": "4", "label": "4 per row" },
+        { "value": "5", "label": "5 per row" },
+        { "value": "6", "label": "6 per row" }
+      ],
+      "default": "6",
+      "info": "Tablet always shows 4 per row. Mobile scrolls horizontally regardless of this setting."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Brand logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo image",
+          "info": "PNG with transparent background works best. Recommended minimum width: 240px. The image will be displayed at a fixed 52px height — horizontal wordmarks look great."
+        },
+        {
+          "type": "text",
+          "id": "brand_name",
+          "label": "Brand name",
+          "default": "Brand Name",
+          "info": "Required for accessibility (alt text and screen reader label). Also shown as a placeholder before you upload a logo."
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL",
+          "info": "Optional. Link to a brand collection, a filtered product page, or the brand's website. Leave blank for a non-linked display logo."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brands We Love",
+      "settings": {
+        "heading": "Brands We Love",
+        "subheading": "Brands we know, love, and stand behind — every step of the way.",
+        "columns": "6"
+      },
+      "blocks": [
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "HOKA"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Brooks"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Birkenstock"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "New Balance"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Vionic"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Dansko"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

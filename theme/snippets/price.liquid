@@ -1,0 +1,182 @@
+{% comment %}
+  snippets/price.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Renders product price with full sale/compare-at logic.
+
+  Parameters:
+    product      {object}  Required. The product object.
+    variant      {object}  Optional. A specific variant; defaults to product.selected_or_first_available_variant.
+    show_compare {boolean} Optional. Show compare-at (strikethrough) price. Default: true.
+
+  Output examples:
+    Regular:  $89.95
+    Sale:     $69.95  ~~$89.95~~  (sale in warm red, compare struck through)
+    Sold out: $89.95 (no special treatment — badge handles the sold-out signal)
+
+  Unit pricing:
+    If the product/variant has unit pricing (e.g. cost per oz), it is shown
+    below the price in muted small text: "$0.75 / fl oz"
+{% endcomment %}
+
+{%- liquid
+  # ── Resolve the target variant ────────────────────────────────────────────
+  if variant
+    assign target_variant = variant
+  else
+    assign target_variant = product.selected_or_first_available_variant
+  endif
+
+  # ── Determine show_compare default ────────────────────────────────────────
+  # Liquid doesn't have a direct "default true" for booleans, so we test
+  # for explicit false. Any other value (nil / true) → show compare.
+  if show_compare == false
+    assign display_compare = false
+  else
+    assign display_compare = true
+  endif
+
+  # ── Resolve prices ────────────────────────────────────────────────────────
+  # Prefer variant-level prices when a variant is specified; fall back to
+  # product-level (which Shopify sets to the cheapest variant).
+  if target_variant
+    assign current_price      = target_variant.price
+    assign compare_at_price   = target_variant.compare_at_price
+    assign price_varies       = false
+  else
+    assign current_price      = product.price
+    assign compare_at_price   = product.compare_at_price
+    assign price_varies       = product.price_varies
+  endif
+
+  # ── Sale state ────────────────────────────────────────────────────────────
+  assign is_on_sale = false
+  if compare_at_price > current_price and compare_at_price != blank
+    assign is_on_sale = true
+  endif
+
+  # ── Unit pricing ──────────────────────────────────────────────────────────
+  assign show_unit_price = false
+  if target_variant.unit_price_measurement
+    assign show_unit_price = true
+  endif
+-%}
+
+<div class="price{% if is_on_sale %} price--on-sale{% endif %}"
+  {{ block.shopify_attributes }}>
+
+  {%- comment -%} ── Main price line ────────────────────────────────────── {%- endcomment -%}
+  <div class="price__row">
+
+    {%- if price_varies and target_variant == nil -%}
+      {%- comment -%}
+        No variant selected and price varies across variants.
+        Show "From $XX.XX" — common pattern on collection/search pages.
+      {%- endcomment -%}
+      <span class="price__current{% if is_on_sale %} price__current--sale{% endif %}"
+        aria-label="From {{ product.price_min | money }}">
+        <span class="visually-hidden">From </span>
+        {{- product.price_min | money -}}
+      </span>
+
+    {%- elsif is_on_sale -%}
+      {%- comment -%}
+        Sale: show sale price first (visually prominent, warm red),
+        then compare-at struck through. Both wrapped in a group for
+        screen-reader context: "Sale price $69.95, was $89.95".
+      {%- endcomment -%}
+      <span class="visually-hidden">Sale price: </span>
+      <span class="price__current price__current--sale">
+        {{- current_price | money -}}
+      </span>
+
+      {%- if display_compare -%}
+        <s class="price__compare">
+          <span class="visually-hidden">Regular price: </span>
+          {{- compare_at_price | money -}}
+        </s>
+      {%- endif -%}
+
+    {%- else -%}
+      <span class="price__current">
+        {{- current_price | money -}}
+      </span>
+    {%- endif -%}
+
+  </div>
+
+  {%- comment -%} ── Unit pricing line ──────────────────────────────────── {%- endcomment -%}
+  {%- if show_unit_price -%}
+    {%- assign unit = target_variant.unit_price_measurement -%}
+    <div class="price__unit" aria-label="Unit price">
+      {{- target_variant.unit_price | money -}}
+      <span aria-hidden="true">/</span>
+      {%- if unit.reference_value != 1 -%}
+        {{- unit.reference_value -}}
+      {%- endif -%}
+      {{- unit.reference_unit -}}
+    </div>
+  {%- endif -%}
+
+</div><!-- /.price -->
+
+<style>
+  /* ── Price component styles ─────────────────────────────────────────────
+     These are scoped to .price so they're safe to include multiple times
+     on a page (product cards, PDP, cart). Duplicate <style> blocks in the
+     same document are de-duped by the browser.
+  ─────────────────────────────────────────────────────────────────────── */
+
+  .price__row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .price__current {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: inherit; /* Inherits from context — 15px on card, 22px on PDP */
+    font-weight: 600;
+    color: var(--color-heading, #000000);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Sale price — warm red that reads as value signal without clashing with blush */
+  .price__current--sale {
+    color: #A83232;
+  }
+
+  /* Compare-at price — struck through, muted */
+  .price__compare {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 0.85em;
+    font-weight: 400;
+    color: var(--color-text-secondary, #A8A8A8);
+    text-decoration: line-through;
+    /* <s> element provides semantic strikethrough; text-decoration
+       makes it visually explicit for sighted users */
+    white-space: nowrap;
+  }
+
+  /* Unit price — shown below main price in muted small text */
+  .price__unit {
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: 12px;
+    color: var(--color-text-secondary, #A8A8A8);
+    margin-top: 3px;
+  }
+
+  /* Visually hidden but accessible to screen readers */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

@@ -1,0 +1,57 @@
+{% comment %} templates/customers/register.liquid {% endcomment %}
+<main id="MainContent" class="section-padding" role="main" tabindex="-1">
+  <div class="container" style="max-width:480px;">
+    <h1>Create Account</h1>
+    {% form 'create_customer' %}
+      {{ form.errors | default_errors }}
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:24px;">
+        <div>
+          <label for="FirstName">First name</label>
+          <input
+            type="text"
+            name="customer[first_name]"
+            id="FirstName"
+            autocomplete="given-name"
+            style="width:100%;padding:12px;border:1px solid var(--color-border,#EBEBEB);border-radius:8px;font-size:16px;margin-top:6px;"
+          >
+        </div>
+        <div>
+          <label for="LastName">Last name</label>
+          <input
+            type="text"
+            name="customer[last_name]"
+            id="LastName"
+            autocomplete="family-name"
+            style="width:100%;padding:12px;border:1px solid var(--color-border,#EBEBEB);border-radius:8px;font-size:16px;margin-top:6px;"
+          >
+        </div>
+        <div>
+          <label for="CustomerEmail">Email</label>
+          <input
+            type="email"
+            name="customer[email]"
+            id="CustomerEmail"
+            autocomplete="email"
+            required
+            style="width:100%;padding:12px;border:1px solid var(--color-border,#EBEBEB);border-radius:8px;font-size:16px;margin-top:6px;"
+          >
+        </div>
+        <div>
+          <label for="CustomerPassword">Password</label>
+          <input
+            type="password"
+            name="customer[password]"
+            id="CustomerPassword"
+            autocomplete="new-password"
+            required
+            style="width:100%;padding:12px;border:1px solid var(--color-border,#EBEBEB);border-radius:8px;font-size:16px;margin-top:6px;"
+          >
+        </div>
+        <button type="submit" class="btn btn--full" style="margin-top:8px;">Create Account</button>
+        <p style="text-align:center;font-size:14px;color:var(--color-text-secondary,#A8A8A8);">
+          Already have an account? <a href="{{ routes.account_login_url }}">Sign in</a>
+        </p>
+      </div>
+    {% endform %}
+  </div>
+</main>

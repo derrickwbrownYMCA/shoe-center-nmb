@@ -1,0 +1,369 @@
+Shoe Center NMB Rebrand Vision Document and Technical Specification — Version 2.1, March 2026
+Executive Summary
+Shoe Center NMB will evolve from a legacy, service-led local shoe destination into a modern, lifestyle-oriented e-commerce boutique that still feels unmistakably rooted in the North Myrtle Beach community. The brand foundation is already strong: a family-owned-and-operated store since 1978 (48 years as of 2026), with deep credibility in comfort, fashion, and dance footwear, and a documented history of high-touch customer service (including national recognition from Footwear Insight’s Gold Medal Service Awards). 
+
+This new Shopify experience will lean into “We Make Your Feet Happy” as both promise and system: a fast, clean, mobile-first shopping journey that reduces uncertainty (fit, comfort, occasion) and increases confidence (social proof, guidance, omnichannel pickup). It must expand men’s visibility and sales mix while staying loyal to Shag dancers—especially important in this region where the Shag is formally recognized in South Carolina as the official state dance (Act 329 of 1984) and culturally associated with the Ocean Drive area in North Myrtle Beach. 
+
+Reference Websites and Visual Inspiration
+This section focuses on photography direction, lifestyle imagery choices, color mood, and overall coastal-Southern boutique feel (no video inspiration), using the three provided reference sites plus a curated expanded set of comparable premium coastal/lifestyle e-commerce brands.
+
+Core references to pull from (photography + mood + layout feel)
+
+Charleston Shoe Company: Strong “day-to-night” storytelling (“From Cobblestones To Cocktails”) that pairs practical comfort with aspirational occasions (boardroom, beach, cocktail hour, sporty). The page architecture supports lifestyle framing without abandoning product clarity, using occasion-based pathways and comfort-forward messaging (walk all day / dance all night). 
+
+Faherty: Lifestyle photography leans into relaxed coastal polish with natural-light scenes and wardrobe storytelling—e.g., “a woman on a pier wearing a striped shirt dress,” linen suiting, and beach-referenced product imagery (sandals on the beach) presented in an editorial, airy way. 
+
+Southern Tide: A clear “coastal + Southern occasion” posture (seasonal moments like brunch and gatherings) with a preppy palette and product-forward merchandising. Also pairs commerce with lifestyle content via its “Southern Edit” blog positioning (style + travel + lifestyle). 
+
+Additional curated inspiration collection (coastal / Southern / comfort-first lifestyle)
+Each site below includes 2–3 imagery strengths worth emulating for Shoe Center NMB’s new brand feel.
+
+Spartina 449: Coastal/Lowcountry storytelling anchored in “island living” and place-based inspiration (Daufuskie Island, South Carolina); a lookbook/capsule presentation that feels like a warm vacation; “shop the look” flows that connect lifestyle imagery to purchasable items smoothly. 
+
+Palm Beach Sandals: “Always summer somewhere” mood with sunlit, travel-led hero storytelling; heritage positioning (“handmade,” “luxury and comfort,” “sandals that take you places”) that aligns craft with ease; monogram/icon personalization visuals that feel upscale-yet-playful. 
+
+Tuckernuck: Editorial-first image hierarchy that makes the site feel like a lifestyle magazine (travel guides, “edits,” seasonal stories) while still driving product discovery; strong use of destination framing and “Shop the Edit” merchandising; consistent, bright-yet-premium styling that works well for a 30–50 demographic. 
+
+Ivy Coast Collection: Lifestyle vignettes tied to real-world activities and places (e.g., “Sailing…”, “Shopping in Savannah”); polished, social-first imagery that still reads as practical (sun protection) rather than purely fashion; “as seen in” credibility blocks paired with product storytelling for trust. 
+
+Hari Mari: Comfort-led lifestyle language (“pier to patio and beach to bonfire”) paired with casual, natural-light settings (pool, rope swing, beach contexts); “shop the look” photography that mixes men’s + women’s products; review-forward imagery blocks that connect comfort claims to real people. 
+
+OluKai: Island lifestyle framing and product storytelling that explicitly connects durability + craftsmanship to (beach/water) daily life; aspirational “getaway” narrative while staying grounded in comfort and use; strong trust-and-service iconography alongside product imagery (warranty, exchanges, support). 
+
+Fair Harbor: “Ease of coastal living” positioning paired with community/UGC presentation; grid-based lifestyle imagery that feels like real moments and families rather than only studio shots; the site blends comfort proof points with brand ethos for credibility. 
+
+johnnie-O: “Coastal-inspired” palette framing (sea + sky blues) and a relaxed-prep lifestyle tone; clear merchandising that highlights seasonal collections while keeping the layout clean; consistent lifestyle positioning that can translate well to men’s growth without feeling overly formal. 
+
+Tommy Bahama: High-impact, sun-soaked hero storytelling (“escape,” “paradise,” “linen,” “made to feel like sunshine you can slip on”) that still works commercially; strong “beach-to-home” lifestyle scope; UGC callouts that reinforce vibe/community when used selectively. 
+
+Duck Head: Heritage-forward, rugged-yet-refined visual framing that can inspire Shoe Center’s men’s growth strategy; “maritime styles” and workwear legacy cues that translate naturally to coastal men’s footwear; clean product storytelling blocks that don’t overcomplicate the shopping path. 
+
+Brand Identity and Visual Direction
+Tagline and brand story
+
+Tagline: We Make Your Feet Happy. This line already appears in public-facing promotional content and can function as a measurable brand promise when supported with fit guidance, comfort education, and low-friction fulfillment. 
+
+Brand story (recommended narrative arc):
+Shoe Center NMB is a family-owned comfort, fashion, and dance shoe destination “since 1978,” built on old-school service and expertise. 
+ The new brand expression modernizes the look without losing the heart: a coastal-Southern boutique that helps customers feel confident in what they buy—whether they’re headed to brunch, the boardwalk, work, or a night of Shag. Service isn’t a slogan; it’s proven and recognized, including Shoe Center’s 2021 Gold Medal Service Award recognition by Footwear Insight, which was based on mystery-shop criteria throughout the buying process (greeting, measuring, checkout quality, and more). 
+
+Color palette (hex codes + usage)
+Palette goal: sun-warmed coastal neutrals + ocean depth + one joyful accent. (All pairings must meet WCAG contrast requirements for text and UI states; see Accessibility section.) 
+
+Primary foundation:
+
+Deep Atlantic Navy — #0B1F2A: Primary text, headers, footer background, icon strokes, “premium” anchor color.
+Salt White — #FFFFFF: Primary background, negative space, product pages.
+Sandbar — #F3EBDD: Warm neutral background for sections, cards, “boutique” warmth.
+Coastal supporting tones:
+
+Sea Glass — #76B8B2: Secondary accents (links, icons, subtle highlights), wellness/comfort cues.
+Driftwood — #C9B8A3: Borders, dividers, quiet UI surfaces, secondary background.
+Dune Taupe — #A48E7A: Secondary text, subtle “heritage” tone, UI outlines in light mode.
+Conversion accents (use intentionally; never everywhere):
+
+Sunset Coral — #E76F51: Primary CTA buttons, promo highlights, sale badges (sparingly).
+Golden Hour — #E2B04A: Secondary CTA hover accent, loyalty/rewards highlight, subtle “joy” moments.
+Typography system (Shopify-ready, performance-aware)
+Goal: premium but approachable, with high legibility on mobile and a soft coastal vibe.
+
+Recommended stack (Google-font compatible + self-hostable):
+
+Headings: Fraunces (600–700) — warm serif with boutique personality.
+Body/UI: Inter (400–600) — modern, highly readable, neutral.
+Accent microtype (optional): Inter (600, uppercase, letter-spaced) — avoids a third font while still creating hierarchy.
+Type scale (mobile-first, using CSS clamp()):
+
+H1: clamp(32px, 5vw, 48px)
+H2: clamp(24px, 3.8vw, 36px)
+H3: clamp(20px, 3.2vw, 28px)
+Body: 16–18px default, 1.55–1.7 line-height
+UI labels: 12–14px, 0.06–0.08em letter-spacing for uppercase labels
+Photography and imagery style (mood board direction)
+The target look is coastal-Southern boutique: natural light, real environments, warm neutrals, and effortless comfort—leaning more “vacation state of mind” than “high fashion.” The reference set supports this in several consistent ways: pier/beach contexts, linen and breathable textures, relaxed-prep styling, and occasion-based storytelling (beach, brunch, night out) without losing product clarity. 
+
+The Best 30A Photography Spots for Couples: Your Complete Guide to Picture-Perfect  Moments — Hay Photography
+The 10 Best Beach Sandals of 2026, Tested and Reviewed
+Lifestyle - Linen For Men – Island Trends
+Men Casual Shirt Long Sleeve Cotton Linen Beach T Shirt Lightweight NEW 8  COLORS
+
+Mood board directives (developer/creative-ready):
+
+Lighting: golden hour + bright overcast; avoid harsh flash; keep skin tones warm and natural.
+Locations: boardwalks, beach paths, marinas, pastel storefronts, porches, airy interiors with plants and textured neutrals. Include subtle local cues (signage, dunes, beach grass) without becoming “tourist merch.”
+People (30–50 priority): show couples, friends, and families; include men prominently and confidently; keep posing candid (walking, laughing, stepping out of a car, heading to dinner).
+Shag representation (tasteful): one or two stills that feel documentary—shoes on a dance floor, a couple from behind, or a close-up of footwork—kept secondary to broader lifestyle.
+Product framing: always show shoes in context (walking, standing, dancing) plus crisp product-only images. For comfort credibility, include “downward angle” shots that show footbed, arch, straps, and outsole grip.
+Color mood: sand, white, faded denim blues, sea-glass greens, occasional coral pop. This is driven by the references’ coastal palette and “resort” storytelling cues. 
+Logo usage rules and supporting assets (production-ready guidance)
+Primary deliverables (minimum):
+
+Full logo (horizontal) — SVG + PNG (1x/2x/3x)
+Mark icon (for favicons/social) — SVG + PNG
+Wordmark-only variant — SVG + PNG
+Monochrome versions — dark on light, light on dark
+Usage rules:
+
+Minimum clear space: height of the “S” in Shoe on all sides.
+Minimum pixel size: 120px width for header on mobile; 160px desktop.
+Background control: never place full logo over complex photography without a solid or blurred backing (semi-opaque Sandbar overlay recommended).
+Favicon: simplified icon mark; ensure legibility at 16px and 32px.
+Supporting assets:
+
+Coastal stripe pattern (thin, subtle) for section separators
+Icon set: Comfort, Fit Help, Local Pickup, Family-Owned, Dance-Ready (simple line icons, 2px stroke)
+Badge system: “Shag-Ready,” “All-Day Comfort,” “Wide Friendly,” “Travel Favorite”
+Overall design principles (Do’s and Don’ts)
+Do:
+
+Keep the interface calm and airy; let photography and whitespace carry the lifestyle tone.
+Use a comfort-first shopping frame: fit info near purchase actions, reviews visible early, and clear pickup/shipping promises.
+Bias toward men’s visibility through layout (not aggressive “Men!” messaging): equal hero CTA weight, men’s featured rail, and men’s editorial imagery.
+Don’t:
+
+Don’t use flashy effects, auto-rotating hero carousels, or video-heavy content (performance + tone risk).
+Don’t bury fit/sizing in an FAQ—surface it at the exact point of decision.
+Don’t make Shag the homepage headline; it should feel like an “insider layer,” not the main pitch.
+Target Audience and Personas
+These personas are designed to influence information architecture, photography emphasis, merchandising rules, and UX prioritization.
+
+Persona A: “Coastal Professional, Comfort-First” (Female, 36–45, local/regional)
+Goals: find stylish shoes that can handle long days; trust the store’s fit expertise; buy quickly on mobile; pick up locally when possible.
+Pain points: uncertainty about arch support/comfort; worries about returns; wants style but refuses “hurts to wear it.”
+Design implications: persistent comfort cues (arch support, cushioning level, width notes); “Fit Help” always within one tap; pickup availability visible on PDPs; clean, non-pushy promotions.
+
+Persona B: “Vacation Dad Who Actually Shops” (Male, 38–50, visitor + occasional local repeat)
+Goals: buy breathable, good-looking shoes/sandals he can walk in all day; shop fast; avoid guessing sizing; wants men’s products to feel “for him,” not like an afterthought.
+Pain points: men’s categories hidden on many boutiques; limited time on vacation; skeptically avoids “boutique sites” that feel female-only.
+Design implications: top-nav Men; homepage hero with dual CTA (Shop Men / Shop Women); men’s best sellers above the fold; simple filters (size, width, slip-on, waterproof, travel); fit recommendations built into PDP.
+
+Persona C: “Shag Loyalist Couple” (Ages 55–70, local/core customer base)
+Goals: find dance-appropriate shoes and buy from trusted experts; feel respected (not rebranded out of existence); stay connected to community traditions and seasonal events.
+Pain points: modern e-commerce can feel confusing or impersonal; worries dance categories disappear; needs fast answers when an event is approaching.
+Design implications: dedicated Dance + “Shag Community” area; “call the store” and “fit help” surfaced as assistive options; tasteful event + community cues; maintain familiar terminology (Shag / Ballroom / Swing / Line). 
+
+Business Goals and Success Metrics
+Below are practical, trackable KPIs paired with the specific site features designed to move them.
+
+Grow men’s sales to ~50% of revenue (in-store + online)
+Success metrics: men’s revenue share, men’s conversion rate, men’s AOV, repeat purchase rate for men.
+Feature drivers: Men-first navigation + homepage CTA parity; men’s “Best Sellers” rail; men’s fit filters (width, arch support, slip-on); men’s lifestyle photography at hero + collection top.
+
+Increase overall conversion rate with lower fit uncertainty
+Success metrics: conversion rate by device; add-to-cart rate; product page exit rate; return rate (especially “didn’t fit/comfort”).
+Feature drivers: structured size/fit system and clear sizing information (Baymard’s apparel benchmark indicates most apparel sites fail to provide sufficient sizing info—an avoidable conversion leak); size selection UI patterns (buttons vs. dropdowns); fit notes and “true to size” review aggregation. 
+
+Protect and grow dance/Shag loyalty while keeping it secondary
+Success metrics: Dance collection conversion rate; returning customer rate in Dance segment; email segment engagement; event-period sales lifts.
+Feature drivers: Dance landing page; Shag Community page; subtle “Shag-Ready” product badges; seasonal merchandising aligned to known SOS dates (without turning the brand into an event site). 
+
+Increase omnichannel convenience (BOPIS / pickup)
+Success metrics: share of orders using store pickup; pickup availability interactions on PDP; in-store pickup fulfillment times; customer satisfaction.
+Feature drivers: Shopify pickup in store configuration + PDP pickup availability UI; clear microcopy at checkout and PDP; POS workflows for pickup orders. 
+
+Maintain high-speed, premium UX standards
+Success metrics: Lighthouse ≥95 (mobile + desktop); Core Web Vitals pass rate; LCP/INP/CLS at 75th percentile; bounce rate from mobile product pages.
+Feature drivers: minimal JS, performance budgets, controlled third-party apps; image optimization; accessibility-first UI (which also reduces UX friction). Core Web Vitals thresholds: LCP <2.5s, INP <200ms, CLS <0.1; INP replaced FID as the responsiveness metric as of March 2024. 
+
+Site Architecture and Page Templates
+Navigation structure (recommended)
+Top navigation (desktop):
+
+New
+Women
+Men
+Dance
+Brands
+Sale
+About (dropdown: Our Story, Visit the Store, Fit Guide, Shag Community, Shipping & Returns)
+Mobile navigation (priority order):
+
+Search
+New
+Women
+Men
+Dance
+Brands
+About + Help
+This structure reflects Shoe Center’s existing core category pillars (Comfort / Fashion / Dance) while reframing them into a modern boutique taxonomy (Women/Men/Dance + lifestyle “New/Sale/Brands”). 
+
+Homepage layout (section order + hero style)
+Hero style: single still image (no video), natural light, coastal setting; overlay headline + tagline; two primary CTAs (Shop Women / Shop Men) and one subtle secondary CTA (Shop Dance or Find Your Fit).
+
+Recommended order:
+
+Hero image + “We Make Your Feet Happy” + dual CTA
+Trust bar (Family-owned since 1978; Fit Help; Local Pickup; Dance-Ready) 
+Category tiles (Women / Men / Dance / New Arrivals)
+Best Sellers: Men + Women (side-by-side or tabs; men always visible by default)
+“Find Your Fit” module (quiz/light guidance + link to Fit Guide)
+Lifestyle editorial strip (coastal day-to-night, locally rooted story)
+Shag Community teaser (small, tasteful; “For dancers & beach music lovers”)
+Brands we love (logo grid, minimal)
+Visit the store (hours/location/pickup promise)
+Newsletter / SMS opt-in
+Key templates (Shopify OS 2.0)
+All templates should be JSON templates (sections everywhere) to allow merchant editing without developer dependency. 
+
+Core templates:
+
+Home (templates/index.json)
+Collection (default) (templates/collection.json)
+Collection — Men (custom merchandising + filters)
+Collection — Dance (dance-specific content blocks)
+Product (standard footwear)
+Product — Dance (adds Shag/Dance fit + floor suitability fields)
+About / Our Story
+Shag Community (content + curated collection)
+Fit Guide
+Brands landing (brand directory + featured brands)
+Search results
+Cart (drawer or page; performance dependent)
+Blog index + article
+FAQ / Shipping & Returns
+Key Features and Functionality
+Must-have Shopify sections and custom elements (OS 2.0)
+Use modular sections and blocks so the merchant can re-order and update content in Theme Editor. 
+
+Core sections (native-style):
+
+Image Hero (single image + text overlay + dual CTA)
+Trust Bar (icon + microcopy)
+Featured Collections (Men, Women, Dance)
+Editorial Image + Text (story blocks)
+Featured Products (Best Sellers)
+Brand Logo Grid
+Store Info strip (hours, phone, pickup)
+Custom sections (build as lightweight, reusable):
+
+Men’s Visibility Rail (always above fold on Men landing + optionally on homepage)
+“Find Your Fit” Mini-Quiz (progressive enhancement; minimal JS)
+Fit Summary Block (on PDP: true-to-size, width, arch support, cushioning)
+Dance-Ready Module (on dance PDPs: flexibility, sole material, stability, heel notes)
+Pickup Callout + Availability (ties into Shopify pickup features) 
+Fit guide and size recommendation system
+Fit uncertainty is one of the highest-leverage conversion problems in apparel/footwear UX; Baymard reports widespread failure across sites to provide sufficient sizing information, which increases abandonment risk. 
+
+Specification (minimum viable, high-impact):
+
+Size selections must be button-based, not only dropdowns (mobile-friendly and clearer). 
+Size Guide link placed adjacent to size selector with measurement instructions (inches + cm) and width guidance.
+PDP Fit Summary (metafields-driven):
+True to size? (Yes/No/Size up/Size down)
+Width notes (narrow/regular/wide)
+Arch support level (1–5)
+Cushioning level (1–5)
+Foot concerns supported (bunion-friendly, plantar support, etc.)
+Recommendation system (phaseable):
+
+Phase 1 (Theme-only): rules-based recommendations derived from metafields (e.g., “Runs small → consider half size up”).
+Phase 2 (Enhanced): lightweight Fit Finder quiz to suggest size + product category based on user inputs; optionally layer in review-derived “fit” aggregation if supported by the reviews provider. 
+Shag dancer experience (subtle, exclusive, secondary)
+Cultural grounding: the Shag is legally recognized as South Carolina’s official state dance, and regional culture ties the dance to the North Myrtle Beach / Ocean Drive coastal area. 
+
+Implementation:
+
+Dedicated Shag Community page (not top-level hero) featuring:
+Brief heritage paragraph (respectful, non-touristy)
+Curated “Dance-Ready Picks” collection
+Quiet link-out to SOS dates (optional) or “Plan your season” microcopy (keep maintainable). Official SOS dates exist for 2026 (Spring Safari and Fall Migration windows), which can guide seasonal merchandising and email segmentation. 
+Small “Shag-Ready” badge available for qualifying products (metafield-driven).
+“Call the store” fallbacks for customers who prefer human help (prominently available but not interruptive).
+POS and omnichannel integration (BOPIS, inventory, real-time sync)
+Goal: match the expectations of a modern 30–50 shopper: buy online, pick up same day; check pickup availability without calling; consistent inventory across store + online.
+
+Shopify-native functional requirements:
+
+Use Shopify locations + inventory tracking so stock can be managed across store and online. 
+Enable “Pickup in store” and surface pickup availability on PDPs (pickup availability section). 
+Shopify POS syncs with Shopify to track orders and inventory across retail locations and online store. 
+If staff will manage pickup orders in POS, confirm POS subscription requirements and workflows for pickup notifications and order handling. 
+Performance targets (Lighthouse + Core Web Vitals)
+Non-negotiables:
+
+Lighthouse score ≥95 (mobile + desktop) — per project constraint.
+Core Web Vitals (75th percentile targets): LCP ≤2.5s, INP ≤200ms, CLS ≤0.1. 
+INP is the responsiveness metric replacing FID as of March 2024; optimize for INP specifically (reduce JS main-thread work, defer noncritical scripts). 
+Technical, Performance, SEO, Accessibility, and Content Standards
+Platform and theme architecture (Shopify Online Store 2.0)
+Platform: Shopify Online Store 2.0, Liquid theme (not headless). OS 2.0 enables JSON templates (“sections everywhere”) so sections can be added/removed across most pages via Theme Editor, improving maintainability. 
+
+Theme build rules:
+
+All custom sections must include schema presets to be addable in the editor. 
+Use Theme Editor blocks heavily (buttons, image blocks, icon + text) so marketing can iterate without code edits. 
+Use dynamic sources/metafields so product fit content and badges are editable without developer involvement. 
+Mobile-first responsive specifications
+Target “primary device” assumptions:
+
+Mobile widths: 360–430px common; design for thumb reach and one-hand use.
+Tap targets: minimum 44x44px; space controls to avoid accidental taps (aligns with modern accessibility expectations). 
+Layout rules:
+
+Product cards: 2-up grid on mobile collections; ensure price, rating, and quick “Men/Women/Dance” cues remain visible.
+Sticky PDP purchase bar: show price, selected variant, and Add to Cart; never cover critical content or focus states.
+Use responsive images with srcset and correct sizing; preload hero image; lazy-load below fold.
+Accessibility standard (WCAG 2.2 AA)
+Accessibility must meet WCAG 2.2 Level AA requirements. 
+
+Implementation checklist (practical):
+
+Visible focus states that are not obscured by sticky headers/bars and meet new WCAG 2.2 expectations. 
+Color contrast: all body text and actionable UI meets minimum contrast; do not rely on color alone for meaning. 
+Keyboard navigability for menus, modals (size guide), accordion content, and cart drawer.
+Accessible form labels and inline error handling for email/SMS opt-ins and contact forms.
+SEO best practices (Shopify + Google) Key structure rules:
+
+Keep navigation and internal linking shallow where possible; Shopify explicitly recommends that pages not be more than 3 clicks away from the home page when feasible. 
+Use descriptive menu labels and internal link text (not vague “Click here”). 
+Blogging supports SEO and community-building using Shopify’s built-in blog engine. 
+Structured data:
+
+Add/maintain Product structured data so search results can display richer product details (price, availability, ratings). 
+Shopify provides a structured_data Liquid filter for product and article objects; use it carefully and avoid duplicate schemas from apps. 
+Merchant feeds (footwear-specific practicality):
+
+For shoes, Google’s product data requirements can require proper brand plus GTIN or MPN values; missing identifiers can cause issues. 
+Theme Editor customization guidelines (merchant autonomy without performance loss)
+Guardrails:
+
+Limit the number of “heavy” sections allowed on homepage (e.g., carousels, external embeds).
+Provide “Simple / Standard / Editorial” presets for key templates (Home, PDP, About) so the team can switch layouts safely.
+Create a “Performance-safe” section library (static images + text + product rails) and a “Use sparingly” bucket (social feeds, multi-row sliders).
+Content and tone guidelines (voice + samples)
+Voice attributes: premium yet approachable, warm, trustworthy, community-rooted. Write like a friendly expert, not like a luxury brand that’s “too cool.” Keep copy joyful and human; avoid corporate stiffness.
+
+Microcopy principles:
+
+Prefer reassurance over hype (“All-day comfort you can count on” > “BEST SHOES EVER!!!”).
+Be concrete: comfort features, fit notes, pickup timing, and returns clarity.
+Sample homepage headline set:
+
+“We Make Your Feet Happy.”
+“Comfort you feel. Style you live in.”
+“From beach days to date nights—step easy.”
+Product description template (ready for Shopify admin copy/paste):
+
+text
+Copy
+Headline:
+[One-sentence benefit: comfort + lifestyle]
+Example: “Easy, all-day comfort — from boardwalk strolls to dinner reservations.”
+
+Why you’ll love it:
+- Comfort: [cushioning/arch support/footbed details]
+- Fit: [true-to-size note + width note]
+- Wear it for: [top 3 occasions]
+- Materials: [upper/lining/outsole]
+
+Fit & Sizing:
+- Runs: [true / small / large]
+- Width: [narrow / regular / wide-friendly]
+- If between sizes: [recommendation]
+- Need help? Use our Fit Guide or contact us — we’ll help you get it right.
+
+Local promise:
+Pick up in store when available, or ship it to your door. Easy exchanges.
+Tone for the Shag Community page:
+
+Respectful and insider-friendly, never kitschy. Ground it in place and tradition, with light nods to known local Shag culture, which is formally recognized and regionally associated with the Ocean Drive area. 

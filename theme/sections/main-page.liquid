@@ -1,0 +1,222 @@
+{% comment %}
+  sections/main-page.liquid
+  ─────────────────────────────────────────────────────────────────────────────
+  Generic page template. Used for About, Contact, FAQ, etc.
+  Renders page.title as H1 and page.content as rich text (rte).
+{% endcomment %}
+
+{%- liquid
+  assign max_width   = section.settings.max_width | default: '700px'
+  assign text_align  = section.settings.text_alignment | default: 'left'
+  assign container_style = 'max-width:' | append: max_width | append: ';'
+  if text_align == 'center'
+    assign container_style = container_style | append: 'text-align:center;'
+  endif
+-%}
+
+<div class="main-page section-padding">
+  <div class="container main-page__inner" style="{{ container_style }}">
+
+    <h1 class="main-page__title">{{ page.title | escape }}</h1>
+
+    {%- if page.content != blank -%}
+      <div class="main-page__content rte">
+        {{ page.content }}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+<style>
+  /* ── Page ──────────────────────────────────────────────────────────────── */
+  .main-page__inner {
+    /* max-width and text-align set via inline style from settings */
+    margin-inline: auto;
+  }
+
+  .main-page__title {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 40px);
+    color: var(--color-heading, #000000);
+    margin: 0 0 32px;
+    letter-spacing: var(--heading-letter-spacing, 0.03em);
+    line-height: 1.15;
+  }
+
+  /* ── Rich Text Editor output styles ────────────────────────────────────── */
+  /* These match what Shopify's admin page editor produces. */
+
+  .rte {
+    color: var(--color-text, #3D3D3D);
+    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-size: var(--font-size-body, 16px);
+    line-height: 1.75;
+  }
+
+  .rte h1,
+  .rte h2,
+  .rte h3,
+  .rte h4,
+  .rte h5,
+  .rte h6 {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    color: var(--color-heading, #000000);
+    letter-spacing: var(--heading-letter-spacing, 0.03em);
+    margin: 1.4em 0 0.5em;
+    line-height: 1.2;
+  }
+
+  .rte h1 { font-size: clamp(24px, 2.8vw, 36px); }
+  .rte h2 { font-size: clamp(20px, 2.2vw, 28px); }
+  .rte h3 { font-size: clamp(17px, 1.8vw, 22px); }
+  .rte h4 { font-size: 18px; }
+  .rte h5,
+  .rte h6 { font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .rte p {
+    margin: 0 0 1.2em;
+  }
+
+  .rte a {
+    color: var(--color-heading, #000000);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.18s ease;
+  }
+
+  .rte a:hover { opacity: 0.65; }
+  .rte a:focus-visible { outline: 3px solid #005FCC; outline-offset: 2px; border-radius: 2px; }
+
+  .rte strong,
+  .rte b {
+    font-weight: 700;
+    color: var(--color-heading, #000000);
+  }
+
+  .rte em,
+  .rte i {
+    font-style: italic;
+  }
+
+  .rte ul,
+  .rte ol {
+    padding-left: 1.6em;
+    margin: 0 0 1.2em;
+  }
+
+  .rte li {
+    margin-bottom: 0.5em;
+    line-height: 1.65;
+  }
+
+  .rte blockquote {
+    border-left: 4px solid var(--color-accent, #F5E1E1);
+    padding-left: 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: var(--color-text-secondary, #A8A8A8);
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .rte hr {
+    border: none;
+    border-top: 1px solid var(--color-border, #EBEBEB);
+    margin: 32px 0;
+  }
+
+  .rte img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-card, 12px);
+    display: block;
+    margin: 24px auto;
+  }
+
+  .rte table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+
+  .rte th,
+  .rte td {
+    padding: 10px 16px;
+    border: 1px solid var(--color-border, #EBEBEB);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .rte th {
+    background-color: var(--color-card, #FFFFFF);
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .rte tr:nth-child(even) td {
+    background-color: var(--color-card, #FFFFFF);
+  }
+
+  .rte code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    background-color: var(--color-card, #FFFFFF);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border, #EBEBEB);
+  }
+
+  .rte pre {
+    background-color: var(--color-card, #FFFFFF);
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-btn, 8px);
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  .rte pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Page",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "select",
+      "id": "max_width",
+      "label": "Content max width",
+      "options": [
+        { "value": "700px", "label": "Narrow (700px) — article-style" },
+        { "value": "900px", "label": "Medium (900px)" },
+        { "value": "100%",  "label": "Full container width" }
+      ],
+      "default": "700px"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    }
+  ]
+}
+{% endschema %}
