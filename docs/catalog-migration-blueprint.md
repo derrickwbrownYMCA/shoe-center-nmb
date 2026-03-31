@@ -1,0 +1,238 @@
+# 10,000 SKU Catalog Migration Blueprint
+
+This plan is for moving a large catalog into Shopify safely and in a way that supports long-term merchandising.
+
+## Migration Principle
+
+Do not treat this as a one-time import.
+
+Treat it as:
+
+- a data cleanup project
+- a product-structure design project
+- an operational rollout project
+
+## Primary Goals
+
+- import products accurately
+- preserve or improve merchandising quality
+- avoid duplicate, broken, or inconsistent catalog data
+- support Shopify collections, filters, search, and pickup workflows
+
+## Phase 1: Source Audit
+
+Identify every current source of product data:
+
+- current POS
+- existing ecommerce platform
+- vendor spreadsheets
+- barcode or UPC files
+- image folders
+- pricing files
+- inventory exports
+- any manual product lists
+
+For each source, document:
+
+- owner
+- format
+- update frequency
+- reliability
+- overlapping fields
+- missing fields
+
+## Phase 2: Canonical Field Map
+
+Create one master schema for every importable product record.
+
+Minimum fields:
+
+- handle
+- title
+- vendor
+- product type
+- category
+- description
+- status
+- tags
+- option names
+- option values
+- variant SKU
+- barcode
+- price
+- compare-at price
+- cost
+- taxable
+- inventory quantity
+- inventory location
+- image source
+- alt text
+
+Required business fields beyond Shopify basics:
+
+- gender target
+- use case
+- width notes
+- arch support level
+- cushioning level
+- foot concerns
+- pickup eligible
+
+## Phase 3: Product Structure Decisions
+
+Lock these rules before importing:
+
+- what is a product versus a variant
+- when width becomes a variant versus a filter attribute
+- which fields are tags
+- which fields are metafields
+- which fields drive automated collections
+
+Recommended default:
+
+- variants for size, color, and only truly selectable dimensions
+- metafields for fit, support, use case, and merchandising logic
+- avoid using tags as a long-term structured data system
+
+## Phase 4: Data Cleanup
+
+Before any pilot import, clean:
+
+- duplicate SKUs
+- duplicate handles
+- inconsistent brand names
+- inconsistent product types
+- inconsistent size formats
+- inconsistent width labels
+- empty descriptions
+- missing prices
+- missing inventory counts
+- broken image references
+- discontinued products that should not launch
+
+Normalization rules should exist for:
+
+- brand
+- category
+- gender
+- size
+- width
+- color
+- use case
+
+## Phase 5: Pilot Import
+
+Do not start with all 10,000 SKUs.
+
+Pilot sequence:
+
+1. 50 products
+2. 500 products
+3. 2,000 products
+4. full catalog
+
+Validate after each stage:
+
+- product grouping
+- variant logic
+- image quality
+- PDP rendering
+- collection membership
+- filtering behavior
+- search quality
+- inventory counts
+- pickup eligibility
+
+## Phase 6: Full Import Readiness Checklist
+
+Before full import:
+
+- metafields are defined in Shopify
+- collections and rules are defined
+- navigation is planned
+- filter model is planned
+- image naming is stable
+- source data freeze date is chosen
+- QA owner is assigned
+
+## Phase 7: Full Import Execution
+
+Execution order:
+
+1. freeze source data
+2. export source data
+3. transform to Shopify-ready format
+4. import products and variants
+5. associate images
+6. import inventory by location
+7. verify counts
+8. test collections and search
+9. review top-selling and high-risk products manually
+
+## Phase 8: Post-Import QA
+
+Validate:
+
+- total product count
+- total variant count
+- active versus draft count
+- broken images
+- empty PDPs
+- incorrect prices
+- incorrect compare-at prices
+- missing barcodes
+- missing pickup flags
+- missing fit data
+
+Top-priority manual QA:
+
+- top brands
+- top men's products
+- top women's products
+- dance category
+- sale items
+- pickup-enabled products
+
+## Operational Recommendations
+
+- Keep raw source exports out of Git.
+- Track cleaned schemas, templates, and validation logic in Git.
+- Maintain one master source-of-truth sheet or database.
+- Build repeatable import and validation steps so future updates are not manual chaos.
+
+## Recommended Working Assets
+
+- master field-mapping sheet
+- cleaned product master sheet
+- image mapping sheet
+- validation checklist
+- Shopify import template
+- launch-day QA checklist
+
+## Risks To Manage
+
+- duplicate products
+- inconsistent naming
+- bad size/width mappings
+- image mismatches
+- poor collection membership
+- search irrelevance
+- messy tags
+- under-modeled fit data
+- importing too much before validation
+
+## Recommended Launch Strategy
+
+- launch core and validated categories first if needed
+- prioritize hero categories and top-selling brands
+- keep uncertain or low-quality products in draft until cleaned
+
+## Success Definition
+
+Migration is successful when:
+
+- customers can find products quickly
+- PDP data is clear and useful
+- merchandising feels intentional
+- inventory is trustworthy
+- updates can be repeated without starting over
