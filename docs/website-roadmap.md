@@ -29,12 +29,40 @@ Commercial interpretation:
 - service-led
 - coastal lifestyle
 - local trust
+- modern curation built on legacy credibility
+
+## Business Context To Preserve
+
+The store is not starting from zero.
+
+Important context:
+
+- the legacy customer base historically skewed older
+- the business was already known for service, comfort, and trust
+- Rachel has spent the last two years modernizing the assortment
+- newer brands and fresher styles have been added without abandoning what the store was known for
+- `On` is currently the largest brand and represents roughly 35 percent of sales
+- about two-thirds of `On` sales are women's
+- the long-term business goal includes opening at least one and possibly two additional stores in the Myrtle Beach area
+
+Strategic implication:
+
+- the site should not feel like an "older comfort store trying to look younger"
+- the site should feel like a modern, style-aware comfort destination with real service depth and local trust
 
 Primary audience priorities:
 
 - women seeking comfort without sacrificing style
 - men who want fast, confident shopping and clear product relevance
 - dance and Shag customers who want continuity, familiarity, and trusted help
+
+Merchandising priorities:
+
+- protect the existing comfort-and-service reputation
+- reflect Rachel's modernization of the assortment
+- feature women's performance/lifestyle discovery more strongly because of current sales mix
+- use `On` as a flagship growth and merchandising anchor
+- keep the brand architecture ready for future locations
 
 ## Phase 1: Revenue-Critical Fixes
 
@@ -56,11 +84,13 @@ Work items:
 - Fix or complete search drawer / predictive search implementation.
 - Correct brand-history references to one canonical version.
 - Rewrite homepage hero for stronger value clarity.
+- Shift hero copy toward legacy + modern curation, not just nostalgia.
 - Add proof line below hero CTA:
   - family-owned since 1978
   - fit help
   - local pickup
   - dance-ready expertise
+- Add a subtle line of future-facing brand language that can survive multi-location growth.
 - Add PDP reassurance block near add-to-cart:
   - pickup availability
   - easy returns
@@ -72,6 +102,7 @@ Work items:
   - hours
   - phone
   - pickup promise
+- Reduce hardcoded single-location phrasing that may become limiting later.
 
 ## Phase 2: Conversion Upgrade
 
@@ -102,6 +133,7 @@ Work items:
 - Add `Find Your Fit` module.
 - Add `Visit the Store` module.
 - Add `Shag Community` teaser and page plan.
+- Add a `Locations` planning path even if only one store is live now.
 - Add stronger proof blocks:
   - reviews / rating summary
   - service award or trust credential if verified
@@ -110,6 +142,8 @@ Work items:
   - men's featured rail
   - men-forward imagery
   - stronger men's collection merchandising
+- Add women's performance/lifestyle emphasis where sales data supports it.
+- Build a flagship brand module or collection path for `On`.
 - Add fit-support content:
   - size guide entry point near size selection
   - fit notes
@@ -142,6 +176,7 @@ Work items:
   - women
   - men
   - dance
+  - on-running
   - brands
   - new arrivals
   - sale
@@ -159,6 +194,7 @@ Work items:
   - travel favorite
   - dance-ready
   - pickup available
+- Plan for future location-aware messaging and pickup behavior.
 
 ## Phase 4: Theme Maintainability
 
@@ -212,6 +248,8 @@ PDP copy should communicate:
 - PDP exit rate
 - pickup adoption rate
 - men's revenue share
+- women's performance-brand revenue share
+- `On` brand revenue share
 - dance collection conversion rate
 - return rate for fit-related reasons
 

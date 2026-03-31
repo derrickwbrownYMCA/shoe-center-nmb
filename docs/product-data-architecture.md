@@ -8,6 +8,8 @@ This document defines how Shoe Center NMB products should be modeled in Shopify 
 - Metafields are for structured product intelligence.
 - Collections should be automated wherever possible.
 - Tags should be light-weight and not carry the full data model.
+- The model should support both today's flagship location and future multi-location expansion.
+- The model should support legacy comfort shoppers and newer performance/lifestyle shoppers without splitting the catalog into disconnected systems.
 
 ## Product-Level Core Fields
 
@@ -71,6 +73,8 @@ Recommended product metafields:
 - `custom.dance_ready`
 - `custom.pickup_eligible`
 - `custom.badge_primary`
+- `custom.brand_priority`
+- `custom.style_generation`
 
 Recommended variant metafields if needed later:
 
@@ -95,6 +99,14 @@ Examples:
   - casual
   - dress
   - dance
+- `brand_priority`
+  - flagship
+  - core
+  - specialty
+- `style_generation`
+  - legacy
+  - modern
+  - crossover
 - `true_to_size`
   - true_to_size
   - runs_small
@@ -119,6 +131,7 @@ Primary collections:
 - women
 - men
 - dance
+- on-running
 - new arrivals
 - sale
 - best sellers
@@ -172,6 +185,8 @@ Examples:
 - `dance_ready = true` can power dance modules and landing pages
 - `pickup_eligible = true` can power pickup callouts
 - `arch_support_level >= 4` can support comfort-focused merchandising
+- `brand_priority = flagship` can power homepage and collection merchandising
+- `style_generation = modern` can support younger-facing edits without abandoning legacy favorites
 
 ## PDP Content Mapping
 
@@ -205,5 +220,6 @@ This model should support:
 
 1. Finalize canonical product and variant rules.
 2. Define exact Shopify metafield definitions.
-3. Build a sample import template with 10 to 20 products.
-4. Use that pilot to validate theme rendering and collection logic.
+3. Identify flagship brands and pilot-product groups, starting with `On`.
+4. Build a sample import template with 10 to 20 products.
+5. Use that pilot to validate theme rendering and collection logic.

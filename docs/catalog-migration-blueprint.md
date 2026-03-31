@@ -18,6 +18,14 @@ Treat it as:
 - preserve or improve merchandising quality
 - avoid duplicate, broken, or inconsistent catalog data
 - support Shopify collections, filters, search, and pickup workflows
+- support future multi-location operations
+
+## Business-Specific Priorities
+
+- protect the legacy comfort/service customer while supporting a younger and more style-aware assortment
+- make women's performance and modern lifestyle discovery especially strong
+- treat `On` as a flagship brand in migration QA and merchandising readiness
+- keep the catalog model ready for future stores in Sayebrook and Downtown Myrtle Beach if those locations open
 
 ## Phase 1: Source Audit
 
@@ -143,6 +151,14 @@ Validate after each stage:
 - inventory counts
 - pickup eligibility
 
+Priority pilot sequence recommendation:
+
+1. `On`
+2. top women's brands
+3. top men's growth brands
+4. dance category
+5. remaining catalog
+
 ## Phase 6: Full Import Readiness Checklist
 
 Before full import:
@@ -168,6 +184,8 @@ Execution order:
 7. verify counts
 8. test collections and search
 9. review top-selling and high-risk products manually
+
+Even if only one location is live at first, structure imports with Shopify locations in mind so future store expansion does not require rethinking the inventory model from scratch.
 
 ## Phase 8: Post-Import QA
 
@@ -225,6 +243,7 @@ Top-priority manual QA:
 
 - launch core and validated categories first if needed
 - prioritize hero categories and top-selling brands
+- prioritize `On` and other flagship brands first
 - keep uncertain or low-quality products in draft until cleaned
 
 ## Success Definition
