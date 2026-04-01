@@ -4,8 +4,8 @@
     "theme_name": "ShoeCenterNMB Premium",
     "theme_version": "1.0.0",
     "theme_author": "Shoe Center NMB",
-    "theme_documentation_url": "",
-    "theme_support_url": ""
+    "theme_documentation_url": "https://example.com/docs",
+    "theme_support_url": "https://example.com/support"
   },
 
   {
@@ -357,14 +357,12 @@
         "type": "textarea",
         "id": "custom_head_scripts",
         "label": "Custom <head> code",
-        "default": "",
         "info": "Runs before </head>. Use for meta tags or preload hints."
       },
       {
         "type": "textarea",
         "id": "custom_body_end_scripts",
         "label": "Custom end-of-body code",
-        "default": "",
         "info": "Runs before </body>. Use for analytics or chat widgets."
       }
     ]

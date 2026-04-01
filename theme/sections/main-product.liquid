@@ -230,6 +230,21 @@
         {%- endform -%}
       </product-form>
 
+      <div class="product-info__trust" aria-label="Shopping reassurance">
+        <div class="product-info__trust-item">
+          <strong>Pickup available</strong>
+          <span>Buy online and grab your pair locally.</span>
+        </div>
+        <div class="product-info__trust-item">
+          <strong>Fit help matters</strong>
+          <span>We are known for comfort guidance and personal service.</span>
+        </div>
+        <div class="product-info__trust-item">
+          <strong>Trusted since 1978</strong>
+          <span>Legacy expertise with a fresh, modern assortment.</span>
+        </div>
+      </div>
+
       <!-- Description accordion -->
       {%- if show_desc and product.description != blank -%}
         <details class="product-info__details" open>
@@ -527,6 +542,35 @@
     /* btn btn--full handles sizing; just ensure min height */
     min-height: 52px;
     font-size: 14px;
+  }
+
+  .product-info__trust {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-card, 12px);
+    background-color: var(--color-card, #FFFFFF);
+  }
+
+  .product-info__trust-item {
+    display: grid;
+    gap: 4px;
+  }
+
+  .product-info__trust-item strong {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+  }
+
+  .product-info__trust-item span {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text, #3D3D3D);
   }
 
   /* ── Description accordion ──────────────────────────────────────────────── */

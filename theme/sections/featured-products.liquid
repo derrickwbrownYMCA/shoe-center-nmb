@@ -109,7 +109,7 @@
       style="--fp-cols: {{ desktop_cols }};"
     >
 
-      {%- if fp_collection and fp_collection.products_count > 0 -%}
+      {%- if fp_collection != blank and fp_collection.products != blank and fp_collection.products.size > 0 -%}
 
         {%- for product in fp_collection.products limit: products_limit -%}
 

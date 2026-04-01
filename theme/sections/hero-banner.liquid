@@ -223,6 +223,16 @@
         </div>
       {%- endif -%}
 
+      <p class="hero__proof" aria-label="Why shoppers choose Shoe Center">
+        Family-owned since 1978
+        <span aria-hidden="true">•</span>
+        Expert fit help
+        <span aria-hidden="true">•</span>
+        Local pickup available
+        <span aria-hidden="true">•</span>
+        Comfort, performance, and dance
+      </p>
+
       {%- if section.settings.story_text != blank -%}
         <a
           href="{{ section.settings.story_url | default: '/pages/about' }}"
@@ -379,6 +389,21 @@
     justify-content: center;
   }
 
+  .hero__proof {
+    margin: 0;
+    max-width: 640px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.7;
+    opacity: 0.78;
+  }
+
+  .hero__proof span {
+    display: inline-block;
+    margin-inline: 8px;
+    color: var(--color-accent-hover);
+  }
+
   /*
     Primary button inherits the global .btn styles (blush background).
     No overrides needed — it works straight from theme.liquid's .btn class.
@@ -488,6 +513,10 @@
       max-width: 320px;
     }
 
+    .hero__proof {
+      text-align: center;
+    }
+
     .hero__btn {
       width: 100%;
       justify-content: center;
@@ -553,7 +582,7 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Subheadline",
-      "default": "Family-owned in North Myrtle Beach for 48 years · Comfort shoes for every step of life"
+      "default": "Trusted local fit experts since 1978 with modern comfort, performance, and dance shoes for every step of life"
     },
     {
       "type": "select",
@@ -661,7 +690,7 @@
       "name": "Hero banner",
       "settings": {
         "heading": "We Make Your Feet Happy",
-        "subheading": "Family-owned in North Myrtle Beach for 48 years · Comfort shoes for every step of life",
+        "subheading": "Trusted local fit experts since 1978 with modern comfort, performance, and dance shoes for every step of life",
         "eyebrow": "North Myrtle Beach, SC",
         "cta_primary_text": "Shop Women's",
         "cta_secondary_text": "Shop Men's",

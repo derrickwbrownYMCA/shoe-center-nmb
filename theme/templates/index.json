@@ -13,7 +13,7 @@
           "settings": {
             "quote": "Best shoe-fitting experience I've ever had. They actually measure your foot.",
             "author": "Rachel T., NMB",
-            "rating": 5
+            "rating": "5"
           }
         },
         "testimonial-2": {
@@ -21,7 +21,7 @@
           "settings": {
             "quote": "On Running selection is incredible. My Cloud 6s are perfect for the boardwalk.",
             "author": "Marcus D., Myrtle Beach",
-            "rating": 5
+            "rating": "5"
           }
         },
         "testimonial-3": {
@@ -29,7 +29,7 @@
           "settings": {
             "quote": "Family-owned feel with big-store selection. Worth the drive.",
             "author": "Susan K., Conway SC",
-            "rating": 5
+            "rating": "5"
           }
         }
       },
