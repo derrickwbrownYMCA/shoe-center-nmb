@@ -142,13 +142,13 @@
 
     {%- else -%}
       {%- comment -%}
-        No image uploaded yet: show a curated coastal lifestyle photo so
-        the hero looks premium from first install. Replace with the
-        merchant's own photography via the Image setting above.
+        No image uploaded yet: use the current in-theme athletic lifestyle
+        image as a more neutral fallback until the final hero photography
+        is ready in the editor.
       {%- endcomment -%}
       <img
         class="hero__img"
-        src="{{ 'tile-womens-style.png' | asset_url }}"
+        src="{{ 'tile-athletic-lacing.webp' | asset_url }}"
         alt="{{ section.settings.image_alt | escape }}"
         width="1920"
         height="1080"
