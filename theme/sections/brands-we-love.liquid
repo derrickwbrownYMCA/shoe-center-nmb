@@ -203,9 +203,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     text-align: center;
-    margin-bottom: 64px;
+    margin-bottom: 42px;
   }
 
   .brands__heading {
@@ -221,10 +221,10 @@
   .brands__subheading {
     margin: 0;
     font-family: var(--font-body, 'Open Sans', sans-serif);
-    font-size: clamp(13px, 1.2vw, 15px);
-    color: var(--color-text-secondary, #A8A8A8);
-    line-height: 1.65;
-    max-width: 44ch;
+    font-size: clamp(14px, 1.35vw, 16px);
+    color: var(--color-text-secondary, #5b6368);
+    line-height: 1.7;
+    max-width: 56ch;
   }
 
   /* ── Logo grid ───────────────────────────────────────────────────────── */
@@ -239,7 +239,7 @@
       Row gap is tighter than column gap — logos are wider than tall, so
       vertical rhythm needs less space than horizontal rhythm.
     */
-    gap: 12px 24px;
+    gap: 14px 24px;
     align-items: center;
   }
 
@@ -260,12 +260,18 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 20px 12px;
-    border-radius: var(--radius-card, 12px);
+    min-height: 108px;
+    padding: 20px 16px;
+    border-radius: 18px;
     text-decoration: none;
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(24, 36, 46, 0.08);
+    box-shadow: 0 8px 22px rgba(24, 36, 46, 0.03);
     transition:
-      background-color var(--transition, 0.35s ease);
+      background-color var(--transition, 0.3s ease),
+      border-color var(--transition, 0.3s ease),
+      box-shadow var(--transition, 0.3s ease),
+      transform var(--transition, 0.3s ease);
     cursor: pointer;
   }
 
@@ -280,7 +286,10 @@
 
   /* Warmer, softer blush halo — slightly more pigment than the section bg */
   .brands__logo-link:hover {
-    background-color: var(--color-accent, #EDD8D8);
+    background-color: rgba(191, 211, 207, 0.20);
+    border-color: rgba(24, 36, 46, 0.14);
+    box-shadow: 0 16px 30px rgba(24, 36, 46, 0.06);
+    transform: translateY(-2px);
   }
 
   .brands__logo-link:focus-visible {
@@ -305,7 +314,7 @@
       Grayscale + reduced opacity at rest: logos recede into the background,
       feeling like a calm endorsement rather than a sales pitch.
     */
-    filter: grayscale(100%) opacity(0.78);
+    filter: grayscale(100%) opacity(0.84);
     /*
       Staggered transition:
         filter  0.50s — colour bloom is slowest, feels like a gentle warm-up
@@ -321,7 +330,7 @@
   .brands__logo-link:hover    .brands__logo-img,
   .brands__logo-link:focus-visible .brands__logo-img {
     filter: grayscale(0%) opacity(1);
-    transform: translateY(-2px) scale(1.03);
+    transform: scale(1.03);
   }
 
   /* Honour reduced-motion: colour transition stays, lift is disabled */
@@ -342,13 +351,16 @@
     justify-content: center;
     height: 48px;
     font-family: var(--font-heading, 'Montserrat', sans-serif);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-text-secondary, #A8A8A8);
-    opacity: 0.8;
-    white-space: nowrap;
+    color: var(--color-heading, #18242E);
+    opacity: 1;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+    max-width: 14ch;
   }
 
   /* ── Empty state ─────────────────────────────────────────────────────── */
@@ -480,15 +492,15 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Brands We Love",
+      "default": "The brands people come in asking for",
       "info": "Displayed as an H2. Leave blank to hide the header entirely."
     },
     {
       "type": "text",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Brands we know, love, and stand behind — every step of the way.",
-      "info": "Short line beneath the heading. Optional — leave blank to hide."
+      "default": "From On and performance favorites to trusted comfort names and dance staples, we carry brands we know how to fit and recommend with confidence.",
+      "info": "Short line beneath the heading. Optional - leave blank to hide."
     },
     {
       "type": "header",
@@ -516,7 +528,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Logo image",
-          "info": "PNG with transparent background works best. Recommended minimum width: 240px. The image will be displayed at a fixed 52px height — horizontal wordmarks look great."
+          "info": "PNG with transparent background works best. Recommended minimum width: 240px. The image will be displayed at a fixed 52px height - horizontal wordmarks look great."
         },
         {
           "type": "text",
@@ -538,27 +550,39 @@
     {
       "name": "Brands We Love",
       "settings": {
-        "heading": "Brands We Love",
-        "subheading": "Brands we know, love, and stand behind — every step of the way.",
+        "heading": "The brands people come in asking for",
+        "subheading": "From On and performance favorites to trusted comfort names and dance staples, we carry brands we know how to fit and recommend with confidence.",
         "columns": "6"
       },
       "blocks": [
         {
           "type": "logo",
           "settings": {
-            "brand_name": "HOKA"
+            "brand_name": "On"
           }
         },
         {
           "type": "logo",
           "settings": {
-            "brand_name": "Brooks"
+            "brand_name": "Olukai"
           }
         },
         {
           "type": "logo",
           "settings": {
-            "brand_name": "Birkenstock"
+            "brand_name": "Charleston Shoe Company"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Bernie Mev"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Saola"
           }
         },
         {
@@ -566,21 +590,10 @@
           "settings": {
             "brand_name": "New Balance"
           }
-        },
-        {
-          "type": "logo",
-          "settings": {
-            "brand_name": "Vionic"
-          }
-        },
-        {
-          "type": "logo",
-          "settings": {
-            "brand_name": "Dansko"
-          }
         }
       ]
     }
   ]
 }
 {% endschema %}
+

@@ -35,7 +35,7 @@
     <meta property="og:site_name"  content="{{ shop.name }}">
     <meta property="og:url"        content="{{ canonical_url }}">
     <meta property="og:title"      content="{{ page_title | escape }}">
-    <meta property="og:type"       content="website">
+    <meta property="og:type"       content="{% if request.page_type == 'product' %}product{% else %}website{% endif %}">
     {%- if page_description -%}
       <meta property="og:description" content="{{ page_description | escape }}">
     {%- endif -%}
@@ -60,8 +60,6 @@
       ③ font_display: swap keeps body text visible immediately —
         prevents invisible text (FOIT) and improves LCP.
     ============================================================ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     {%- assign font_heading = settings.type_header_font -%}
     {%- assign font_body    = settings.type_body_font -%}
@@ -94,16 +92,16 @@
         --color-heading:      {{ settings.color_heading }};
 
         /* Semantic aliases — components use these, not raw palette vars */
-        --color-text-secondary: #6f6a63;
+        --color-text-secondary: #5b6368;
         --color-surface:        var(--color-card);      /* #EDEDED */
-        --color-header-bg:      var(--color-bg);
+        --color-header-bg:      var(--color-card);
         --color-header-text:    var(--color-heading);
         --color-footer-bg:      var(--color-heading);   /* Black footer */
         --color-footer-text:    var(--color-bg);        /* Cream text on black */
 
         /* ── Announcement Bar ──────────────────────────────────── */
-        --color-announcement-bg:   var(--color-accent);
-        --color-announcement-text: var(--color-heading);
+        --color-announcement-bg:   var(--color-heading);
+        --color-announcement-text: var(--color-bg);
 
         /* ── Typography ────────────────────────────────────────── */
         --font-heading:         {{ font_heading.family }}, {{ font_heading.fallback_families }};
@@ -246,8 +244,8 @@
         justify-content: center;
         gap: 0.5em;
         padding: 0.8em 2em;
-        background-color: var(--color-accent);
-        color: var(--color-heading);
+        background-color: var(--color-heading);
+        color: var(--color-bg);
         border: 1.5px solid transparent;
         border-radius: var(--radius-btn);
         font-family: var(--font-body);
@@ -268,19 +266,19 @@
 
       .btn:hover,
       .btn:focus-visible {
-        background-color: var(--color-accent-hover);
+        background-color: #233542;
         box-shadow: var(--shadow-sm);
       }
 
       .btn--secondary {
-        background-color: transparent;
-        color: var(--color-text);
-        border-color: var(--color-text);
+        background-color: rgba(24, 36, 46, 0.04);
+        color: var(--color-heading);
+        border-color: rgba(24, 36, 46, 0.32);
       }
 
       .btn--secondary:hover,
       .btn--secondary:focus-visible {
-        background-color: var(--color-card);
+        background-color: rgba(24, 36, 46, 0.08);
         box-shadow: none;
       }
 
@@ -362,13 +360,44 @@
       {{ settings.custom_head_scripts }}
     {%- endif -%}
 
-    <!--
-      NOTE: Structured data (JSON-LD) is intentionally omitted here.
-      Per-page schema (Product, BreadcrumbList, LocalBusiness, etc.)
-      will be rendered inside each template/section where the data
-      is actually available via Liquid objects. This avoids generic
-      or incorrect markup at the layout level.
-    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "name": {{ shop.name | json }},
+        "url": {{ shop.url | json }},
+        "telephone": "(843) 272-6515",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "710 Hwy 17 S",
+          "addressLocality": "North Myrtle Beach",
+          "addressRegion": "SC",
+          "postalCode": "29582",
+          "addressCountry": "US"
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "10:00",
+            "closes": "18:00"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Sunday",
+            "opens": "12:00",
+            "closes": "17:00"
+          }
+        ]
+      }
+    </script>
   </head>
 
   <body>
@@ -435,7 +464,9 @@
           cart:             '{{ routes.cart_url }}',
           cartAdd:          '{{ routes.cart_add_url }}',
           cartChange:       '{{ routes.cart_change_url }}',
-          predictiveSearch: '{{ routes.predictive_search_url }}'
+          cartUpdate:       '{{ routes.cart_update_url }}',
+          predictiveSearch: '{{ routes.predictive_search_url }}',
+          search:           '{{ routes.search_url }}'
         }
       };
     </script>

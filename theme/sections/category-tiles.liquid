@@ -1,63 +1,15 @@
 {% comment %}
   sections/category-tiles.liquid
-  ──────────────────────────────────────────────────────────────────
-  Featured category tile grid — the editorial "shop by category" band
-  that sits directly below the hero on the homepage.
-
-  DESIGN DECISIONS
-  ─────────────────
-  Scout & Molly's-inspired: spacious, whitespace-heavy, image-forward.
-  Each tile is a full-bleed lifestyle photograph with the category name
-  and a "Shop Now" callout set in white type over a dark gradient veil.
-
-  HOVER MECHANICS (pure CSS — zero JS)
-  ─────────────────────────────────────
-  Three layers stack inside each tile:
-    1. .cat-tile__img          — the photograph, scales up on hover
-    2. .cat-tile::before       — permanent dark gradient (text legibility)
-    3. .cat-tile::after        — blush overlay, opacity 0 → 0.22 on hover
-
-  The blush overlay makes the tile "react" to the cursor in a way that
-  feels on-brand (it literally blushes) without any JS event listeners.
-  `overflow: hidden` on the tile clips the scaled image cleanly.
-
-  GRID LAYOUT
-  ────────────
-  --desktop-cols and --tile-aspect are inline CSS custom properties
-  derived from schema settings via Liquid. This means:
-    • No class-name switching needed for different column counts
-    • Values cascade perfectly to child elements
-    • Works reliably in Shopify's Theme Editor preview
-
-  ASPECT RATIO
-  ─────────────
-  The `aspect-ratio` CSS property is used on .cat-tile__img rather than
-  padding-bottom hacks. Supported in all browsers targeted by the Vision
-  Document (Chrome 88+, Safari 15+, Firefox 89+).
-
-  HEADING HIERARCHY
-  ──────────────────
-  If the section has a visible heading, tile titles are <h3> (correct
-  document outline). If no section heading is set, they become <h2>.
-  This is computed once in Liquid and reused for all blocks.
-
-  PERFORMANCE
-  ────────────
-  Images use loading="lazy" + decoding="async" because these tiles sit
-  below the hero — they are never the LCP element. The `sizes` attribute
-  is calibrated to the 4-column layout so browsers fetch appropriately
-  sized files at every viewport width and DPR.
+  Homepage category grid with local asset fallbacks.
 {% endcomment %}
 
 {%- liquid
-  # Determine tile heading level for correct document hierarchy
   if section.settings.heading != blank
     assign tile_heading_tag = 'h3'
   else
     assign tile_heading_tag = 'h2'
   endif
 
-  # Map select value to a valid CSS aspect-ratio string
   case section.settings.aspect_ratio
     when 'square'
       assign tile_aspect = '1 / 1'
@@ -78,152 +30,148 @@
   {% if section.settings.heading == blank %}aria-label="Shop by category"{% endif %}
 >
   <div class="container">
-
-    <!-- ── Optional section heading ──────────────────────────────── -->
     {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
       <header class="cat-tiles__header">
-
         {%- if section.settings.heading != blank -%}
-          <h2
-            class="cat-tiles__heading"
-            id="CatTilesHeading-{{ section.id }}"
-          >
-            {{- section.settings.heading | escape -}}
-          </h2>
+          <h2 class="cat-tiles__heading" id="CatTilesHeading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
         {%- endif -%}
 
         {%- if section.settings.subheading != blank -%}
-          <p class="cat-tiles__subheading">
-            {{- section.settings.subheading | escape -}}
-          </p>
+          <p class="cat-tiles__subheading">{{ section.settings.subheading | escape }}</p>
         {%- endif -%}
-
       </header>
     {%- endif -%}
 
-    <!-- ── Tile grid ─────────────────────────────────────────────── -->
     {%- if section.blocks.size > 0 -%}
       <ul
         class="cat-tiles__grid"
         role="list"
-        style="
-          --desktop-cols: {{ desktop_cols }};
-          --tile-aspect:  {{ tile_aspect }};
-        "
+        style="--desktop-cols: {{ desktop_cols }}; --tile-aspect: {{ tile_aspect }};"
       >
-
         {%- for block in section.blocks -%}
-          <li class="cat-tiles__item" {{ block.shopify_attributes }}>
+          {%- liquid
+            assign tile_title = block.settings.title | default: 'Category'
+            assign fallback_alt = tile_title | append: ' image'
+            assign title_downcase = tile_title | downcase
 
+            if title_downcase contains 'women'
+              assign fallback_alt = 'Woman in a light dress lifting her leg, wearing stylish shoes'
+            elsif title_downcase contains 'men'
+              assign fallback_alt = 'Man tying a shoe'
+            elsif title_downcase contains 'on' or title_downcase contains 'athletic' or title_downcase contains 'performance'
+              assign fallback_alt = 'Woman tying an athletic shoe'
+            elsif title_downcase contains 'dance'
+              assign fallback_alt = 'Dance lifestyle image'
+            elsif title_downcase contains 'sale'
+              assign fallback_alt = 'Sale category image'
+            endif
+          -%}
+
+          <li class="cat-tiles__item" {{ block.shopify_attributes }}>
             <a
               href="{{ block.settings.link | default: routes.collections_url }}"
               class="cat-tile"
-              {%- comment -%}
-                The aria-label names the link with both the category and the
-                call-to-action so screen-reader users hear the full intent,
-                not just an image alt text. E.g. "Women's Shoes — Shop Now".
-              {%- endcomment -%}
-              aria-label="{{ block.settings.title | escape }}{% if block.settings.subtitle != blank %} — {{ block.settings.subtitle | escape }}{% endif %}"
+              aria-label="{{ tile_title | escape }}{% if block.settings.subtitle != blank %} - {{ block.settings.subtitle | escape }}{% endif %}"
             >
-
-              <!-- Photograph or branded placeholder ───────────────── -->
               <div class="cat-tile__media">
                 {%- if block.settings.image != blank -%}
-                  {%- assign cat_img_alt = block.settings.image_alt | default: block.settings.title -%}
-                  {%- assign cat_src_400 = block.settings.image | image_url: width: 400 -%}
-                  {%- assign cat_src_600 = block.settings.image | image_url: width: 600 -%}
-                  {%- assign cat_src_800 = block.settings.image | image_url: width: 800 -%}
-                  {%- assign cat_src_1000 = block.settings.image | image_url: width: 1000 -%}
-                  {%- assign cat_srcset = cat_src_400 | append: ' 400w, ' | append: cat_src_600 | append: ' 600w, ' | append: cat_src_800 | append: ' 800w, ' | append: cat_src_1000 | append: ' 1000w' -%}
+                  {%- assign cat_img_alt = block.settings.image_alt | default: tile_title -%}
                   {{
                     block.settings.image
-                    | image_url: width: 800
+                    | image_url: width: 900
                     | image_tag:
                       loading: 'lazy',
                       decoding: 'async',
                       alt: cat_img_alt,
                       width: block.settings.image.width,
                       height: block.settings.image.height,
+                      widths: '400, 600, 800, 900',
                       sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--desktop-cols) - 1) * var(--grid-gap)) / var(--desktop-cols))',
-                      srcset: cat_srcset,
                       class: 'cat-tile__img'
                   }}
                 {%- else -%}
-                  {%- comment -%}
-                    Curated lifestyle placeholder — shows a premium on-brand image
-                    before the merchant uploads their own photography.
-                    Keyed by title keyword so each tile gets the right subject.
-                    Replace via the Image picker in the block settings.
-                  {%- endcomment -%}
-                  {%- liquid
-                    assign t = block.settings.title | downcase
-                    if t contains 'women'
-                      assign ph_src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=1000&fit=crop&crop=faces,top&auto=format&q=80'
-                      assign ph_alt = 'Woman in a light summer dress, soft coastal light'
-                    elsif t contains 'men'
-                      assign ph_src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=1000&fit=crop&crop=faces,top&auto=format&q=80'
-                      assign ph_alt = 'Man outdoors in comfortable casual wear, natural light'
-                    elsif t contains 'brand'
-                      assign ph_src = 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=1000&fit=crop&crop=top&auto=format&q=80'
-                      assign ph_alt = 'Curated boutique shoe display, warm elegant lighting'
-                    elsif t contains 'dance'
-                      assign ph_src = 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&h=1000&fit=crop&crop=top&auto=format&q=80'
-                      assign ph_alt = 'Woman in joyful dance movement, coastal light'
-                    else
-                      assign ph_src = 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&h=1000&fit=crop&crop=top&auto=format&q=80'
-                      assign ph_alt = block.settings.title | escape | append: ' — placeholder image'
-                    endif
-                  -%}
-                  <img
-                    class="cat-tile__img"
-                    src="{{ ph_src }}"
-                    alt="{{ ph_alt }}"
-                    width="800"
-                    height="1000"
-                    loading="lazy"
-                    decoding="async"
-                  >
+                  {%- if title_downcase contains 'women' -%}
+                    <img class="cat-tile__img" src="{{ 'tile-womens-style.png' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- elsif title_downcase contains 'men' -%}
+                    <img class="cat-tile__img" src="{{ 'tile-mens-lace-up.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- elsif title_downcase contains 'on' or title_downcase contains 'athletic' or title_downcase contains 'performance' -%}
+                    <img class="cat-tile__img" src="{{ 'tile-athletic-lacing.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- elsif title_downcase contains 'dance' -%}
+                    <img class="cat-tile__img" src="{{ 'tile-dance-lifestyle.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- elsif title_downcase contains 'sale' -%}
+                    <img class="cat-tile__img" src="{{ 'tile-sale.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- else -%}
+                    <img class="cat-tile__img" src="{{ 'tile-womens-style.png' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- endif -%}
                 {%- endif -%}
               </div>
 
-              <!-- Text overlay (always above both CSS pseudo overlays) -->
               <div class="cat-tile__content">
                 {%- if block.settings.subtitle != blank -%}
-                  <p class="cat-tile__subtitle">
-                    {{- block.settings.subtitle | escape -}}
-                  </p>
+                  <p class="cat-tile__subtitle">{{ block.settings.subtitle | escape }}</p>
                 {%- endif -%}
-                <{{ tile_heading_tag }} class="cat-tile__title">
-                  {{- block.settings.title | escape -}}
-                </{{ tile_heading_tag }}>
+                <{{ tile_heading_tag }} class="cat-tile__title">{{ tile_title | escape }}</{{ tile_heading_tag }}>
               </div>
-
             </a>
           </li>
         {%- endfor -%}
-
       </ul>
-
     {%- else -%}
-      {%- comment -%}
-        Empty state shown in Theme Editor before any blocks are added.
-        Guides the merchant without leaving a broken-looking section.
-      {%- endcomment -%}
-      <div class="cat-tiles__empty">
-        <p>Add category tiles using the block panel on the right → </p>
-      </div>
+      <ul class="cat-tiles__grid" role="list" style="--desktop-cols: 4; --tile-aspect: 4 / 5;">
+        <li class="cat-tiles__item">
+          <a href="{{ routes.collections_url }}" class="cat-tile" aria-label="Women's - Shop now">
+            <div class="cat-tile__media">
+              <img class="cat-tile__img" src="{{ 'tile-womens-style.png' | asset_url }}" alt="Women's shoes category image" width="800" height="1000" loading="lazy" decoding="async">
+            </div>
+            <div class="cat-tile__content">
+              <p class="cat-tile__subtitle">Shop now</p>
+              <h3 class="cat-tile__title">Women's</h3>
+            </div>
+          </a>
+        </li>
+        <li class="cat-tiles__item">
+          <a href="{{ routes.collections_url }}" class="cat-tile" aria-label="Men's - Shop now">
+            <div class="cat-tile__media">
+              <img class="cat-tile__img" src="{{ 'tile-mens-lace-up.webp' | asset_url }}" alt="Men's shoes category image" width="800" height="1000" loading="lazy" decoding="async">
+            </div>
+            <div class="cat-tile__content">
+              <p class="cat-tile__subtitle">Shop now</p>
+              <h3 class="cat-tile__title">Men's</h3>
+            </div>
+          </a>
+        </li>
+        <li class="cat-tiles__item">
+          <a href="{{ routes.collections_url }}" class="cat-tile" aria-label="On Running - Performance favorites">
+            <div class="cat-tile__media">
+              <img class="cat-tile__img" src="{{ 'tile-athletic-lacing.webp' | asset_url }}" alt="On Running category image" width="800" height="1000" loading="lazy" decoding="async">
+            </div>
+            <div class="cat-tile__content">
+              <p class="cat-tile__subtitle">Performance favorites</p>
+              <h3 class="cat-tile__title">On Running</h3>
+            </div>
+          </a>
+        </li>
+        <li class="cat-tiles__item">
+          <a href="{{ routes.collections_url }}" class="cat-tile" aria-label="Dance - Move well">
+            <div class="cat-tile__media">
+              <img class="cat-tile__img" src="{{ 'tile-dance-lifestyle.webp' | asset_url }}" alt="Dance category image" width="800" height="1000" loading="lazy" decoding="async">
+            </div>
+            <div class="cat-tile__content">
+              <p class="cat-tile__subtitle">Move well</p>
+              <h3 class="cat-tile__title">Dance</h3>
+            </div>
+          </a>
+        </li>
+      </ul>
     {%- endif -%}
-
   </div>
 </section>
 
 <style>
-  /* ── Section wrapper ───────────────────────────────────────────── */
   .cat-tiles {
     background-color: var(--color-bg);
   }
 
-  /* ── Optional heading area ─────────────────────────────────────── */
   .cat-tiles__header {
     display: flex;
     flex-direction: column;
@@ -234,82 +182,57 @@
   }
 
   .cat-tiles__heading {
+    margin: 0;
     font-family: var(--font-heading);
     font-weight: var(--font-heading-weight);
     font-size: var(--font-size-h2);
     letter-spacing: var(--heading-letter-spacing);
     color: var(--color-heading);
-    margin: 0;
   }
 
   .cat-tiles__subheading {
-    font-family: var(--font-body);
-    font-size: clamp(15px, 1.4vw, 17px);
-    color: var(--color-text-secondary);
-    max-width: 520px;
     margin: 0;
+    max-width: 520px;
+    font-size: clamp(15px, 1.4vw, 17px);
     line-height: 1.6;
+    color: var(--color-text-secondary);
   }
 
-  /* ── Grid ──────────────────────────────────────────────────────── */
   .cat-tiles__grid {
     display: grid;
-    /*
-      --desktop-cols comes from schema settings (2, 3, or 4).
-      Defaults to 4 if the custom property is somehow absent.
-    */
     grid-template-columns: repeat(var(--desktop-cols, 4), 1fr);
     gap: var(--grid-gap);
   }
 
-  .cat-tiles__item { list-style: none; }
+  .cat-tiles__item {
+    list-style: none;
+  }
 
-  /* ── Individual tile ───────────────────────────────────────────── */
   .cat-tile {
-    display: block;
     position: relative;
+    display: block;
     overflow: hidden;
     border-radius: var(--radius-card);
     text-decoration: none;
-    /*
-      The tile is a positioning context for both CSS pseudo-elements
-      (overlays) and the .cat-tile__content div.
-    */
-    background-color: var(--color-card); /* visible during image load */
+    background-color: var(--color-card);
   }
 
-  /*
-    Permanent dark gradient at the bottom of every tile.
-    Ensures the white title text is always legible regardless of how
-    light or dark the photograph is — no contrast failures.
-    This pseudo-element sits between the image (z:0) and the text (z:3).
-  */
   .cat-tile::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.68) 0%,     /* Solid at the bottom — text lives here */
-      rgba(0, 0, 0, 0.20) 40%,    /* Mid fade */
-      transparent 65%              /* Fully clear at the top */
-    );
     z-index: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.20) 40%, transparent 65%);
     transition: opacity 0.35s ease;
   }
 
-  /*
-    Blush hover overlay — the brand's signature hover "blush".
-    Starts invisible; drifts to a warm semi-transparent pink on hover.
-    Sits above the dark gradient but below the text content.
-  */
   .cat-tile::after {
     content: '';
     position: absolute;
     inset: 0;
-    background-color: var(--color-accent); /* #F5E1E1 */
-    opacity: 0;
     z-index: 2;
+    background-color: var(--color-accent);
+    opacity: 0;
     transition: opacity 0.35s ease;
   }
 
@@ -318,25 +241,18 @@
     opacity: 0.20;
   }
 
-  /* Slightly deepen the dark gradient on hover too — adds drama */
   .cat-tile:hover::before,
   .cat-tile:focus-visible::before {
     opacity: 0.9;
   }
 
-  /* ── Photograph ─────────────────────────────────────────────────
-    object-fit: cover fills the tile at the correct aspect ratio.
-    The aspect ratio is driven by --tile-aspect from the grid wrapper.
-    transform: scale() is triggered by hover on the parent .cat-tile.
-  ──────────────────────────────────────────────────────────────── */
   .cat-tile__img {
     display: block;
     width: 100%;
     aspect-ratio: var(--tile-aspect, 4 / 5);
     object-fit: cover;
-    object-position: center top; /* Favour faces/subjects at the top */
+    object-position: center top;
     transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    /* cubic-bezier gives a slightly springy feel — more alive than linear ease */
   }
 
   .cat-tile:hover .cat-tile__img,
@@ -344,135 +260,77 @@
     transform: scale(1.06);
   }
 
-  /* Fallback placeholder — shown before an image is uploaded */
-  .cat-tile__placeholder {
-    width: 100%;
-    aspect-ratio: var(--tile-aspect, 4 / 5);
-    background: linear-gradient(
-      145deg,
-      var(--color-accent) 0%,
-      var(--color-bg) 50%,
-      var(--color-card) 100%
-    );
-  }
-
-  /* ── Text content ──────────────────────────────────────────────── */
   .cat-tile__content {
-    /*
-      z-index: 3 places the text above both overlay pseudo-elements.
-      The stacking order inside .cat-tile:
-        0  image (.cat-tile__img)
-        1  dark gradient (.cat-tile::before)
-        2  blush overlay (.cat-tile::after)
-        3  text (.cat-tile__content)  ← always on top
-    */
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
     z-index: 3;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: 16px 20px 24px;
     gap: 5px;
+    padding: 16px 20px 24px;
+    text-align: center;
   }
 
-  /* Optional "Shop Now" callout — eyebrow above the title */
   .cat-tile__subtitle {
     margin: 0;
-    font-family: var(--font-body);
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+    line-height: 1;
     color: rgba(255, 255, 255, 0.70);
     transition: color 0.25s ease;
-    line-height: 1;
   }
 
-  /* Subtitle brightens on hover to guide the eye */
   .cat-tile:hover .cat-tile__subtitle,
   .cat-tile:focus-visible .cat-tile__subtitle {
     color: rgba(255, 255, 255, 0.95);
   }
 
-  /* Category name — the primary label */
   .cat-tile__title {
     margin: 0;
     font-family: var(--font-heading);
     font-weight: var(--font-heading-weight);
-    /*
-      Fluid type: scales from 17px on narrow mobile to 22px on desktop.
-      Prevents the title from wrapping awkwardly on small tiles.
-    */
     font-size: clamp(17px, 1.8vw, 22px);
     letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #ffffff;
     line-height: 1.1;
+    text-transform: uppercase;
+    color: #FFFFFF;
     transition: letter-spacing 0.3s ease;
   }
 
-  /* Subtle letter-spacing expansion on hover — refined boutique touch */
   .cat-tile:hover .cat-tile__title,
   .cat-tile:focus-visible .cat-tile__title {
     letter-spacing: 0.13em;
   }
 
-  /* Focus ring sits outside the tile (not clipped by overflow:hidden) */
   .cat-tile:focus-visible {
     outline: 3px solid #005FCC;
     outline-offset: 3px;
   }
 
-  /* ── Empty state (Theme Editor only) ──────────────────────────── */
-  .cat-tiles__empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-    border: 2px dashed var(--color-border);
-    border-radius: var(--radius-card);
-    font-family: var(--font-body);
-    font-size: var(--font-size-small);
-    color: var(--color-text-secondary);
-    text-align: center;
-    padding: 40px;
-  }
-
-  /* ── Responsive breakpoints ────────────────────────────────────── */
-
-  /*
-    Tablet: cap at 2 columns regardless of desktop setting.
-    Prevents tiny cramped tiles on mid-range screens.
-  */
   @media (max-width: 1023px) and (min-width: 600px) {
     .cat-tiles__grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  /*
-    Mobile: always 2-column grid (per Vision Document spec).
-    Gap tightens to the mobile token.
-  */
   @media (max-width: 599px) {
     .cat-tiles__grid {
       grid-template-columns: repeat(2, 1fr);
       gap: var(--grid-gap-mobile, 12px);
     }
 
-    /* Tighten text padding on small tiles */
+    .cat-tiles__header {
+      margin-bottom: 28px;
+    }
+
     .cat-tile__content {
       padding: 10px 12px 16px;
       gap: 3px;
-    }
-
-    /* Reduce header spacing on mobile */
-    .cat-tiles__header {
-      margin-bottom: 28px;
     }
   }
 </style>
@@ -511,9 +369,9 @@
       "id": "columns",
       "label": "Columns (desktop)",
       "options": [
-        { "value": "2", "label": "2 columns — large tiles" },
-        { "value": "3", "label": "3 columns — medium tiles" },
-        { "value": "4", "label": "4 columns — standard (recommended)" }
+        { "value": "2", "label": "2 columns - large tiles" },
+        { "value": "3", "label": "3 columns - medium tiles" },
+        { "value": "4", "label": "4 columns - standard (recommended)" }
       ],
       "default": "4",
       "info": "Mobile always shows 2 columns."
@@ -523,12 +381,12 @@
       "id": "aspect_ratio",
       "label": "Tile shape",
       "options": [
-        { "value": "square",   "label": "Square — 1:1" },
-        { "value": "portrait", "label": "Portrait — 4:5 (recommended)" },
-        { "value": "tall",     "label": "Tall portrait — 3:4" }
+        { "value": "square", "label": "Square - 1:1" },
+        { "value": "portrait", "label": "Portrait - 4:5 (recommended)" },
+        { "value": "tall", "label": "Tall portrait - 3:4" }
       ],
       "default": "portrait",
-      "info": "Portrait (4:5) shows more of the shoe and model — best for fashion."
+      "info": "Portrait (4:5) shows more of the shoe and model."
     }
   ],
   "blocks": [
@@ -540,34 +398,31 @@
           "type": "image_picker",
           "id": "image",
           "label": "Category image",
-          "info": "Lifestyle photography works best. Avoid busy or dark images — the gradient overlay will add darkness to the bottom."
+          "info": "Lifestyle photography works best."
         },
         {
           "type": "text",
           "id": "image_alt",
           "label": "Image alt text",
-          "info": "Describe the image for screen readers and SEO. E.g. 'Woman walking on the beach wearing Dansko sandals'."
+          "info": "Describe the image for screen readers and SEO."
         },
         {
           "type": "text",
           "id": "title",
           "label": "Category name",
-          "default": "Women's Shoes",
-          "info": "Displayed in Montserrat Bold over the image."
+          "default": "Women's Shoes"
         },
         {
           "type": "text",
           "id": "subtitle",
           "label": "Callout text",
           "default": "Shop Now",
-          "placeholder": "Shop Now",
-          "info": "Small text above the category name. Leave blank to hide. Keep it to 2–3 words."
+          "placeholder": "Shop Now"
         },
         {
           "type": "url",
           "id": "link",
-          "label": "Link",
-          "info": "Where clicking the tile takes the customer. Typically a collection page."
+          "label": "Link"
         }
       ]
     }
@@ -597,15 +452,15 @@
         {
           "type": "tile",
           "settings": {
-            "title": "Brands",
-            "subtitle": "Explore All"
+            "title": "On Running",
+            "subtitle": "Performance Favorites"
           }
         },
         {
           "type": "tile",
           "settings": {
-            "title": "Dance Shoes",
-            "subtitle": "Find Your Sole"
+            "title": "Dance",
+            "subtitle": "Move Well"
           }
         }
       ]
