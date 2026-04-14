@@ -35,6 +35,7 @@
     "cart_note_enable": false,
     "predictive_search_enabled": true,
     "launch_overlay_enabled": true,
+    "launch_overlay_frequency_days": 1,
     "launch_overlay_primary_url": "shopify://pages/carolina-drift",
     "launch_overlay_image": "shopify://shop_images/Dunes_Cognac_LS.webp",
     "content_for_index": []
