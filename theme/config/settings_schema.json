@@ -366,6 +366,84 @@
         "info": "Runs before </body>. Use for analytics or chat widgets."
       }
     ]
+  },
+
+  {
+    "name": "Launch Overlay",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "launch_overlay_enabled",
+        "label": "Enable launch overlay",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "launch_overlay_home_only",
+        "label": "Show on homepage only",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "launch_overlay_frequency_days",
+        "label": "Show again after this many days",
+        "min": 1,
+        "max": 30,
+        "step": 1,
+        "default": 7
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_eyebrow",
+        "label": "Eyebrow",
+        "default": "Just dropped"
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_heading",
+        "label": "Heading",
+        "default": "A New Leather Shoe Built for the South"
+      },
+      {
+        "type": "textarea",
+        "id": "launch_overlay_text",
+        "label": "Text",
+        "default": "Exclusive to Shoe Center. Designed for comfort, style, and movement."
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_primary_label",
+        "label": "Primary button label",
+        "default": "Shop the Drop"
+      },
+      {
+        "type": "url",
+        "id": "launch_overlay_primary_url",
+        "label": "Primary button link"
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_secondary_label",
+        "label": "Secondary link label",
+        "default": "Enter Store"
+      },
+      {
+        "type": "url",
+        "id": "launch_overlay_secondary_url",
+        "label": "Secondary link"
+      },
+      {
+        "type": "image_picker",
+        "id": "launch_overlay_image",
+        "label": "Overlay image"
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_image_alt",
+        "label": "Overlay image alt text",
+        "default": "Exclusive leather shoe in a warm coastal setting"
+      }
+    ]
   }
 ]
 

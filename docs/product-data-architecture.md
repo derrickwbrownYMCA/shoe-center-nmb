@@ -44,6 +44,117 @@ Common option order:
 2. Color
 3. Width
 
+## Size System Architecture
+
+Sizing should stay true to the brand's native labeling while still giving shoppers clear guidance.
+
+Core rule:
+
+- if a brand sells in US sizing, keep US sizing in the variant
+- if a brand sells in EU sizing, keep EU sizing in the variant
+- do not force all brands into one fake universal size system
+
+Recommended approach:
+
+- `Size` remains the primary variant option
+- the visible variant value should match the box or brand-native size
+- structured metafields should explain the sizing system and fit guidance
+
+Examples:
+
+- `US Women's 8`
+- `US Men's 10.5`
+- `EU 39`
+- `8M / 10W`
+
+If the team prefers shorter labels in Shopify, the native variant values can still be:
+
+- `8`
+- `10.5`
+- `39`
+
+but the product must then carry a clear size-system metafield and PDP guidance so shoppers know whether they are seeing US men's, US women's, or EU sizing.
+
+### Size System Rules
+
+Recommended product-level sizing metafields:
+
+- `custom.size_system`
+- `custom.size_notes`
+- `custom.size_guide_label`
+
+Recommended variant-level sizing metafields if needed later:
+
+- `custom.approx_us_womens_size`
+- `custom.approx_us_mens_size`
+
+Suggested `size_system` values:
+
+- `us_women`
+- `us_men`
+- `eu`
+- `unisex_us`
+
+Suggested `gender_target` values:
+
+- `women`
+- `men`
+- `unisex`
+
+### Unisex Product Rule
+
+For true unisex products:
+
+- keep one product, not duplicate men's and women's versions
+- set `custom.gender_target` to `unisex`
+- set `custom.size_system` to `unisex_us` when sizes are shown as men's and women's equivalents
+- let collection logic surface the same product in both men's and women's paths when appropriate
+
+Example:
+
+- variant: `8M / 10W`
+- `gender_target`: `unisex`
+- `size_system`: `unisex_us`
+- PDP note: `Unisex sizing shown as Men's / Women's equivalents.`
+
+This avoids:
+
+- duplicate inventory
+- duplicate product pages
+- SEO duplication
+- inconsistent stock between men's and women's listings
+
+Use `Width` as a variant only when:
+
+- the shopper must actively choose width
+- width changes inventory materially
+- the product is commonly sold in multiple widths
+
+Otherwise:
+
+- keep width out of the option stack
+- use `custom.width_notes` plus PDP fit guidance
+
+### Conversion Guidance Strategy
+
+For EU-sized brands:
+
+- keep the native EU variant value
+- show approximate US conversion guidance on the PDP
+- support that guidance through metafields instead of relabeling the variants into US-only sizes
+
+Example:
+
+- variant: `EU 39`
+- PDP note: `Approx. US Women's 8.5`
+
+This protects:
+
+- inventory accuracy
+- staff sanity
+- shopper trust
+- future import repeatability
+
 Use width as a variant only if:
 
 - the customer must select it directly
@@ -61,6 +172,9 @@ Recommended product metafields:
 
 - `custom.gender_target`
 - `custom.use_case`
+- `custom.size_system`
+- `custom.size_notes`
+- `custom.size_guide_label`
 - `custom.true_to_size`
 - `custom.width_notes`
 - `custom.arch_support_level`
@@ -80,6 +194,8 @@ Recommended variant metafields if needed later:
 
 - `custom.fit_note_variant`
 - `custom.width_label_normalized`
+- `custom.approx_us_womens_size`
+- `custom.approx_us_mens_size`
 
 ## Metafield Value Guidelines
 
@@ -91,6 +207,11 @@ Examples:
   - women
   - men
   - unisex
+- `size_system`
+  - us_women
+  - us_men
+  - eu
+  - unisex_us
 - `use_case`
   - walking
   - work
@@ -194,6 +315,7 @@ Metafields should render into:
 
 - fit summary block
 - size guide support
+- size-system label or conversion note where needed
 - support/cushion indicators
 - use-case badges
 - pickup messaging
@@ -204,6 +326,7 @@ Metafields should render into:
 - one canonical vendor name per brand
 - one canonical product type per category
 - one canonical size and width format
+- one canonical rule for native size system versus conversion guidance
 - no freeform chaos in structured fields
 
 ## Future-Proofing

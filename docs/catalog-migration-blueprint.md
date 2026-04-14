@@ -79,6 +79,8 @@ Minimum fields:
 Required business fields beyond Shopify basics:
 
 - gender target
+- size system
+- size notes
 - use case
 - width notes
 - arch support level
@@ -91,6 +93,7 @@ Required business fields beyond Shopify basics:
 Lock these rules before importing:
 
 - what is a product versus a variant
+- whether size is stored in native US or native EU format for each brand
 - when width becomes a variant versus a filter attribute
 - which fields are tags
 - which fields are metafields
@@ -100,7 +103,23 @@ Recommended default:
 
 - variants for size, color, and only truly selectable dimensions
 - metafields for fit, support, use case, and merchandising logic
+- keep native brand sizing in the variant instead of force-converting all brands into one system
 - avoid using tags as a long-term structured data system
+
+Sizing rule:
+
+- if the brand sells in US sizing, keep US sizing
+- if the brand sells in EU sizing, keep EU sizing
+- if the product is truly unisex, keep one product and use native unisex labels like `8M / 10W`
+- use metafields and PDP guidance for conversion help
+- only use width as a variant when width affects real inventory selection
+
+Unisex rule:
+
+- set `gender_target` to `unisex`
+- set `size_system` to `unisex_us` when variant labels are shown as men's and women's equivalents
+- avoid duplicating the same shoe into separate men's and women's products
+- instead, surface the same product in both shopping paths through collection logic
 
 ## Phase 4: Data Cleanup
 
@@ -111,6 +130,7 @@ Before any pilot import, clean:
 - inconsistent brand names
 - inconsistent product types
 - inconsistent size formats
+- inconsistent size-system labeling
 - inconsistent width labels
 - empty descriptions
 - missing prices
@@ -124,6 +144,7 @@ Normalization rules should exist for:
 - category
 - gender
 - size
+- size system
 - width
 - color
 - use case
@@ -143,6 +164,9 @@ Validate after each stage:
 
 - product grouping
 - variant logic
+- size labeling accuracy
+- EU-to-US conversion guidance where needed
+- unisex products showing correctly in both discovery paths without duplicate products
 - image quality
 - PDP rendering
 - collection membership
@@ -167,6 +191,7 @@ Before full import:
 - collections and rules are defined
 - navigation is planned
 - filter model is planned
+- size-system rules are documented by brand
 - image naming is stable
 - source data freeze date is chosen
 - QA owner is assigned
@@ -201,6 +226,8 @@ Validate:
 - missing barcodes
 - missing pickup flags
 - missing fit data
+- incorrect size labels
+- incorrect size-system assignments
 
 Top-priority manual QA:
 
@@ -232,6 +259,8 @@ Top-priority manual QA:
 - duplicate products
 - inconsistent naming
 - bad size/width mappings
+- converting EU-sized brands into incorrect US-facing variants
+- duplicating unisex products into separate men's and women's SKUs
 - image mismatches
 - poor collection membership
 - search irrelevance

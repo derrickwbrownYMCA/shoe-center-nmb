@@ -886,6 +886,69 @@ customElements.define('predictive-search', PredictiveSearch);
    with data-qty-target matching the same key.
 ═══════════════════════════════════════════════════════════════════════════ */
 
+(function initLaunchOverlay() {
+  const overlay = document.querySelector('[data-launch-overlay]');
+  if (!overlay) return;
+
+  const homeOnly = overlay.dataset.homeOnly === 'true';
+  if (homeOnly && window.location.pathname !== '/') return;
+
+  const frequencyDays = parseInt(overlay.dataset.frequencyDays || '7', 10);
+  const storageKey = 'shoecenter-launch-overlay-dismissed-at';
+  const dismissedAt = parseInt(localStorage.getItem(storageKey) || '0', 10);
+  const lockout = Math.max(frequencyDays, 1) * 24 * 60 * 60 * 1000;
+  if (dismissedAt && Date.now() - dismissedAt < lockout) return;
+
+  const dialog = overlay.querySelector('.launch-overlay__dialog');
+  const closeButtons = overlay.querySelectorAll('[data-launch-overlay-close]');
+  const actionLinks = overlay.querySelectorAll('[data-launch-overlay-action]');
+  let releaseFocusTrap = null;
+  const previousOverflow = document.body.style.overflow;
+
+  function rememberDismissal() {
+    localStorage.setItem(storageKey, String(Date.now()));
+  }
+
+  function closeOverlay() {
+    overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = previousOverflow;
+    if (releaseFocusTrap) {
+      releaseFocusTrap();
+      releaseFocusTrap = null;
+    }
+    document.removeEventListener('keydown', onKeydown);
+  }
+
+  function onKeydown(event) {
+    if (event.key === 'Escape') {
+      rememberDismissal();
+      closeOverlay();
+    }
+  }
+
+  closeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      rememberDismissal();
+      closeOverlay();
+    });
+  });
+
+  actionLinks.forEach(link => {
+    link.addEventListener('click', rememberDismissal);
+  });
+
+  window.requestAnimationFrame(() => {
+    overlay.hidden = false;
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (dialog) {
+      releaseFocusTrap = trapFocus(dialog);
+    }
+    document.addEventListener('keydown', onKeydown);
+  });
+})();
+
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-qty-up], [data-qty-down]');
   if (!btn) return;
