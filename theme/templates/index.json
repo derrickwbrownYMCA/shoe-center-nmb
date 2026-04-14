@@ -1,14 +1,20 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
-    "hero-banner": { "type": "hero-banner", "settings": {} },
+    "hero-banner": {
+      "type": "hero-banner",
+      "settings": {}
+    },
     "category-tiles": {
       "type": "category-tiles",
-      "settings": {
-        "heading": "Shop the store",
-        "subheading": "Browse the departments and brands people look for first.",
-        "columns": "4",
-        "aspect_ratio": "portrait"
-      },
       "blocks": {
         "cat-1": {
           "type": "tile",
@@ -39,11 +45,15 @@
           }
         }
       },
-      "blocks_order": ["cat-1", "cat-2", "cat-3", "cat-4"]
+      "settings": {
+        "heading": "Shop the store",
+        "subheading": "Browse the departments and brands people look for first.",
+        "columns": "4",
+        "aspect_ratio": "portrait"
+      }
     },
     "feature-bar": {
       "type": "feature-bar",
-      "settings": {},
       "blocks": {
         "feature-1": {
           "type": "feature",
@@ -78,10 +88,16 @@
           }
         }
       },
-      "blocks_order": ["feature-1", "feature-2", "feature-3", "feature-4"]
+      "settings": {}
     },
-    "fit-guide": { "type": "fit-guide", "settings": {} },
-    "featured-products": { "type": "featured-products", "settings": {} },
+    "fit-guide": {
+      "type": "fit-guide",
+      "settings": {}
+    },
+    "featured-products": {
+      "type": "featured-products",
+      "settings": {}
+    },
     "visit-store": {
       "type": "visit-store",
       "settings": {
@@ -91,10 +107,10 @@
         "address": "710 Hwy 17 S, North Myrtle Beach, SC 29582",
         "hours": "Mon-Sat 10:00a-6:00p • Sun 12:00p-5:00p",
         "phone": "(843) 272-6515",
-        "secondary_link": "tel:+18432726515",
         "pickup": "Reserve online and pick up in store",
         "primary_label": "Get Directions",
         "secondary_label": "Call the Store",
+        "secondary_link": "tel:+18432726515",
         "card_title": "Come in for the pair. Leave with the right fit.",
         "card_copy": "From On and everyday comfort favorites to dance-ready styles, we help locals and visitors try the right options with real guidance before they buy.",
         "tag_1": "Try before you buy",
@@ -104,17 +120,6 @@
     },
     "testimonials": {
       "type": "testimonials",
-      "settings": {
-        "eyebrow": "Trusted locally",
-        "heading": "What Our Customers Say",
-        "subheading": "Real comfort. Real people. Real North Myrtle Beach.",
-        "proof_1_value": "48",
-        "proof_1_label": "Years serving North Myrtle Beach",
-        "proof_2_value": "50+",
-        "proof_2_label": "Brands across comfort, style, performance, and dance",
-        "proof_3_value": "1:1",
-        "proof_3_label": "Personal fit help in store"
-      },
       "blocks": {
         "testimonial-1": {
           "type": "testimonial",
@@ -141,7 +146,17 @@
           }
         }
       },
-      "blocks_order": ["testimonial-1", "testimonial-2", "testimonial-3"]
+      "settings": {
+        "eyebrow": "Trusted locally",
+        "heading": "What Our Customers Say",
+        "subheading": "Real comfort. Real people. Real North Myrtle Beach.",
+        "proof_1_value": "48",
+        "proof_1_label": "Years serving North Myrtle Beach",
+        "proof_2_value": "50+",
+        "proof_2_label": "Brands across comfort, style, performance, and dance",
+        "proof_3_value": "1:1",
+        "proof_3_label": "Personal fit help in store"
+      }
     },
     "story-legacy": {
       "type": "story-legacy",
@@ -161,11 +176,6 @@
     },
     "brands-we-love": {
       "type": "brands-we-love",
-      "settings": {
-        "heading": "The brands people come in asking for",
-        "subheading": "From On and performance favorites to trusted comfort names and dance staples, we carry brands we know how to fit and recommend with confidence.",
-        "columns": "6"
-      },
       "blocks": {
         "brand-1": {
           "type": "logo",
@@ -204,7 +214,11 @@
           }
         }
       },
-      "blocks_order": ["brand-1", "brand-2", "brand-3", "brand-4", "brand-5", "brand-6"]
+      "settings": {
+        "heading": "The brands people come in asking for",
+        "subheading": "From On and performance favorites to trusted comfort names and dance staples, we carry brands we know how to fit and recommend with confidence.",
+        "columns": "6"
+      }
     }
   },
   "order": [

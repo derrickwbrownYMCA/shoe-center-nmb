@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "color_background": "#F6F4EF",
@@ -24,6 +33,10 @@
     "button_letter_spacing": "0.1em",
     "cart_type": "drawer",
     "cart_note_enable": false,
-    "predictive_search_enabled": true
+    "predictive_search_enabled": true,
+    "launch_overlay_enabled": true,
+    "launch_overlay_primary_url": "shopify://pages/carolina-drift",
+    "launch_overlay_image": "shopify://shop_images/Dunes_Cognac_LS.webp",
+    "content_for_index": []
   }
 }
