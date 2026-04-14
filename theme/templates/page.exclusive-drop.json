@@ -1,0 +1,62 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "exclusive-drop",
+      "settings": {
+        "eyebrow": "Exclusive first run",
+        "heading": "A Leather Shoe Built for the South",
+        "subheading": "Designed exclusively for Shoe Center. Comfortable enough for everyday wear, sharp enough for a night out, and smooth enough for casual dancing.",
+        "primary_cta_label": "Shop the Drop",
+        "primary_cta_url": "shopify://pages/carolina-drift",
+        "secondary_cta_label": "Enter Store",
+        "secondary_cta_url": "",
+        "proof_1": "Exclusive to Shoe Center",
+        "proof_2": "Limited by size and color",
+        "proof_3": "Built for comfort and movement",
+        "hero_image": "shopify://shop_images/Dunes_Cognac_LS.webp",
+        "hero_image_alt": "Exclusive leather shoe photographed in warm coastal evening light",
+        "story_label": "Why we made it",
+        "story_heading": "Designed for Southern style, everyday comfort, and nights that stay in motion.",
+        "story_body": "<p>We wanted a leather shoe that did not force men to choose between style and comfort. Something you could wear to dinner, to the boardwalk, or out dancing. So we worked with Milwaukee Leather to create one just for us.</p>",
+        "buy_label": "Shop the drop",
+        "product": "carolina-loafer",
+        "buy_intro": "Choose your color, grab your size, and check out without leaving the page.",
+        "add_to_cart_label": "Add to Cart",
+        "product_page_label": "See full product details",
+        "colors_label": "Find your color",
+        "colors_heading": "Three shades. One easygoing leather silhouette.",
+        "benefits_label": "Made to wear. Made to move.",
+        "benefits_heading": "Everything the launch needs to communicate at a glance.",
+        "lifestyle_label": "From everyday wear to the dance floor",
+        "lifestyle_heading": "A versatile leather shoe for dinners out, beach music nights, and weekends around town.",
+        "lifestyle_body": "<p>This is not a formal shoe that sits in the closet. It is meant to be lived in, from casual evenings on the boardwalk to local nights that call for a little movement.</p>",
+        "lifestyle_image": "shopify://shop_images/man-putting-on-nice-pair-of-pikolinos-dress-shoes.png",
+        "lifestyle_image_alt": "Man wearing leather shoes while walking outside in warm evening light",
+        "urgency_label": "Exclusive first run",
+        "urgency_heading": "Limited by size and color. Restock is not guaranteed.",
+        "urgency_copy": "This design was made just for Shoe Center. Once this run is gone, there may not be another batch waiting behind it.",
+        "urgency_cta_label": "Get Yours Before They Are Gone",
+        "urgency_cta_url": "",
+        "final_label": "The Carolina Drift",
+        "final_heading": "Southern style, easy comfort, and a limited run worth moving on now.",
+        "final_copy": "Send shoppers back to the buy panel or into the main store without breaking the drop story.",
+        "final_primary_label": "Shop the Drop",
+        "final_primary_url": "",
+        "final_secondary_label": "Enter Store",
+        "final_secondary_url": ""
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
