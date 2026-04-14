@@ -74,6 +74,10 @@ function debounce(fn, wait = 300) {
   };
 }
 
+function getThemeRoute(key, fallback) {
+  return window.ShoeCenter?.routes?.[key] || fallback;
+}
+
 /**
  * Focus trap: keeps keyboard focus inside `container` while active.
  * Returns a cleanup function.
@@ -129,7 +133,7 @@ const CartAPI = {
    * @returns {Promise<object>} Shopify cart object
    */
   async get() {
-    const res = await fetch('/cart.js', {
+    const res = await fetch(`${getThemeRoute('cart', '/cart')}.js`, {
       headers: { 'Content-Type': 'application/json' },
     });
     if (!res.ok) throw new Error(`CartAPI.get failed: ${res.status}`);
@@ -142,7 +146,7 @@ const CartAPI = {
    * @returns {Promise<object>} Shopify cart object
    */
   async addItems(items) {
-    const res = await fetch('/cart/add.js', {
+    const res = await fetch(`${getThemeRoute('cartAdd', '/cart/add')}.js`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items }),
@@ -162,7 +166,7 @@ const CartAPI = {
    * @returns {Promise<object>} Shopify cart object
    */
   async change(line, quantity) {
-    const res = await fetch('/cart/change.js', {
+    const res = await fetch(`${getThemeRoute('cartChange', '/cart/change')}.js`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ line, quantity }),
@@ -177,7 +181,7 @@ const CartAPI = {
    * @returns {Promise<object>} Shopify cart object
    */
   async update(updates) {
-    const res = await fetch('/cart/update.js', {
+    const res = await fetch(`${getThemeRoute('cartUpdate', '/cart/update')}.js`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
@@ -596,9 +600,13 @@ customElements.define('variant-selector', VariantSelector);
 // Listen for variant:change to update price and availability displays
 document.addEventListener('variant:change', (e) => {
   const { variant } = e.detail;
+  const scope =
+    e.target?.closest?.('[data-section-id]') ||
+    e.target?.closest?.('.shopify-section') ||
+    document;
 
   // Update price display
-  const priceEl = document.querySelector('.js-variant-price');
+  const priceEl = scope.querySelector('.js-variant-price');
   if (priceEl && variant) {
     const isOnSale = variant.compare_at_price > variant.price;
     priceEl.innerHTML = isOnSale
@@ -608,7 +616,7 @@ document.addEventListener('variant:change', (e) => {
   }
 
   // Update add-to-cart button
-  const addBtn = document.querySelector('.js-add-to-cart');
+  const addBtn = scope.querySelector('.js-add-to-cart');
   if (addBtn) {
     if (!variant) {
       addBtn.disabled = true;
@@ -624,7 +632,7 @@ document.addEventListener('variant:change', (e) => {
 
   // Update featured image if variant has one
   if (variant?.featured_image) {
-    const mainImg = document.querySelector('.js-main-product-img');
+    const mainImg = scope.querySelector('.js-main-product-img');
     if (mainImg) {
       const newSrc = variant.featured_image.src.replace(/(\.[a-z]+)(\?.*)?$/, '_800x800$1');
       mainImg.src = newSrc;
@@ -703,20 +711,10 @@ class PredictiveSearch extends HTMLElement {
     if (this._abortController) this._abortController.abort();
     this._abortController = new AbortController();
 
-    const params = new URLSearchParams({
-      q: query,
-      resources: JSON.stringify({
-        type: 'product',
-        limit: 6,
-        options: { unavailable_products: 'last', fields: 'title,vendor,variants.title,body_type' },
-      }),
-      'resources[type]': 'product',
-      'resources[limit]': '6',
-    });
-
     try {
+      const predictiveSearchUrl = getThemeRoute('predictiveSearch', '/search/suggest');
       const res = await fetch(
-        `/search/suggest.json?q=${encodeURIComponent(query)}&resources[type]=product&resources[limit]=6`,
+        `${predictiveSearchUrl}.json?q=${encodeURIComponent(query)}&resources[type]=product&resources[limit]=6`,
         { signal: this._abortController.signal }
       );
       if (!res.ok) return;
@@ -751,7 +749,7 @@ class PredictiveSearch extends HTMLElement {
           </li>
         `).join('')}
         <li class="predictive-search__all">
-          <a href="/search?q=${encodeURIComponent(this._input.value)}" class="predictive-search__see-all">
+          <a href="${getThemeRoute('search', '/search')}?q=${encodeURIComponent(this._input.value)}" class="predictive-search__see-all">
             See all results for "${escapeHtml(this._input.value)}"
           </a>
         </li>
@@ -887,6 +885,69 @@ customElements.define('predictive-search', PredictiveSearch);
    Wired via data attributes: data-qty-up, data-qty-down target an input
    with data-qty-target matching the same key.
 ═══════════════════════════════════════════════════════════════════════════ */
+
+(function initLaunchOverlay() {
+  const overlay = document.querySelector('[data-launch-overlay]');
+  if (!overlay) return;
+
+  const homeOnly = overlay.dataset.homeOnly === 'true';
+  if (homeOnly && window.location.pathname !== '/') return;
+
+  const frequencyDays = parseInt(overlay.dataset.frequencyDays || '7', 10);
+  const storageKey = 'shoecenter-launch-overlay-dismissed-at';
+  const dismissedAt = parseInt(localStorage.getItem(storageKey) || '0', 10);
+  const lockout = Math.max(frequencyDays, 1) * 24 * 60 * 60 * 1000;
+  if (dismissedAt && Date.now() - dismissedAt < lockout) return;
+
+  const dialog = overlay.querySelector('.launch-overlay__dialog');
+  const closeButtons = overlay.querySelectorAll('[data-launch-overlay-close]');
+  const actionLinks = overlay.querySelectorAll('[data-launch-overlay-action]');
+  let releaseFocusTrap = null;
+  const previousOverflow = document.body.style.overflow;
+
+  function rememberDismissal() {
+    localStorage.setItem(storageKey, String(Date.now()));
+  }
+
+  function closeOverlay() {
+    overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = previousOverflow;
+    if (releaseFocusTrap) {
+      releaseFocusTrap();
+      releaseFocusTrap = null;
+    }
+    document.removeEventListener('keydown', onKeydown);
+  }
+
+  function onKeydown(event) {
+    if (event.key === 'Escape') {
+      rememberDismissal();
+      closeOverlay();
+    }
+  }
+
+  closeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      rememberDismissal();
+      closeOverlay();
+    });
+  });
+
+  actionLinks.forEach(link => {
+    link.addEventListener('click', rememberDismissal);
+  });
+
+  window.requestAnimationFrame(() => {
+    overlay.hidden = false;
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (dialog) {
+      releaseFocusTrap = trapFocus(dialog);
+    }
+    document.addEventListener('keydown', onKeydown);
+  });
+})();
 
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-qty-up], [data-qty-down]');

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="760" viewBox="0 0 1440 760" role="img" aria-labelledby="title desc">
+  <title id="title">Background Color Comparison</title>
+  <desc id="desc">Three side-by-side background color options for Shoe Center NMB inspired by Faherty's lighter neutral base.</desc>
+
+  <defs>
+    <style>
+      .label {
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        fill: #18242E;
+      }
+      .value {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        fill: #2E3438;
+      }
+      .note {
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        fill: #4E5961;
+      }
+      .title {
+        font-family: Arial, sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        fill: #18242E;
+      }
+      .subtitle {
+        font-family: Arial, sans-serif;
+        font-size: 17px;
+        fill: #4E5961;
+      }
+    </style>
+  </defs>
+
+  <rect width="1440" height="760" fill="#FFFFFF"/>
+
+  <text x="80" y="74" class="title">Background Comparison</text>
+  <text x="80" y="106" class="subtitle">Three lighter alternatives to the current tan-stone base. Each panel uses the full color as a page-style canvas.</text>
+
+  <g transform="translate(80,150)">
+    <rect x="0" y="0" width="400" height="520" rx="20" fill="#F6F4EF" stroke="#D7D2C8"/>
+    <text x="32" y="52" class="label">OPTION A</text>
+    <text x="32" y="82" class="value">#F6F4EF</text>
+    <text x="32" y="118" class="note">Soft off-white</text>
+    <text x="32" y="142" class="note">Closest to premium neutral</text>
+    <text x="32" y="166" class="note">Light, clean, still warm</text>
+  </g>
+
+  <g transform="translate(520,150)">
+    <rect x="0" y="0" width="400" height="520" rx="20" fill="#F7F5F1" stroke="#D9D5CC"/>
+    <text x="32" y="52" class="label">OPTION B</text>
+    <text x="32" y="82" class="value">#F7F5F1</text>
+    <text x="32" y="118" class="note">Clean warm white</text>
+    <text x="32" y="142" class="note">Brightest of the three</text>
+    <text x="32" y="166" class="note">Feels airy and polished</text>
+  </g>
+
+  <g transform="translate(960,150)">
+    <rect x="0" y="0" width="400" height="520" rx="20" fill="#F4F6F4" stroke="#D0D8D2"/>
+    <text x="32" y="52" class="label">OPTION C</text>
+    <text x="32" y="82" class="value">#F4F6F4</text>
+    <text x="32" y="118" class="note">Cooler fresh neutral</text>
+    <text x="32" y="142" class="note">Most modern/coastal</text>
+    <text x="32" y="166" class="note">Least tan of the group</text>
+  </g>
+</svg>

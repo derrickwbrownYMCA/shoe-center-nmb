@@ -1,19 +1,132 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
-    "hero-banner": { "type": "hero-banner", "settings": {} },
-    "category-tiles": { "type": "category-tiles", "settings": {} },
-    "feature-bar": { "type": "feature-bar", "settings": {} },
-    "featured-products": { "type": "featured-products", "settings": {} },
+    "hero-banner": {
+      "type": "hero-banner",
+      "settings": {}
+    },
+    "category-tiles": {
+      "type": "category-tiles",
+      "blocks": {
+        "cat-1": {
+          "type": "tile",
+          "settings": {
+            "title": "Women's",
+            "subtitle": "Shop now"
+          }
+        },
+        "cat-2": {
+          "type": "tile",
+          "settings": {
+            "title": "Men's",
+            "subtitle": "Shop now"
+          }
+        },
+        "cat-3": {
+          "type": "tile",
+          "settings": {
+            "title": "On Running",
+            "subtitle": "Performance favorites"
+          }
+        },
+        "cat-4": {
+          "type": "tile",
+          "settings": {
+            "title": "Dance",
+            "subtitle": "Move well"
+          }
+        }
+      },
+      "settings": {
+        "heading": "Shop the store",
+        "subheading": "Browse the departments and brands people look for first.",
+        "columns": "4",
+        "aspect_ratio": "portrait"
+      }
+    },
+    "feature-bar": {
+      "type": "feature-bar",
+      "blocks": {
+        "feature-1": {
+          "type": "feature",
+          "settings": {
+            "icon": "shoe",
+            "heading": "Expert Fit Help",
+            "description": "Personal service for women and men looking for the right pair"
+          }
+        },
+        "feature-2": {
+          "type": "feature",
+          "settings": {
+            "icon": "tag",
+            "heading": "Modern Brands",
+            "description": "From On to comfort favorites and dance-ready styles"
+          }
+        },
+        "feature-3": {
+          "type": "feature",
+          "settings": {
+            "icon": "pin",
+            "heading": "Local Since 1978",
+            "description": "Trusted North Myrtle Beach service with fresh new energy"
+          }
+        },
+        "feature-4": {
+          "type": "feature",
+          "settings": {
+            "icon": "refresh",
+            "heading": "Pickup Available",
+            "description": "Reserve online and pick up locally on the Grand Strand"
+          }
+        }
+      },
+      "settings": {}
+    },
+    "fit-guide": {
+      "type": "fit-guide",
+      "settings": {}
+    },
+    "featured-products": {
+      "type": "featured-products",
+      "settings": {}
+    },
+    "visit-store": {
+      "type": "visit-store",
+      "settings": {
+        "eyebrow": "Visit the store",
+        "heading": "See what local service still feels like",
+        "copy": "Visit Shoe Center NMB for expert fitting, modern brands, and a better chance of leaving in the right pair the first time.",
+        "address": "710 Hwy 17 S, North Myrtle Beach, SC 29582",
+        "hours": "Mon-Sat 10:00a-6:00p • Sun 12:00p-5:00p",
+        "phone": "(843) 272-6515",
+        "pickup": "Reserve online and pick up in store",
+        "primary_label": "Get Directions",
+        "secondary_label": "Call the Store",
+        "secondary_link": "tel:+18432726515",
+        "card_title": "Come in for the pair. Leave with the right fit.",
+        "card_copy": "From On and everyday comfort favorites to dance-ready styles, we help locals and visitors try the right options with real guidance before they buy.",
+        "tag_1": "Try before you buy",
+        "tag_2": "Expert fit help",
+        "tag_3": "Since 1978"
+      }
+    },
     "testimonials": {
       "type": "testimonials",
-      "settings": {},
       "blocks": {
         "testimonial-1": {
           "type": "testimonial",
           "settings": {
             "quote": "Best shoe-fitting experience I've ever had. They actually measure your foot.",
             "author": "Rachel T., NMB",
-            "rating": 5
+            "rating": "5"
           }
         },
         "testimonial-2": {
@@ -21,7 +134,7 @@
           "settings": {
             "quote": "On Running selection is incredible. My Cloud 6s are perfect for the boardwalk.",
             "author": "Marcus D., Myrtle Beach",
-            "rating": 5
+            "rating": "5"
           }
         },
         "testimonial-3": {
@@ -29,20 +142,92 @@
           "settings": {
             "quote": "Family-owned feel with big-store selection. Worth the drive.",
             "author": "Susan K., Conway SC",
-            "rating": 5
+            "rating": "5"
           }
         }
       },
-      "blocks_order": ["testimonial-1", "testimonial-2", "testimonial-3"]
+      "settings": {
+        "eyebrow": "Trusted locally",
+        "heading": "What Our Customers Say",
+        "subheading": "Real comfort. Real people. Real North Myrtle Beach.",
+        "proof_1_value": "48",
+        "proof_1_label": "Years serving North Myrtle Beach",
+        "proof_2_value": "50+",
+        "proof_2_label": "Brands across comfort, style, performance, and dance",
+        "proof_3_value": "1:1",
+        "proof_3_label": "Personal fit help in store"
+      }
     },
-    "story-legacy": { "type": "story-legacy", "settings": {} },
-    "brands-we-love": { "type": "brands-we-love", "settings": {} }
+    "story-legacy": {
+      "type": "story-legacy",
+      "settings": {
+        "eyebrow": "Legacy + Next Chapter",
+        "heading": "A Local Favorite, Moving Forward",
+        "body_copy": "<p>Shoe Center NMB has been part of North Myrtle Beach since 1978, and that history still matters. Longtime customers know us for comfort, personal service, and the kind of fit help that is hard to find in a chain store.</p><p>Today, that same trust is carrying the store into a new chapter. Under the Brown family, Rachel has been expanding the mix with fresher brands, younger styles, and stronger performance footwear while keeping the comfort-first service the store has always been known for.</p><p>We are here for the customers who have loved this store for years and for the ones discovering it for the first time. Whether you come in for On, everyday comfort, men's favorites, or dance-ready styles, the goal is the same: help you leave in the right pair.</p>",
+        "cta_text": "Visit Our Story",
+        "show_stats": false,
+        "stat_1_number": "48",
+        "stat_1_label": "Years in North Myrtle Beach",
+        "stat_2_number": "50+",
+        "stat_2_label": "Brands Curated Today",
+        "stat_3_number": "1",
+        "stat_3_label": "Grand Strand Flagship"
+      }
+    },
+    "brands-we-love": {
+      "type": "brands-we-love",
+      "blocks": {
+        "brand-1": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "On"
+          }
+        },
+        "brand-2": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Olukai"
+          }
+        },
+        "brand-3": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Charleston Shoe Company"
+          }
+        },
+        "brand-4": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Bernie Mev"
+          }
+        },
+        "brand-5": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Saola"
+          }
+        },
+        "brand-6": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "New Balance"
+          }
+        }
+      },
+      "settings": {
+        "heading": "The brands people come in asking for",
+        "subheading": "From On and performance favorites to trusted comfort names and dance staples, we carry brands we know how to fit and recommend with confidence.",
+        "columns": "6"
+      }
+    }
   },
   "order": [
     "hero-banner",
     "category-tiles",
     "feature-bar",
+    "fit-guide",
     "featured-products",
+    "visit-store",
     "testimonials",
     "story-legacy",
     "brands-we-love"

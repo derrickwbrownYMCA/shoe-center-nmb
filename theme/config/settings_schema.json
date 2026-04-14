@@ -4,8 +4,8 @@
     "theme_name": "ShoeCenterNMB Premium",
     "theme_version": "1.0.0",
     "theme_author": "Shoe Center NMB",
-    "theme_documentation_url": "",
-    "theme_support_url": ""
+    "theme_documentation_url": "https://github.com/derrickwbrownYMCA/shoe-center-nmb",
+    "theme_support_url": "https://github.com/derrickwbrownYMCA/shoe-center-nmb"
   },
 
   {
@@ -13,28 +13,28 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "These six colors are the complete brand palette from the Shoe Center NMB Vision Document. Header and footer tones are derived automatically — no separate overrides needed."
+        "content": "These six colors are the complete brand palette from the Shoe Center NMB vision document. Header and footer tones are derived automatically - no separate overrides needed."
       },
       {
         "type": "color",
         "id": "color_background",
         "label": "Background",
-        "default": "#FAF9F6",
-        "info": "Soft cream — primary canvas for every page."
+        "default": "#F6F4EF",
+        "info": "Soft stone-sand canvas for every page."
       },
       {
         "type": "color",
         "id": "color_accent",
         "label": "Accent (CTAs & hover states)",
-        "default": "#F5E1E1",
-        "info": "Blush — used for primary buttons, hover fills, and highlight bands."
+        "default": "#BFD3CF",
+        "info": "Muted sea-glass accent used for CTAs, hover fills, and highlight bands."
       },
       {
         "type": "color",
         "id": "color_accent_hover",
         "label": "Accent hover",
-        "default": "#E8C8C8",
-        "info": "Slightly deeper blush for button hover/active states. Darken if contrast is insufficient."
+        "default": "#9FB7B1",
+        "info": "Slightly deeper sea-glass tone for button hover and active states."
       },
       {
         "type": "color",
@@ -47,21 +47,21 @@
         "type": "color",
         "id": "color_border",
         "label": "Border & secondary text",
-        "default": "#A8A8A8",
+        "default": "#CFC7BC",
         "info": "Applies to dividers, input borders, captions, and metadata."
       },
       {
         "type": "color",
         "id": "color_text",
         "label": "Body text",
-        "default": "#333333"
+        "default": "#2E3438"
       },
       {
         "type": "color",
         "id": "color_heading",
         "label": "Heading text",
-        "default": "#000000",
-        "info": "Also used as the footer background (inverted palette). Buttons use this as text color on the blush background."
+        "default": "#18242E",
+        "info": "Also used as the footer background and as the dark anchor color throughout the theme."
       }
     ]
   },
@@ -357,16 +357,93 @@
         "type": "textarea",
         "id": "custom_head_scripts",
         "label": "Custom <head> code",
-        "default": "",
         "info": "Runs before </head>. Use for meta tags or preload hints."
       },
       {
         "type": "textarea",
         "id": "custom_body_end_scripts",
         "label": "Custom end-of-body code",
-        "default": "",
         "info": "Runs before </body>. Use for analytics or chat widgets."
+      }
+    ]
+  },
+
+  {
+    "name": "Launch Overlay",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "launch_overlay_enabled",
+        "label": "Enable launch overlay",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "launch_overlay_home_only",
+        "label": "Show on homepage only",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "launch_overlay_frequency_days",
+        "label": "Show again after this many days",
+        "min": 1,
+        "max": 30,
+        "step": 1,
+        "default": 7
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_eyebrow",
+        "label": "Eyebrow",
+        "default": "Just dropped"
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_heading",
+        "label": "Heading",
+        "default": "A New Leather Shoe Built for the South"
+      },
+      {
+        "type": "textarea",
+        "id": "launch_overlay_text",
+        "label": "Text",
+        "default": "Exclusive to Shoe Center. Designed for comfort, style, and movement."
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_primary_label",
+        "label": "Primary button label",
+        "default": "Shop the Drop"
+      },
+      {
+        "type": "url",
+        "id": "launch_overlay_primary_url",
+        "label": "Primary button link"
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_secondary_label",
+        "label": "Secondary link label",
+        "default": "Enter Store"
+      },
+      {
+        "type": "url",
+        "id": "launch_overlay_secondary_url",
+        "label": "Secondary link"
+      },
+      {
+        "type": "image_picker",
+        "id": "launch_overlay_image",
+        "label": "Overlay image"
+      },
+      {
+        "type": "text",
+        "id": "launch_overlay_image_alt",
+        "label": "Overlay image alt text",
+        "default": "Exclusive leather shoe in a warm coastal setting"
       }
     ]
   }
 ]
+

@@ -230,6 +230,21 @@
         {%- endform -%}
       </product-form>
 
+      <div class="product-info__trust" aria-label="Shopping reassurance">
+        <div class="product-info__trust-item">
+          <strong>Pickup available</strong>
+          <span>Buy online and grab your pair locally.</span>
+        </div>
+        <div class="product-info__trust-item">
+          <strong>Fit help matters</strong>
+          <span>We are known for comfort guidance and personal service.</span>
+        </div>
+        <div class="product-info__trust-item">
+          <strong>Trusted since 1978</strong>
+          <span>Legacy expertise with a fresh, modern assortment.</span>
+        </div>
+      </div>
+
       <!-- Description accordion -->
       {%- if show_desc and product.description != blank -%}
         <details class="product-info__details" open>
@@ -378,7 +393,7 @@
 
   .product-info__vendor {
     display: block;
-    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-family: var(--font-body, sans-serif);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.18em;
@@ -392,7 +407,7 @@
   .product-info__vendor:focus-visible { outline: 3px solid #005FCC; outline-offset: 2px; border-radius: 2px; }
 
   .product-info__title {
-    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-family: var(--font-heading, sans-serif);
     font-weight: 700;
     font-size: clamp(22px, 2.5vw, 32px);
     letter-spacing: var(--heading-letter-spacing, 0.03em);
@@ -420,7 +435,7 @@
   }
 
   .product-info__option-label {
-    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-family: var(--font-heading, sans-serif);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -435,7 +450,7 @@
     border-radius: var(--radius-btn, 8px);
     background-color: var(--color-bg, #FAF9F6);
     color: var(--color-text, #3D3D3D);
-    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-family: var(--font-body, sans-serif);
     font-size: 15px;
     cursor: pointer;
     appearance: none;
@@ -461,7 +476,7 @@
   }
 
   .product-info__qty-label {
-    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-family: var(--font-heading, sans-serif);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -508,7 +523,7 @@
     border-left: 1px solid var(--color-border, #EBEBEB);
     border-right: 1px solid var(--color-border, #EBEBEB);
     text-align: center;
-    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-family: var(--font-body, sans-serif);
     font-size: 16px;
     font-weight: 600;
     background: none;
@@ -529,6 +544,35 @@
     font-size: 14px;
   }
 
+  .product-info__trust {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-card, 12px);
+    background-color: var(--color-card, #FFFFFF);
+  }
+
+  .product-info__trust-item {
+    display: grid;
+    gap: 4px;
+  }
+
+  .product-info__trust-item strong {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-heading, #000000);
+  }
+
+  .product-info__trust-item span {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text, #3D3D3D);
+  }
+
   /* ── Description accordion ──────────────────────────────────────────────── */
   .product-info__details {
     border-top: 1px solid var(--color-border, #EBEBEB);
@@ -543,7 +587,7 @@
     padding: 16px 0;
     cursor: pointer;
     list-style: none;
-    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-family: var(--font-heading, sans-serif);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -581,7 +625,7 @@
   .product-info__description h2,
   .product-info__description h3,
   .product-info__description h4 {
-    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-family: var(--font-heading, sans-serif);
     font-weight: 700;
     margin: 1em 0 0.5em;
   }
@@ -627,3 +671,4 @@
   ]
 }
 {% endschema %}
+

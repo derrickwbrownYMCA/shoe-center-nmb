@@ -1,0 +1,302 @@
+{%- liquid
+  assign launch_product = section.settings.product
+  assign current_variant = blank
+  if launch_product != blank
+    assign current_variant = launch_product.selected_or_first_available_variant
+  endif
+  assign hero_image = section.settings.hero_image
+  assign lifestyle_image = section.settings.lifestyle_image
+  assign buy_anchor = '#DropBuy-' | append: section.id
+-%}
+
+<section class="exclusive-drop">
+  <div class="exclusive-drop__hero">
+    {%- if hero_image != blank -%}
+      {{ hero_image | image_url: width: 2200 | image_tag: loading: 'eager', fetchpriority: 'high', class: 'exclusive-drop__hero-image', alt: section.settings.hero_image_alt }}
+    {%- else -%}
+      <img src="{{ 'tile-dance-lifestyle.webp' | asset_url }}" alt="{{ section.settings.hero_image_alt | escape }}" width="1600" height="1000" loading="eager" fetchpriority="high" class="exclusive-drop__hero-image">
+    {%- endif -%}
+    <div class="exclusive-drop__hero-overlay"></div>
+    <div class="container exclusive-drop__hero-inner">
+      <p class="exclusive-drop__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h1 class="exclusive-drop__title">{{ section.settings.heading | escape }}</h1>
+      <p class="exclusive-drop__copy">{{ section.settings.subheading | escape }}</p>
+      <div class="exclusive-drop__actions">
+        <a href="{{ section.settings.primary_cta_url | default: buy_anchor }}" class="btn">{{ section.settings.primary_cta_label | escape }}</a>
+        <a href="{{ section.settings.secondary_cta_url | default: routes.root_url }}" class="btn btn--secondary">{{ section.settings.secondary_cta_label | escape }}</a>
+      </div>
+      <div class="exclusive-drop__proof">
+        <span>{{ section.settings.proof_1 | escape }}</span>
+        <span>{{ section.settings.proof_2 | escape }}</span>
+        <span>{{ section.settings.proof_3 | escape }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-padding">
+    <div class="container exclusive-drop__narrow">
+      <p class="exclusive-drop__label">{{ section.settings.story_label | escape }}</p>
+      <h2 class="exclusive-drop__heading">{{ section.settings.story_heading | escape }}</h2>
+      <div class="exclusive-drop__rte">{{ section.settings.story_body }}</div>
+    </div>
+  </div>
+
+  <div class="section-padding" id="DropBuy-{{ section.id }}">
+    <div class="container exclusive-drop__buy">
+      {%- if launch_product != blank -%}
+        <div>
+          {%- if launch_product.featured_image != blank -%}
+            {{ launch_product.featured_image | image_url: width: 1100 | image_tag: loading: 'eager', class: 'exclusive-drop__product-image js-main-product-img', alt: launch_product.featured_image.alt | default: launch_product.title }}
+          {%- endif -%}
+        </div>
+        <div class="exclusive-drop__panel" data-section-id="{{ section.id }}">
+          <p class="exclusive-drop__label">{{ section.settings.buy_label | escape }}</p>
+          <h2 class="exclusive-drop__heading">{{ launch_product.title | escape }}</h2>
+          <p class="exclusive-drop__copy">{{ section.settings.buy_intro | escape }}</p>
+          <div class="exclusive-drop__price js-variant-price">{% render 'price', product: launch_product, variant: current_variant %}</div>
+
+          {%- unless launch_product.has_only_default_variant -%}
+            <variant-selector class="exclusive-drop__variants" data-section-id="{{ section.id }}">
+              {%- for option in launch_product.options_with_values -%}
+                <label class="exclusive-drop__option">
+                  <span>{{ option.name | escape }}</span>
+                  <select name="options[{{ option.name | escape }}]" class="exclusive-drop__select">
+                    {%- for value in option.values -%}
+                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value | escape }}</option>
+                    {%- endfor -%}
+                  </select>
+                </label>
+              {%- endfor -%}
+              <script type="application/json" data-variant-json>{{ launch_product.variants | json }}</script>
+            </variant-selector>
+          {%- endunless -%}
+
+          <product-form>
+            {%- assign drop_product_form_id = 'DropProductForm-' | append: section.id -%}
+            {%- form 'product', launch_product, id: drop_product_form_id, novalidate: 'novalidate' -%}
+              <input type="hidden" name="id" id="ProductVariantId-{{ section.id }}" value="{{ current_variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button class="btn btn--full js-add-to-cart" type="submit" name="add" data-add-text="{{ section.settings.add_to_cart_label | escape }}" {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}>
+                {% if current_variant.available %}{{ section.settings.add_to_cart_label | escape }}{% else %}Sold Out{% endif %}
+              </button>
+            {%- endform -%}
+          </product-form>
+
+          <a href="{{ launch_product.url }}" class="exclusive-drop__text-link">{{ section.settings.product_page_label | escape }}</a>
+        </div>
+      {%- else -%}
+        <div class="exclusive-drop__panel">
+          <p class="exclusive-drop__label">{{ section.settings.buy_label | escape }}</p>
+          <h2 class="exclusive-drop__heading">Select the launch product in the theme editor</h2>
+          <p class="exclusive-drop__copy">This section is ready for the Milwaukee Leather style as soon as the Shopify product is assigned.</p>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="section-padding">
+    <div class="container">
+      <p class="exclusive-drop__label">{{ section.settings.colors_label | escape }}</p>
+      <h2 class="exclusive-drop__heading">{{ section.settings.colors_heading | escape }}</h2>
+      <div class="exclusive-drop__grid exclusive-drop__grid--colors">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'color_card' -%}
+            <article class="exclusive-drop__card" {{ block.shopify_attributes }}>
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image | image_url: width: 700 | image_tag: loading: 'lazy', class: 'exclusive-drop__card-image', alt: block.settings.title }}
+              {%- endif -%}
+              <div class="exclusive-drop__card-body">
+                <h3>{{ block.settings.title | escape }}</h3>
+                <p>{{ block.settings.copy | escape }}</p>
+                <a href="{{ block.settings.url | default: buy_anchor }}" class="btn btn--secondary">{{ block.settings.button_label | escape }}</a>
+              </div>
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="section-padding">
+    <div class="container">
+      <p class="exclusive-drop__label">{{ section.settings.benefits_label | escape }}</p>
+      <h2 class="exclusive-drop__heading">{{ section.settings.benefits_heading | escape }}</h2>
+      <div class="exclusive-drop__grid exclusive-drop__grid--benefits">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'benefit' -%}
+            <article class="exclusive-drop__benefit" {{ block.shopify_attributes }}>
+              <span class="exclusive-drop__dot"></span>
+              <h3>{{ block.settings.title | escape }}</h3>
+              <p>{{ block.settings.copy | escape }}</p>
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="section-padding">
+    <div class="container exclusive-drop__buy">
+      <div class="exclusive-drop__panel">
+        <p class="exclusive-drop__label">{{ section.settings.lifestyle_label | escape }}</p>
+        <h2 class="exclusive-drop__heading">{{ section.settings.lifestyle_heading | escape }}</h2>
+        <div class="exclusive-drop__rte">{{ section.settings.lifestyle_body }}</div>
+      </div>
+      <div>
+        {%- if lifestyle_image != blank -%}
+          {{ lifestyle_image | image_url: width: 1400 | image_tag: loading: 'lazy', class: 'exclusive-drop__product-image', alt: section.settings.lifestyle_image_alt }}
+        {%- else -%}
+          <img src="{{ 'tile-dance-lifestyle.webp' | asset_url }}" alt="{{ section.settings.lifestyle_image_alt | escape }}" width="1200" height="900" loading="lazy" class="exclusive-drop__product-image">
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="exclusive-drop__band section-padding">
+    <div class="container exclusive-drop__narrow exclusive-drop__band-inner">
+      <p class="exclusive-drop__label exclusive-drop__label--light">{{ section.settings.urgency_label | escape }}</p>
+      <h2 class="exclusive-drop__heading exclusive-drop__heading--light">{{ section.settings.urgency_heading | escape }}</h2>
+      <p class="exclusive-drop__copy exclusive-drop__copy--light">{{ section.settings.urgency_copy | escape }}</p>
+      <a href="{{ section.settings.urgency_cta_url | default: buy_anchor }}" class="btn">{{ section.settings.urgency_cta_label | escape }}</a>
+    </div>
+  </div>
+
+  <div class="section-padding">
+    <div class="container exclusive-drop__narrow exclusive-drop__band-inner">
+      <p class="exclusive-drop__label">{{ section.settings.final_label | escape }}</p>
+      <h2 class="exclusive-drop__heading">{{ section.settings.final_heading | escape }}</h2>
+      <p class="exclusive-drop__copy">{{ section.settings.final_copy | escape }}</p>
+      <div class="exclusive-drop__actions">
+        <a href="{{ section.settings.final_primary_url | default: buy_anchor }}" class="btn">{{ section.settings.final_primary_label | escape }}</a>
+        <a href="{{ section.settings.final_secondary_url | default: routes.root_url }}" class="btn btn--secondary">{{ section.settings.final_secondary_label | escape }}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .exclusive-drop { background: linear-gradient(180deg, #f4efe6 0%, var(--color-bg) 32%, #faf8f2 100%); }
+  .exclusive-drop__hero { position: relative; min-height: min(90svh, 880px); display: flex; align-items: end; overflow: hidden; background: #18242e; }
+  .exclusive-drop__hero-image, .exclusive-drop__hero-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .exclusive-drop__hero-image { object-fit: cover; object-position: center 28%; }
+  .exclusive-drop__hero-overlay { background: linear-gradient(180deg, rgba(17, 23, 30, 0.18), rgba(17, 23, 30, 0.82)), linear-gradient(120deg, rgba(121, 82, 41, 0.34), rgba(24, 36, 46, 0.16)); }
+  .exclusive-drop__hero-inner { position: relative; z-index: 1; width: 100%; padding-top: 140px; padding-bottom: 72px; color: #f7f1e6; }
+  .exclusive-drop__narrow { max-width: 760px; margin: 0 auto; }
+  .exclusive-drop__eyebrow, .exclusive-drop__label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
+  .exclusive-drop__label { color: rgba(24, 36, 46, 0.62); }
+  .exclusive-drop__label--light { color: rgba(247, 241, 230, 0.7); }
+  .exclusive-drop__title { max-width: 12ch; margin: 0; font-size: clamp(42px, 7vw, 78px); line-height: 0.96; color: #f7f1e6; }
+  .exclusive-drop__heading { margin: 0; font-size: clamp(28px, 4vw, 48px); line-height: 1.04; }
+  .exclusive-drop__heading--light { color: #f7f1e6; }
+  .exclusive-drop__copy { margin: 18px 0 0; font-size: clamp(16px, 1.6vw, 19px); line-height: 1.75; color: var(--color-text); }
+  .exclusive-drop__hero .exclusive-drop__copy { max-width: 38rem; color: rgba(247, 241, 230, 0.88); }
+  .exclusive-drop__copy--light { color: rgba(247, 241, 230, 0.84); }
+  .exclusive-drop__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .exclusive-drop__proof { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 28px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(247, 241, 230, 0.74); }
+  .exclusive-drop__proof span::before, .exclusive-drop__dot { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 10px; border-radius: 999px; background: linear-gradient(135deg, #b78b54, #18242e); vertical-align: middle; }
+  .exclusive-drop__dot { margin-right: 0; margin-bottom: 16px; }
+  .exclusive-drop__buy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+  .exclusive-drop__panel, .exclusive-drop__card, .exclusive-drop__benefit { background: rgba(255, 252, 247, 0.88); border: 1px solid rgba(24, 36, 46, 0.08); border-radius: 22px; box-shadow: 0 20px 60px rgba(24, 36, 46, 0.08); }
+  .exclusive-drop__panel { padding: clamp(24px, 4vw, 40px); }
+  .exclusive-drop__product-image, .exclusive-drop__card-image { width: 100%; display: block; border-radius: var(--radius-card); background: var(--color-card); }
+  .exclusive-drop__product-image { aspect-ratio: 1 / 1; object-fit: contain; padding: 18px; background: #fff; }
+  .exclusive-drop__price { margin-top: 18px; }
+  .exclusive-drop__price .price__current { font-size: 26px; }
+  .exclusive-drop__variants { display: grid; gap: 14px; margin-top: 22px; }
+  .exclusive-drop__option { display: grid; gap: 8px; }
+  .exclusive-drop__option span { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-heading); }
+  .exclusive-drop__select { width: 100%; min-height: 48px; padding: 12px 16px; border: 1px solid rgba(24, 36, 46, 0.14); border-radius: var(--radius-btn); background: #fff; color: var(--color-text); font: inherit; }
+  .exclusive-drop__text-link { display: inline-block; margin-top: 16px; border-bottom: 1px solid currentColor; color: var(--color-heading); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .exclusive-drop__rte { margin-top: 18px; color: var(--color-text); font-size: 17px; line-height: 1.8; }
+  .exclusive-drop__rte p { margin: 0 0 1em; }
+  .exclusive-drop__grid { display: grid; gap: 22px; }
+  .exclusive-drop__grid--colors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .exclusive-drop__grid--benefits { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .exclusive-drop__card-body, .exclusive-drop__benefit { padding: 22px; }
+  .exclusive-drop__card-body h3, .exclusive-drop__benefit h3 { margin: 0 0 10px; font-size: 22px; }
+  .exclusive-drop__card-body p, .exclusive-drop__benefit p { margin: 0; color: var(--color-text); line-height: 1.7; }
+  .exclusive-drop__card-body .btn { margin-top: 18px; }
+  .exclusive-drop__band { background: linear-gradient(125deg, rgba(16, 24, 31, 0.96), rgba(47, 33, 18, 0.92)); }
+  .exclusive-drop__band-inner { text-align: center; }
+  @media (max-width: 1023px) { .exclusive-drop__grid--benefits { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 767px) {
+    .exclusive-drop__hero { min-height: 82svh; }
+    .exclusive-drop__hero-inner { padding-top: 120px; padding-bottom: 48px; }
+    .exclusive-drop__buy, .exclusive-drop__grid--colors, .exclusive-drop__grid--benefits { grid-template-columns: 1fr; }
+    .exclusive-drop__actions .btn { width: 100%; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Exclusive drop",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Exclusive first run" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "A Leather Shoe Built for the South" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Designed exclusively for Shoe Center. Comfortable enough for everyday wear, sharp enough for a night out, and smooth enough for casual dancing." },
+    { "type": "text", "id": "primary_cta_label", "label": "Primary button label", "default": "Shop the Drop" },
+    { "type": "url", "id": "primary_cta_url", "label": "Primary button link" },
+    { "type": "text", "id": "secondary_cta_label", "label": "Secondary button label", "default": "Enter Store" },
+    { "type": "url", "id": "secondary_cta_url", "label": "Secondary button link" },
+    { "type": "text", "id": "proof_1", "label": "Proof point 1", "default": "Exclusive to Shoe Center" },
+    { "type": "text", "id": "proof_2", "label": "Proof point 2", "default": "Limited by size and color" },
+    { "type": "text", "id": "proof_3", "label": "Proof point 3", "default": "Built for comfort and movement" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image" },
+    { "type": "text", "id": "hero_image_alt", "label": "Hero image alt text", "default": "Exclusive leather shoe photographed in warm coastal evening light" },
+    { "type": "text", "id": "story_label", "label": "Story label", "default": "Why we made it" },
+    { "type": "text", "id": "story_heading", "label": "Story heading", "default": "Designed for Southern style, everyday comfort, and nights that stay in motion." },
+    { "type": "richtext", "id": "story_body", "label": "Story body", "default": "<p>We wanted a leather shoe that did not force men to choose between style and comfort. Something you could wear to dinner, to the boardwalk, or out dancing. So we worked with Milwaukee Leather to create one just for us.</p>" },
+    { "type": "text", "id": "buy_label", "label": "Buy panel label", "default": "Shop the drop" },
+    { "type": "product", "id": "product", "label": "Launch product" },
+    { "type": "text", "id": "buy_intro", "label": "Buy panel intro", "default": "Choose your color, grab your size, and check out without leaving the page." },
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to Cart" },
+    { "type": "text", "id": "product_page_label", "label": "Product page label", "default": "See full product details" },
+    { "type": "text", "id": "colors_label", "label": "Colors label", "default": "Find your color" },
+    { "type": "text", "id": "colors_heading", "label": "Colors heading", "default": "Three shades. One easygoing leather silhouette." },
+    { "type": "text", "id": "benefits_label", "label": "Benefits label", "default": "Made to wear. Made to move." },
+    { "type": "text", "id": "benefits_heading", "label": "Benefits heading", "default": "Everything the launch needs to communicate at a glance." },
+    { "type": "text", "id": "lifestyle_label", "label": "Lifestyle label", "default": "From everyday wear to the dance floor" },
+    { "type": "text", "id": "lifestyle_heading", "label": "Lifestyle heading", "default": "A versatile leather shoe for dinners out, beach music nights, and weekends around town." },
+    { "type": "richtext", "id": "lifestyle_body", "label": "Lifestyle body", "default": "<p>This is not a formal shoe that sits in the closet. It is meant to be lived in, from casual evenings on the boardwalk to local nights that call for a little movement.</p>" },
+    { "type": "image_picker", "id": "lifestyle_image", "label": "Lifestyle image" },
+    { "type": "text", "id": "lifestyle_image_alt", "label": "Lifestyle image alt text", "default": "Man wearing leather shoes while walking outside in warm evening light" },
+    { "type": "text", "id": "urgency_label", "label": "Urgency label", "default": "Exclusive first run" },
+    { "type": "text", "id": "urgency_heading", "label": "Urgency heading", "default": "Limited by size and color. Restock is not guaranteed." },
+    { "type": "textarea", "id": "urgency_copy", "label": "Urgency copy", "default": "This design was made just for Shoe Center. Once this run is gone, there may not be another batch waiting behind it." },
+    { "type": "text", "id": "urgency_cta_label", "label": "Urgency button label", "default": "Get Yours Before They Are Gone" },
+    { "type": "url", "id": "urgency_cta_url", "label": "Urgency button link" },
+    { "type": "text", "id": "final_label", "label": "Final label", "default": "The Carolina Drift" },
+    { "type": "text", "id": "final_heading", "label": "Final heading", "default": "Southern style, easy comfort, and a limited run worth moving on now." },
+    { "type": "textarea", "id": "final_copy", "label": "Final copy", "default": "Send shoppers back to the buy panel or into the main store without breaking the drop story." },
+    { "type": "text", "id": "final_primary_label", "label": "Final primary button label", "default": "Shop the Drop" },
+    { "type": "url", "id": "final_primary_url", "label": "Final primary button link" },
+    { "type": "text", "id": "final_secondary_label", "label": "Final secondary button label", "default": "Enter Store" },
+    { "type": "url", "id": "final_secondary_url", "label": "Final secondary button link" }
+  ],
+  "blocks": [
+    { "type": "color_card", "name": "Color card", "limit": 3, "settings": [
+      { "type": "image_picker", "id": "image", "label": "Image" },
+      { "type": "text", "id": "title", "label": "Title", "default": "Navy" },
+      { "type": "textarea", "id": "copy", "label": "Copy", "default": "Understated and versatile with a clean coastal feel." },
+      { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop Color" },
+      { "type": "url", "id": "url", "label": "Button link" }
+    ]},
+    { "type": "benefit", "name": "Benefit", "limit": 6, "settings": [
+      { "type": "text", "id": "title", "label": "Title", "default": "All-day comfort" },
+      { "type": "textarea", "id": "copy", "label": "Copy", "default": "Soft leather feel and an easy fit from the start." }
+    ]}
+  ],
+  "presets": [
+    { "name": "Exclusive drop", "blocks": [
+      { "type": "color_card", "settings": { "title": "Navy", "copy": "Understated and versatile with a clean coastal feel.", "button_label": "Shop Navy" } },
+      { "type": "color_card", "settings": { "title": "Cognac", "copy": "A classic Southern leather tone with warm character.", "button_label": "Shop Cognac" } },
+      { "type": "color_card", "settings": { "title": "Black", "copy": "Cleaner and dressier without losing the relaxed shape.", "button_label": "Shop Black" } },
+      { "type": "benefit", "settings": { "title": "Soft leather feel", "copy": "Comfort-forward from the first wear." } },
+      { "type": "benefit", "settings": { "title": "Lightweight construction", "copy": "Easy to keep on from day plans to evening plans." } },
+      { "type": "benefit", "settings": { "title": "Built for movement", "copy": "Easygoing support for casual dancing and walking." } },
+      { "type": "benefit", "settings": { "title": "Dress up or down", "copy": "Works with denim, chinos, and relaxed night-out looks." } },
+      { "type": "benefit", "settings": { "title": "Local exclusive", "copy": "Available only through Shoe Center." } }
+    ]}
+  ]
+}
+{% endschema %}
