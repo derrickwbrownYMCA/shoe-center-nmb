@@ -244,6 +244,82 @@
     </div><!-- /.hero__text -->
   </div><!-- /.hero__content -->
 
+  {%- if section.settings.launch_countdown_enabled -%}
+    <aside
+      class="hero__launch-countdown"
+      data-launch-countdown
+      data-target-date="{{ section.settings.launch_countdown_date | default: '2026-06-12' | escape }}"
+      aria-labelledby="HeroLaunchCountdown-{{ section.id }}"
+    >
+      {%- if section.settings.launch_countdown_eyebrow != blank -%}
+        <p class="hero__launch-eyebrow">{{ section.settings.launch_countdown_eyebrow | escape }}</p>
+      {%- endif -%}
+      <h2 id="HeroLaunchCountdown-{{ section.id }}">{{ section.settings.launch_countdown_heading | escape }}</h2>
+      {%- if section.settings.launch_countdown_text != blank -%}
+        <p class="hero__launch-text">{{ section.settings.launch_countdown_text | escape }}</p>
+      {%- endif -%}
+      <div class="hero__launch-date">
+        {{ section.settings.launch_countdown_date_label | escape }}
+      </div>
+      <div class="hero__launch-grid" aria-label="Countdown to launch date">
+        <div class="hero__launch-cell">
+          <strong data-launch-unit="days">--</strong>
+          <span>Days</span>
+        </div>
+        <div class="hero__launch-cell">
+          <strong data-launch-unit="hours">--</strong>
+          <span>Hours</span>
+        </div>
+        <div class="hero__launch-cell">
+          <strong data-launch-unit="minutes">--</strong>
+          <span>Min</span>
+        </div>
+        <div class="hero__launch-cell">
+          <strong data-launch-unit="seconds">--</strong>
+          <span>Sec</span>
+        </div>
+      </div>
+    </aside>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var countdown = document.currentScript.previousElementSibling;
+        if (!countdown || !countdown.matches('[data-launch-countdown]')) return;
+
+        var rawDate = countdown.getAttribute('data-target-date') || '2026-06-12';
+        var target = new Date(rawDate + 'T09:00:00-04:00').getTime();
+        var units = {
+          days: countdown.querySelector('[data-launch-unit="days"]'),
+          hours: countdown.querySelector('[data-launch-unit="hours"]'),
+          minutes: countdown.querySelector('[data-launch-unit="minutes"]'),
+          seconds: countdown.querySelector('[data-launch-unit="seconds"]')
+        };
+
+        function pad(value) {
+          return String(value).padStart(2, '0');
+        }
+
+        function updateCountdown() {
+          var diff = Math.max(0, target - Date.now());
+          var days = Math.floor(diff / 86400000);
+          var hours = Math.floor((diff % 86400000) / 3600000);
+          var minutes = Math.floor((diff % 3600000) / 60000);
+          var seconds = Math.floor((diff % 60000) / 1000);
+
+          if (units.days) units.days.textContent = days;
+          if (units.hours) units.hours.textContent = pad(hours);
+          if (units.minutes) units.minutes.textContent = pad(minutes);
+          if (units.seconds) units.seconds.textContent = pad(seconds);
+        }
+
+        updateCountdown();
+        window.setInterval(updateCountdown, 1000);
+      }());
+    </script>
+  {%- endif -%}
+
 </section>
 
 <style>
@@ -445,6 +521,84 @@
     opacity: 1;
   }
 
+  .hero__launch-countdown {
+    position: absolute;
+    right: var(--page-padding);
+    bottom: 42px;
+    z-index: 3;
+    width: min(360px, calc(100% - 32px));
+    padding: 18px;
+    border: 1px solid rgba(17, 24, 32, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--color-text);
+    box-shadow: 0 16px 40px rgba(17, 24, 32, 0.24);
+  }
+
+  .hero__launch-eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-accent-hover);
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .hero__launch-countdown h2 {
+    margin: 0;
+    color: var(--color-heading);
+    font-family: var(--font-heading);
+    font-size: clamp(1.2rem, 2vw, 1.45rem);
+    line-height: 1.15;
+  }
+
+  .hero__launch-text {
+    margin: 8px 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .hero__launch-date {
+    margin-top: 12px;
+    color: var(--color-heading);
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .hero__launch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .hero__launch-cell {
+    min-width: 0;
+    min-height: 66px;
+    padding: 10px 6px;
+    border-radius: 6px;
+    background: var(--color-surface);
+    text-align: center;
+  }
+
+  .hero__launch-cell strong {
+    display: block;
+    color: var(--color-heading);
+    font-size: clamp(1.2rem, 3vw, 1.55rem);
+    line-height: 1;
+  }
+
+  .hero__launch-cell span {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-text-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
   /* ── Staggered entrance animation ────────────────────────────────
     Each element fades up with a small offset — feels editorial.
     The entire block is inside a prefers-reduced-motion media query
@@ -479,6 +633,8 @@
         to prevent a huge blank gap when there is no portrait image.
         The content padding ensures comfortable breathing room.
       */
+      flex-direction: column;
+      justify-content: center;
       min-height: min(var(--hero-min-height, 780px), 80svh);
       /* Image focuses slightly lower on mobile — shows feet/shoes */
     }
@@ -489,7 +645,8 @@
 
     .hero__content {
       /* Less padding on mobile — the min-height is already shorter */
-      padding-block: 56px;
+      width: 100%;
+      padding-block: 48px 20px;
       /* Always center text on mobile regardless of desktop setting */
       justify-content: center;
       text-align: center;
@@ -518,6 +675,15 @@
     .hero__btn {
       width: 100%;
       justify-content: center;
+    }
+
+    .hero__launch-countdown {
+      position: relative;
+      right: auto;
+      bottom: auto;
+      align-self: center;
+      width: calc(100% - 32px);
+      margin: 0 16px 28px;
     }
   }
 
@@ -657,6 +823,48 @@
 
     {
       "type": "header",
+      "content": "Launch countdown"
+    },
+    {
+      "type": "checkbox",
+      "id": "launch_countdown_enabled",
+      "label": "Show launch countdown on hero",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "launch_countdown_date",
+      "label": "Launch date",
+      "default": "2026-06-12",
+      "info": "Use YYYY-MM-DD format. The countdown targets 9:00 AM Eastern on this date."
+    },
+    {
+      "type": "text",
+      "id": "launch_countdown_date_label",
+      "label": "Displayed date label",
+      "default": "Full launch: June 12"
+    },
+    {
+      "type": "text",
+      "id": "launch_countdown_eyebrow",
+      "label": "Eyebrow",
+      "default": "Soft launch in progress"
+    },
+    {
+      "type": "text",
+      "id": "launch_countdown_heading",
+      "label": "Heading",
+      "default": "New site launch countdown"
+    },
+    {
+      "type": "textarea",
+      "id": "launch_countdown_text",
+      "label": "Text",
+      "default": "We are still tuning photos, inventory, and checkout details before marketing starts."
+    },
+
+    {
+      "type": "header",
       "content": "Style & height"
     },
     {
@@ -693,6 +901,12 @@
         "cta_primary_text": "Shop Women's",
         "cta_secondary_text": "Shop Men's",
         "story_text": "Discover Our Story",
+        "launch_countdown_enabled": true,
+        "launch_countdown_date": "2026-06-12",
+        "launch_countdown_date_label": "Full launch: June 12",
+        "launch_countdown_eyebrow": "Soft launch in progress",
+        "launch_countdown_heading": "New site launch countdown",
+        "launch_countdown_text": "We are still tuning photos, inventory, and checkout details before marketing starts.",
         "overlay_opacity": 50,
         "section_height": "large",
         "text_align": "center",
