@@ -210,16 +210,28 @@ Purpose:
 
 - helps balance assortment storytelling between long-time favorites and newer curation
 
+### 16. Waterproof
+
+- Name: `Waterproof`
+- Namespace and key: `custom.waterproof`
+- Type: `True or false`
+
+Purpose:
+
+- powers weather-ready merchandising
+- supports collection filtering
+- keeps waterproof logic structured instead of buried in titles or tags
+
 ## Phase 2 Metafields
 
 These can come after the first schema is working.
 
-### 16. Material
+### 17. Material
 
 - Namespace and key: `custom.material`
 - Type: `Single line text`
 
-### 17. Closure Type
+### 18. Closure Type
 
 - Namespace and key: `custom.closure_type`
 - Type: `Single line text`
@@ -232,12 +244,12 @@ Suggested values:
 - `buckle`
 - `zip`
 
-### 18. Travel Friendly
+### 19. Travel Friendly
 
 - Namespace and key: `custom.travel_friendly`
 - Type: `True or false`
 
-### 19. Badge Primary
+### 20. Badge Primary
 
 - Namespace and key: `custom.badge_primary`
 - Type: `Single line text`
@@ -300,6 +312,7 @@ Use only when:
 13. `dance_ready`
 14. `brand_priority`
 15. `style_generation`
+16. `waterproof`
 
 ## Pilot Population Recommendation
 
@@ -327,6 +340,7 @@ With this schema in place, we can later build:
 - brand-aware size guidance for US and EU labels
 - unisex size guidance like `8M / 10W` without duplicating products
 - comfort and support filters
+- waterproof filters and badges
 - better related products
 - `On` and flagship-brand merchandising
 - multi-location pickup messaging

@@ -26,6 +26,7 @@ coverage/
 # Shopify / theme tooling artifacts
 config.yml
 .shopify/
+.claude/
 
 # Large or sensitive migration artifacts
 exports/
@@ -34,6 +35,9 @@ backups/
 inventory-exports/
 catalog-exports/
 product-images-raw/
+launch-artifacts/
+On Images/
+On Images Optimized/
 *.zip
 *.xlsx
 *.xls

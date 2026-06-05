@@ -177,6 +177,7 @@ Recommended product metafields:
 - `custom.size_guide_label`
 - `custom.true_to_size`
 - `custom.width_notes`
+- `custom.waterproof`
 - `custom.arch_support_level`
 - `custom.cushioning_level`
 - `custom.foot_concerns`
@@ -237,6 +238,9 @@ Examples:
   - regular
   - wide
   - extra_wide
+- `waterproof`
+  - true
+  - false
 
 Numeric scales:
 
@@ -280,6 +284,7 @@ High-value storefront filters:
 - color
 - brand
 - price
+- waterproof
 - arch support
 - cushioning
 - use case
@@ -305,6 +310,7 @@ Examples:
 
 - `dance_ready = true` can power dance modules and landing pages
 - `pickup_eligible = true` can power pickup callouts
+- `waterproof = true` can power weather-ready collections and badges
 - `arch_support_level >= 4` can support comfort-focused merchandising
 - `brand_priority = flagship` can power homepage and collection merchandising
 - `style_generation = modern` can support younger-facing edits without abandoning legacy favorites
@@ -316,6 +322,7 @@ Metafields should render into:
 - fit summary block
 - size guide support
 - size-system label or conversion note where needed
+- waterproof badge or weather-ready callout where relevant
 - support/cushion indicators
 - use-case badges
 - pickup messaging

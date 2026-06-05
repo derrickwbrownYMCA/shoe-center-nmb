@@ -27,28 +27,32 @@
           "type": "tile",
           "settings": {
             "title": "Women's",
-            "subtitle": "Shop now"
+            "subtitle": "Shop now",
+            "link": "shopify://collections/womens"
           }
         },
         "cat-2": {
           "type": "tile",
           "settings": {
             "title": "Men's",
-            "subtitle": "Shop now"
+            "subtitle": "Shop now",
+            "link": "shopify://collections/mens"
           }
         },
         "cat-3": {
           "type": "tile",
           "settings": {
             "title": "On Running",
-            "subtitle": "Performance favorites"
+            "subtitle": "Performance favorites",
+            "link": "shopify://collections/on-running"
           }
         },
         "cat-4": {
           "type": "tile",
           "settings": {
             "title": "Dance",
-            "subtitle": "Move well"
+            "subtitle": "Move well",
+            "link": "shopify://collections/dance"
           }
         }
       },
@@ -99,7 +103,36 @@
     },
     "fit-guide": {
       "type": "fit-guide",
-      "settings": {}
+      "settings": {
+        "eyebrow": "Shop by need",
+        "heading": "Find the right pair faster",
+        "subheading": "Whether you want all-day comfort, modern performance, men's favorites, or dance-ready style, start with the path that fits how you actually wear your shoes.",
+        "badge_1": "Everyday",
+        "title_1": "Everyday comfort",
+        "copy_1": "Walking, errands, travel, and all-day wear with comfort-first support.",
+        "link_label_1": "Shop comfort",
+        "link_1": "shopify://collections/everyday-comfort",
+        "badge_2": "Performance",
+        "title_2": "On and active styles",
+        "copy_2": "Modern performance shoes for movement, recovery, and a cleaner athletic look.",
+        "link_label_2": "Shop performance",
+        "link_2": "shopify://collections/performance",
+        "badge_3": "Men",
+        "title_3": "Men's favorites",
+        "copy_3": "A clearer path into the brands and fits men actually want to browse first.",
+        "link_label_3": "Shop men's",
+        "link_3": "shopify://collections/mens-favorites",
+        "badge_4": "Style",
+        "title_4": "Style-Forward Picks",
+        "copy_4": "Fresh silhouettes, modern brands, and newer looks that still feel great on your feet.",
+        "link_label_4": "Shop style",
+        "link_4": "shopify://collections/style-forward",
+        "badge_5": "Dance",
+        "title_5": "Dance-ready picks",
+        "copy_5": "Styles made for Shag nights, events, and shoes that look right and move well.",
+        "link_label_5": "Shop dance",
+        "link_5": "shopify://collections/dance-ready"
+      }
     },
     "featured-products": {
       "type": "featured-products",
