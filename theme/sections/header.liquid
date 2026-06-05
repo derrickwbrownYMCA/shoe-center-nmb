@@ -138,36 +138,40 @@
                   {%- assign tile_count = 0 -%}
                   {%- for block in section.blocks -%}
                     {%- if block.type == 'mega_image' and block.settings.nav_handle == link_handle -%}
-                      {%- if tile_count == 0 -%}<div class="megamenu__tiles">{%- endif -%}
-
-                      <a
-                        href="{{ block.settings.url | default: link.url }}"
-                        class="megamenu__tile"
-                        {{ block.shopify_attributes }}
-                      >
-                        {%- if block.settings.image != blank -%}
-                          {%- assign mega_img_alt = block.settings.title | default: link.title -%}
-                          {{
-                            block.settings.image
-                            | image_url: width: 360
-                            | image_tag:
-                              loading: 'lazy',
-                              alt: mega_img_alt,
-                              width: 360,
-                              class: 'megamenu__tile-img'
-                          }}
-                        {%- else -%}
-                          <div class="megamenu__tile-placeholder"></div>
-                        {%- endif -%}
-                        {%- if block.settings.title != blank -%}
-                          <span class="megamenu__tile-label">{{ block.settings.title }}</span>
-                        {%- endif -%}
-                      </a>
-
                       {%- assign tile_count = tile_count | plus: 1 -%}
                     {%- endif -%}
                   {%- endfor -%}
-                  {%- if tile_count > 0 -%}</div>{%- endif -%}
+                  {%- if tile_count > 0 -%}
+                    <div class="megamenu__tiles">
+                      {%- for block in section.blocks -%}
+                        {%- if block.type == 'mega_image' and block.settings.nav_handle == link_handle -%}
+                          <a
+                            href="{{ block.settings.url | default: link.url }}"
+                            class="megamenu__tile"
+                            {{ block.shopify_attributes }}
+                          >
+                            {%- if block.settings.image != blank -%}
+                              {%- assign mega_img_alt = block.settings.title | default: link.title -%}
+                              {{
+                                block.settings.image
+                                | image_url: width: 360
+                                | image_tag:
+                                  loading: 'lazy',
+                                  alt: mega_img_alt,
+                                  width: 360,
+                                  class: 'megamenu__tile-img'
+                              }}
+                            {%- else -%}
+                              <div class="megamenu__tile-placeholder"></div>
+                            {%- endif -%}
+                            {%- if block.settings.title != blank -%}
+                              <span class="megamenu__tile-label">{{ block.settings.title }}</span>
+                            {%- endif -%}
+                          </a>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
 
                 </div><!-- /.megamenu__inner -->
               </div><!-- /.megamenu -->
@@ -193,19 +197,16 @@
     <div class="header__actions">
 
       {%- if section.settings.show_search -%}
-        <button
+        <a
+          href="{{ routes.search_url }}"
           class="header__icon-btn"
-          type="button"
-          aria-label="Open search"
-          aria-expanded="false"
-          aria-controls="SearchDrawer"
-          id="SearchToggle"
+          aria-label="Search the site"
         >
           <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 19 19" fill="none">
             <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
             <path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-        </button>
+        </a>
       {%- endif -%}
 
       <a
@@ -224,7 +225,7 @@
         type="button"
         aria-label="Open cart, {{ cart.item_count }} {{ cart.item_count | pluralize: 'item', 'items' }}"
         id="CartDrawerToggle"
-        data-cart-toggle
+        data-cart-trigger
       >
         <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 20 20" fill="none">
           <path d="M2.5 3.5h2.1l2.3 9h8.7l1.9-6.5H6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -387,7 +388,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background-color: var(--color-bg);
+    background-color: var(--color-header-bg);
     /* No bottom border by default — appears with scroll shadow below */
     transition: box-shadow 0.25s ease;
   }
@@ -395,8 +396,8 @@
   /* Subtle shadow + border once user scrolls past the top edge */
   .header--scrolled {
     box-shadow:
-      0 1px 0 var(--color-border),
-      0 4px 20px rgba(0, 0, 0, 0.06);
+      0 1px 0 rgba(24, 36, 46, 0.12),
+      0 8px 24px rgba(24, 36, 46, 0.08);
   }
 
   /* ── Inner — three-column flex ────────────────────────────────── */
@@ -477,14 +478,14 @@
 
   .header__nav-link:hover,
   .header__nav-link:focus-visible {
-    background-color: var(--color-accent); /* Blush pill hover */
+    background-color: rgba(24, 36, 46, 0.08);
     color: var(--color-heading);
     opacity: 1; /* Override global a:hover opacity */
   }
 
   /* Active page — blush pill + underline so it's visually distinct from hover */
   .header__nav-link[aria-current="page"] {
-    background-color: var(--color-accent);
+    background-color: rgba(24, 36, 46, 0.10);
     color: var(--color-heading);
     opacity: 1;
     text-decoration: underline;
@@ -514,7 +515,8 @@
     top: 100%; /* Flush below the header's bottom edge */
     left: 0;
     right: 0;
-    background-color: var(--color-accent); /* Blush */
+    background-color: var(--color-card);
+    border-top: 1px solid rgba(24, 36, 46, 0.10);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     /* Hidden state */
     opacity: 0;
@@ -556,7 +558,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.45);
+    color: rgba(24, 36, 46, 0.56);
   }
 
   /* Links column — fixed width, left-aligned */
@@ -587,7 +589,7 @@
   .megamenu__link:hover,
   .megamenu__link:focus-visible,
   .megamenu__link.is-active {
-    background-color: rgba(255, 255, 255, 0.55);
+    background-color: rgba(24, 36, 46, 0.05);
     padding-left: 16px;
     opacity: 1;
   }
@@ -627,7 +629,7 @@
   .megamenu__tile-placeholder {
     width: 100%;
     aspect-ratio: 2 / 3;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(24, 36, 46, 0.06);
     border-radius: var(--radius-card);
   }
 
@@ -677,7 +679,7 @@
 
   .header__icon-btn:hover,
   .header__icon-btn:focus-visible {
-    background-color: var(--color-accent); /* Blush circle hover */
+    background-color: rgba(24, 36, 46, 0.08);
     opacity: 1;
   }
 
@@ -722,7 +724,7 @@
 
   .header__hamburger:hover,
   .header__hamburger:focus-visible {
-    background-color: var(--color-accent);
+    background-color: rgba(24, 36, 46, 0.08);
   }
 
   .header__bar {
@@ -744,7 +746,7 @@
     inset-block: 0;
     right: 0;
     width: min(360px, 92vw);
-    background-color: var(--color-bg);
+    background-color: var(--color-card);
     border-left: 1px solid var(--color-border);
     z-index: 400;
     display: flex;
@@ -1060,7 +1062,9 @@
   // The cart drawer dispatches 'cart:updated' with { count } after
   // any add / remove. All [data-cart-count] badges update instantly.
   document.addEventListener('cart:updated', function (e) {
-    var count  = (e.detail && e.detail.count) || 0;
+    var count  = (e.detail && e.detail.count)
+      || (e.detail && e.detail.cart && e.detail.cart.item_count)
+      || 0;
     var label  = count + ' ' + (count === 1 ? 'item' : 'items');
 
     document.querySelectorAll('[data-cart-count]').forEach(function (el) {

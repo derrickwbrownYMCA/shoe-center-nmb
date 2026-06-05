@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shoe Center NMB Countdown Mockup</title>
+  <style>
+    :root {
+      --ink: #111820;
+      --paper: #f6f1e8;
+      --surface: #ffffff;
+      --mist: #e7edf0;
+      --line: #cfd8dd;
+      --coral: #c75f46;
+      --teal: #2b7075;
+      --sage: #748b68;
+      --gold: #b9852e;
+      --text: #26323a;
+      --muted: #65737b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--paper);
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+
+    button, input {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    .mock-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(190px, 1fr) auto minmax(180px, auto);
+      gap: 14px;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 12px rgba(17, 24, 32, 0.08);
+    }
+
+    .mock-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .mock-title strong {
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .mock-title span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .segments {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .segments button {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #39474f;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .segments button[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .date-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: end;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .date-control input {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 8px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .site-shell {
+      min-height: 100vh;
+      background: var(--paper);
+    }
+
+    .announcement,
+    .construction-strip,
+    .hero-panel,
+    .inline-note,
+    .soft-gate {
+      display: none;
+    }
+
+    body[data-mode="bar"] .announcement,
+    body[data-mode="hero"] .hero-panel,
+    body[data-mode="inline"] .inline-note,
+    body[data-mode="gate"] .soft-gate {
+      display: block;
+    }
+
+    .announcement {
+      background: var(--ink);
+      color: var(--paper);
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .announcement strong {
+      color: #ffdba9;
+      font-weight: 700;
+    }
+
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px clamp(18px, 5vw, 56px);
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .brand-name {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand-name strong {
+      color: var(--ink);
+      font-size: 17px;
+    }
+
+    .brand-name span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      min-height: 560px;
+      background: #cbd7da;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(17, 24, 32, 0.78), rgba(17, 24, 32, 0.18) 58%, rgba(17, 24, 32, 0.06)),
+        url("../theme/assets/tile-athletic-lacing.webp") center / cover no-repeat;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      align-self: end;
+      max-width: 660px;
+      padding: 48px clamp(18px, 5vw, 56px) 58px;
+      color: #fff;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #ffdba9;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 11ch;
+      font-size: clamp(42px, 7vw, 78px);
+      line-height: 0.98;
+      color: #fff;
+    }
+
+    .hero-copy p {
+      max-width: 540px;
+      margin: 18px 0 0;
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    .btn.secondary {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.34);
+    }
+
+    .hero-panel {
+      position: absolute;
+      right: clamp(18px, 5vw, 56px);
+      bottom: 42px;
+      z-index: 2;
+      width: min(360px, calc(100% - 36px));
+      padding: 18px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--ink);
+      box-shadow: 0 16px 40px rgba(17, 24, 32, 0.24);
+    }
+
+    .hero-panel h2,
+    .inline-note h2,
+    .soft-gate h2 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--ink);
+    }
+
+    .hero-panel p,
+    .inline-note p,
+    .soft-gate p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .count-box {
+      min-width: 0;
+      padding: 10px 6px;
+      border-radius: 6px;
+      background: var(--mist);
+      text-align: center;
+    }
+
+    .count-box strong {
+      display: block;
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .count-box span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .inline-note {
+      margin: clamp(20px, 4vw, 42px) clamp(18px, 5vw, 56px) 0;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-left: 8px solid var(--teal);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .inline-note__row {
+      display: grid;
+      grid-template-columns: 1fr minmax(280px, 420px);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .soft-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(17, 24, 32, 0.66);
+      padding: 18px;
+    }
+
+    .soft-gate__dialog {
+      display: grid;
+      grid-template-columns: 1fr 0.95fr;
+      width: min(980px, 100%);
+      min-height: min(620px, calc(100vh - 36px));
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 24px 80px rgba(17, 24, 32, 0.36);
+    }
+
+    .soft-gate__media {
+      background: url("../theme/assets/tile-womens-style.png") center / cover no-repeat;
+    }
+
+    .soft-gate__content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(26px, 5vw, 50px);
+    }
+
+    .soft-gate .btn {
+      margin-top: 20px;
+      color: #fff;
+      background: var(--teal);
+      align-self: start;
+    }
+
+    .product-band {
+      padding: 38px clamp(18px, 5vw, 56px) 60px;
+      background: var(--paper);
+    }
+
+    .product-band h2 {
+      margin: 0 0 18px;
+      color: var(--ink);
+      font-size: clamp(26px, 4vw, 40px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .product {
+      min-height: 220px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .product__image {
+      min-height: 145px;
+      background: var(--mist);
+    }
+
+    .product:nth-child(1) .product__image { background: url("../theme/assets/tile-athletic-lacing.webp") center / cover; }
+    .product:nth-child(2) .product__image { background: url("../theme/assets/tile-mens-lace-up.webp") center / cover; }
+    .product:nth-child(3) .product__image { background: url("../theme/assets/tile-dance-lifestyle.webp") center / cover; }
+    .product:nth-child(4) .product__image { background: url("../theme/assets/tile-sale.webp") center / cover; }
+
+    .product__body {
+      padding: 12px;
+    }
+
+    .product__body strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .product__body span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 18px clamp(18px, 5vw, 56px) 42px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .note strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .note span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      .mock-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .segments {
+        overflow-x: auto;
+      }
+
+      .date-control {
+        justify-content: start;
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .hero {
+        min-height: 660px;
+      }
+
+      .hero-panel {
+        left: 18px;
+        right: 18px;
+        bottom: 22px;
+        width: auto;
+      }
+
+      .inline-note__row,
+      .soft-gate__dialog,
+      .grid,
+      .notes {
+        grid-template-columns: 1fr;
+      }
+
+      .soft-gate__media {
+        min-height: 210px;
+      }
+    }
+  </style>
+</head>
+<body data-mode="hero">
+  <div class="mock-toolbar">
+    <div class="mock-title">
+      <strong>Under-construction front page mockup</strong>
+      <span>Preview only - no Shopify theme changes have been made.</span>
+    </div>
+    <div class="segments" aria-label="Mockup options">
+      <button type="button" data-mode-button="bar" aria-pressed="false">Top bar</button>
+      <button type="button" data-mode-button="hero" aria-pressed="true">Hero countdown</button>
+      <button type="button" data-mode-button="inline" aria-pressed="false">Inline notice</button>
+      <button type="button" data-mode-button="gate" aria-pressed="false">Soft gate</button>
+    </div>
+    <label class="date-control">
+      Target date
+      <input id="targetDate" type="date" value="2026-06-12">
+    </label>
+  </div>
+
+  <main class="site-shell">
+    <div class="announcement">
+      We are finishing our new online store. Full launch in <strong data-days>18 days</strong>. Shop browsing is open while final photos are loaded.
+    </div>
+
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand-mark">SCN</div>
+        <div class="brand-name">
+          <strong>Shoe Center NMB</strong>
+          <span>North Myrtle Beach, SC</span>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Preview navigation">
+        <span>Women</span>
+        <span>Men</span>
+        <span>On Running</span>
+        <span>Visit Store</span>
+      </nav>
+    </header>
+
+    <section class="hero" aria-label="Preview hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Local shoe fitting since 1978</p>
+        <h1>Fresh shoes, better fit.</h1>
+        <p>Our new site is live while we finish product photography, On Running details, and launch polish.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#">Shop new arrivals</a>
+          <a class="btn secondary" href="#">Visit the store</a>
+        </div>
+      </div>
+
+      <aside class="hero-panel" aria-label="Countdown panel">
+        <h2>New site launch countdown</h2>
+        <p>We are still tuning photos, inventory, and checkout details before marketing starts.</p>
+        <div class="countdown" aria-label="Countdown">
+          <div class="count-box"><strong data-count="days">18</strong><span>Days</span></div>
+          <div class="count-box"><strong data-count="hours">00</strong><span>Hours</span></div>
+          <div class="count-box"><strong data-count="minutes">00</strong><span>Min</span></div>
+          <div class="count-box"><strong data-count="seconds">00</strong><span>Sec</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="inline-note" aria-label="Construction notice">
+      <div class="inline-note__row">
+        <div>
+          <h2>Pardon our polish.</h2>
+          <p>The new Shoe Center NMB website is open, but we are still adding product photos and final store details.</p>
+        </div>
+        <div class="countdown" aria-label="Inline countdown">
+          <div class="count-box"><strong data-count="days">18</strong><span>Days</span></div>
+          <div class="count-box"><strong data-count="hours">00</strong><span>Hours</span></div>
+          <div class="count-box"><strong data-count="minutes">00</strong><span>Min</span></div>
+          <div class="count-box"><strong data-count="seconds">00</strong><span>Sec</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="product-band">
+      <h2>Shop by fit and purpose</h2>
+      <div class="grid">
+        <article class="product">
+          <div class="product__image"></div>
+          <div class="product__body"><strong>On Running</strong><span>Performance and everyday comfort</span></div>
+        </article>
+        <article class="product">
+          <div class="product__image"></div>
+          <div class="product__body"><strong>Men's Favorites</strong><span>Casual, comfort, and dress</span></div>
+        </article>
+        <article class="product">
+          <div class="product__image"></div>
+          <div class="product__body"><strong>Dance Ready</strong><span>Styles for movement</span></div>
+        </article>
+        <article class="product">
+          <div class="product__image"></div>
+          <div class="product__body"><strong>Store Finds</strong><span>Rotating local selection</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="notes" aria-label="Option guidance">
+      <div class="note"><strong>Top bar</strong><span>Safest option. Does not block shopping, checkout, or SEO crawling.</span></div>
+      <div class="note"><strong>Hero countdown</strong><span>Most visible. Good if the homepage itself should feel like a soft launch.</span></div>
+      <div class="note"><strong>Inline notice</strong><span>Quiet and professional. Best if you want customers to shop normally.</span></div>
+      <div class="note"><strong>Soft gate</strong><span>Most disruptive. Use only if you need every visitor to see the message.</span></div>
+    </section>
+  </main>
+
+  <section class="soft-gate" aria-label="Soft launch message">
+    <div class="soft-gate__dialog">
+      <div class="soft-gate__media"></div>
+      <div class="soft-gate__content">
+        <p class="eyebrow">Soft launch in progress</p>
+        <h2>We are finishing the new Shoe Center NMB website.</h2>
+        <p>The store is open while we complete product photos and launch details. Full marketing launch begins in <span data-days>18 days</span>.</p>
+        <div class="countdown" aria-label="Gate countdown">
+          <div class="count-box"><strong data-count="days">18</strong><span>Days</span></div>
+          <div class="count-box"><strong data-count="hours">00</strong><span>Hours</span></div>
+          <div class="count-box"><strong data-count="minutes">00</strong><span>Min</span></div>
+          <div class="count-box"><strong data-count="seconds">00</strong><span>Sec</span></div>
+        </div>
+        <a class="btn" href="#">Enter store preview</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      var input = document.getElementById('targetDate');
+      var buttons = Array.from(document.querySelectorAll('[data-mode-button]'));
+
+      function setMode(mode) {
+        document.body.setAttribute('data-mode', mode);
+        buttons.forEach(function (button) {
+          button.setAttribute('aria-pressed', String(button.getAttribute('data-mode-button') === mode));
+        });
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          setMode(button.getAttribute('data-mode-button'));
+        });
+      });
+
+      function pad(value) {
+        return String(value).padStart(2, '0');
+      }
+
+      function updateCountdown() {
+        var raw = input.value || '2026-06-12';
+        var target = new Date(raw + 'T09:00:00-04:00').getTime();
+        var diff = Math.max(0, target - Date.now());
+        var days = Math.floor(diff / 86400000);
+        var hours = Math.floor((diff % 86400000) / 3600000);
+        var minutes = Math.floor((diff % 3600000) / 60000);
+        var seconds = Math.floor((diff % 60000) / 1000);
+
+        document.querySelectorAll('[data-count="days"]').forEach(function (node) { node.textContent = days; });
+        document.querySelectorAll('[data-count="hours"]').forEach(function (node) { node.textContent = pad(hours); });
+        document.querySelectorAll('[data-count="minutes"]').forEach(function (node) { node.textContent = pad(minutes); });
+        document.querySelectorAll('[data-count="seconds"]').forEach(function (node) { node.textContent = pad(seconds); });
+        document.querySelectorAll('[data-days]').forEach(function (node) {
+          node.textContent = days + (days === 1 ? ' day' : ' days');
+        });
+      }
+
+      input.addEventListener('change', updateCountdown);
+      updateCountdown();
+      window.setInterval(updateCountdown, 1000);
+    }());
+  </script>
+</body>
+</html>

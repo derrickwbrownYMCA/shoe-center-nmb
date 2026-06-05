@@ -1,0 +1,228 @@
+{% comment %}
+  sections/visit-store.liquid
+  Local trust and store visit section for the homepage.
+{% endcomment %}
+
+<section class="visit-store section-padding" aria-labelledby="VisitStoreHeading-{{ section.id }}">
+  <div class="container">
+    <div class="visit-store__shell">
+      <div class="visit-store__content">
+        <p class="visit-store__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        <h2 class="visit-store__heading" id="VisitStoreHeading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+        <p class="visit-store__copy">{{ section.settings.copy | escape }}</p>
+
+        <div class="visit-store__meta">
+          <div class="visit-store__item">
+            <p class="visit-store__label">Address</p>
+            <p class="visit-store__value">{{ section.settings.address | escape }}</p>
+          </div>
+          <div class="visit-store__item">
+            <p class="visit-store__label">Hours</p>
+            <p class="visit-store__value">{{ section.settings.hours | escape }}</p>
+          </div>
+          <div class="visit-store__item">
+            <p class="visit-store__label">Phone</p>
+            <p class="visit-store__value">{{ section.settings.phone | escape }}</p>
+          </div>
+          <div class="visit-store__item">
+            <p class="visit-store__label">Pickup</p>
+            <p class="visit-store__value">{{ section.settings.pickup | escape }}</p>
+          </div>
+        </div>
+
+        <div class="visit-store__actions">
+          <a href="{{ section.settings.primary_link | default: '/pages/contact' }}" class="btn">{{ section.settings.primary_label | escape }}</a>
+          <a href="{{ section.settings.secondary_link | default: 'tel:+18432726515' }}" class="btn btn--secondary">{{ section.settings.secondary_label | escape }}</a>
+        </div>
+      </div>
+
+      <div class="visit-store__panel">
+        <div class="visit-store__card">
+          <p class="visit-store__card-title">{{ section.settings.card_title | escape }}</p>
+          <p class="visit-store__card-copy">{{ section.settings.card_copy | escape }}</p>
+          <div class="visit-store__tags">
+            <span class="visit-store__tag">{{ section.settings.tag_1 | escape }}</span>
+            <span class="visit-store__tag">{{ section.settings.tag_2 | escape }}</span>
+            <span class="visit-store__tag">{{ section.settings.tag_3 | escape }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .visit-store {
+    background-color: var(--color-bg, #F6F4EF);
+  }
+
+  .visit-store__shell {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  .visit-store__content,
+  .visit-store__card {
+    border-radius: 28px;
+    background-color: var(--color-card, #FFFFFF);
+    border: 1px solid rgba(24, 36, 46, 0.10);
+    box-shadow: 0 16px 36px rgba(24, 36, 46, 0.05);
+  }
+
+  .visit-store__content {
+    padding: 38px 32px;
+  }
+
+  .visit-store__panel {
+    display: flex;
+  }
+
+  .visit-store__card {
+    width: 100%;
+    padding: 32px 28px;
+    background:
+      linear-gradient(180deg, rgba(24, 36, 46, 0.03) 0%, rgba(24, 36, 46, 0.08) 100%);
+  }
+
+  .visit-store__eyebrow {
+    margin: 0 0 10px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #5b6368);
+  }
+
+  .visit-store__heading {
+    margin: 0;
+    color: var(--color-heading, #18242E);
+  }
+
+  .visit-store__copy {
+    margin: 14px 0 0;
+    max-width: 58ch;
+    color: var(--color-text, #2E3438);
+    line-height: 1.7;
+  }
+
+  .visit-store__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 22px;
+    margin-top: 28px;
+  }
+
+  .visit-store__item {
+    padding: 16px 18px;
+    border-radius: 18px;
+    background-color: rgba(24, 36, 46, 0.04);
+    border: 1px solid rgba(24, 36, 46, 0.06);
+  }
+
+  .visit-store__label {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #5b6368);
+  }
+
+  .visit-store__value {
+    margin: 0;
+    color: var(--color-heading, #18242E);
+    line-height: 1.55;
+  }
+
+  .visit-store__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .visit-store__card-title {
+    margin: 0;
+    font-size: clamp(24px, 2.4vw, 30px);
+    line-height: 1.15;
+    color: var(--color-heading, #18242E);
+  }
+
+  .visit-store__card-copy {
+    margin: 14px 0 0;
+    color: var(--color-text, #2E3438);
+    line-height: 1.7;
+  }
+
+  .visit-store__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .visit-store__tag {
+    padding: 8px 11px;
+    border-radius: 999px;
+    background-color: rgba(24, 36, 46, 0.08);
+    color: var(--color-heading, #18242E);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1023px) {
+    .visit-store__shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .visit-store__content,
+    .visit-store__card {
+      padding: 28px 20px;
+      border-radius: 22px;
+    }
+
+    .visit-store__meta {
+      grid-template-columns: 1fr;
+    }
+
+    .visit-store__actions {
+      flex-direction: column;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Visit store",
+  "tag": "section",
+  "class": "visit-store-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Visit the store" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "See what local service still feels like" },
+    { "type": "textarea", "id": "copy", "label": "Copy", "default": "Visit Shoe Center NMB for expert fitting, modern brands, and a better chance of leaving in the right pair the first time." },
+    { "type": "text", "id": "address", "label": "Address", "default": "710 Hwy 17 S, North Myrtle Beach, SC 29582" },
+    { "type": "text", "id": "hours", "label": "Hours", "default": "Mon-Sat 10:00a-6:00p • Sun 12:00p-5:00p" },
+    { "type": "text", "id": "phone", "label": "Phone", "default": "(843) 272-6515" },
+    { "type": "text", "id": "pickup", "label": "Pickup", "default": "Reserve online and pick up in store" },
+    { "type": "text", "id": "primary_label", "label": "Primary button label", "default": "Get Directions" },
+    { "type": "url", "id": "primary_link", "label": "Primary button link" },
+    { "type": "text", "id": "secondary_label", "label": "Secondary button label", "default": "Call the Store" },
+    { "type": "url", "id": "secondary_link", "label": "Secondary button link" },
+    { "type": "text", "id": "card_title", "label": "Card title", "default": "Come in for the pair. Leave with the right fit." },
+    { "type": "textarea", "id": "card_copy", "label": "Card copy", "default": "From On and everyday comfort favorites to dance-ready styles, we help locals and visitors try the right options with real guidance before they buy." },
+    { "type": "text", "id": "tag_1", "label": "Tag 1", "default": "Try before you buy" },
+    { "type": "text", "id": "tag_2", "label": "Tag 2", "default": "Expert fit help" },
+    { "type": "text", "id": "tag_3", "label": "Tag 3", "default": "Since 1978" }
+  ],
+  "presets": [
+    { "name": "Visit store" }
+  ]
+}
+{% endschema %}

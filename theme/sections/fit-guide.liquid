@@ -1,0 +1,199 @@
+{% comment %}
+  sections/fit-guide.liquid
+  Simplified guided shopping section for homepage upload compatibility.
+{% endcomment %}
+
+<section class="fit-guide section-padding" aria-labelledby="FitGuideHeading-{{ section.id }}">
+  <div class="container">
+    <div class="fit-guide__shell">
+      <header class="fit-guide__header">
+        <p class="fit-guide__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        <h2 class="fit-guide__heading" id="FitGuideHeading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+        <p class="fit-guide__subheading">{{ section.settings.subheading | escape }}</p>
+      </header>
+
+      <div class="fit-guide__grid">
+        <a href="{{ section.settings.link_1 | default: routes.collections_url }}" class="fit-guide__card">
+          <span class="fit-guide__badge">{{ section.settings.badge_1 | escape }}</span>
+          <h3 class="fit-guide__card-title">{{ section.settings.title_1 | escape }}</h3>
+          <p class="fit-guide__card-copy">{{ section.settings.copy_1 | escape }}</p>
+          <span class="fit-guide__card-link">{{ section.settings.link_label_1 | escape }}</span>
+        </a>
+
+        <a href="{{ section.settings.link_2 | default: routes.collections_url }}" class="fit-guide__card">
+          <span class="fit-guide__badge">{{ section.settings.badge_2 | escape }}</span>
+          <h3 class="fit-guide__card-title">{{ section.settings.title_2 | escape }}</h3>
+          <p class="fit-guide__card-copy">{{ section.settings.copy_2 | escape }}</p>
+          <span class="fit-guide__card-link">{{ section.settings.link_label_2 | escape }}</span>
+        </a>
+
+        <a href="{{ section.settings.link_3 | default: routes.collections_url }}" class="fit-guide__card">
+          <span class="fit-guide__badge">{{ section.settings.badge_3 | escape }}</span>
+          <h3 class="fit-guide__card-title">{{ section.settings.title_3 | escape }}</h3>
+          <p class="fit-guide__card-copy">{{ section.settings.copy_3 | escape }}</p>
+          <span class="fit-guide__card-link">{{ section.settings.link_label_3 | escape }}</span>
+        </a>
+
+        <a href="{{ section.settings.link_4 | default: routes.collections_url }}" class="fit-guide__card">
+          <span class="fit-guide__badge">{{ section.settings.badge_4 | escape }}</span>
+          <h3 class="fit-guide__card-title">{{ section.settings.title_4 | escape }}</h3>
+          <p class="fit-guide__card-copy">{{ section.settings.copy_4 | escape }}</p>
+          <span class="fit-guide__card-link">{{ section.settings.link_label_4 | escape }}</span>
+        </a>
+
+        <a href="{{ section.settings.link_5 | default: routes.collections_url }}" class="fit-guide__card">
+          <span class="fit-guide__badge">{{ section.settings.badge_5 | escape }}</span>
+          <h3 class="fit-guide__card-title">{{ section.settings.title_5 | escape }}</h3>
+          <p class="fit-guide__card-copy">{{ section.settings.copy_5 | escape }}</p>
+          <span class="fit-guide__card-link">{{ section.settings.link_label_5 | escape }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .fit-guide {
+    background: linear-gradient(180deg, rgba(24, 36, 46, 0.04) 0%, rgba(24, 36, 46, 0) 100%), var(--color-bg, #F6F4EF);
+  }
+  .fit-guide__shell {
+    border: 1px solid rgba(24, 36, 46, 0.10);
+    background-color: var(--color-card, #FFFFFF);
+    border-radius: 28px;
+    padding: 40px 28px;
+    box-shadow: 0 18px 44px rgba(24, 36, 46, 0.06);
+  }
+  .fit-guide__header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .fit-guide__eyebrow {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #5b6368);
+  }
+  .fit-guide__heading {
+    margin: 0;
+    color: var(--color-heading, #18242E);
+  }
+  .fit-guide__subheading {
+    margin: 0;
+    max-width: 680px;
+    color: var(--color-text-secondary, #5b6368);
+    font-size: clamp(15px, 1.4vw, 17px);
+    line-height: 1.65;
+  }
+  .fit-guide__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .fit-guide__card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 250px;
+    padding: 24px 22px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(24, 36, 46, 0.02) 0%, rgba(24, 36, 46, 0.06) 100%);
+    border: 1px solid rgba(24, 36, 46, 0.08);
+    text-decoration: none;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+  .fit-guide__card:hover,
+  .fit-guide__card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(24, 36, 46, 0.10);
+    border-color: rgba(24, 36, 46, 0.18);
+    opacity: 1;
+  }
+  .fit-guide__badge {
+    align-self: flex-start;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background-color: rgba(24, 36, 46, 0.08);
+    color: var(--color-heading, #18242E);
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .fit-guide__card-title {
+    margin: 0;
+    font-size: clamp(20px, 2vw, 24px);
+    line-height: 1.15;
+    color: var(--color-heading, #18242E);
+  }
+  .fit-guide__card-copy {
+    margin: 0;
+    color: var(--color-text, #2E3438);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .fit-guide__card-link {
+    margin-top: auto;
+    color: var(--color-heading, #18242E);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 1023px) {
+    .fit-guide__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 639px) {
+    .fit-guide__shell { padding: 32px 20px; border-radius: 22px; }
+    .fit-guide__grid { grid-template-columns: 1fr; }
+    .fit-guide__card { min-height: auto; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Fit guide",
+  "tag": "section",
+  "class": "fit-guide-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Shop by need" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find the right pair faster" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Whether you want all-day comfort, modern performance, men's favorites, or dance-ready style, start with the path that fits how you actually wear your shoes." },
+    { "type": "text", "id": "badge_1", "label": "Badge 1", "default": "Everyday" },
+    { "type": "text", "id": "title_1", "label": "Title 1", "default": "Everyday comfort" },
+    { "type": "textarea", "id": "copy_1", "label": "Copy 1", "default": "Walking, errands, travel, and all-day wear with comfort-first support." },
+    { "type": "text", "id": "link_label_1", "label": "Link label 1", "default": "Shop comfort" },
+    { "type": "url", "id": "link_1", "label": "Link 1" },
+    { "type": "text", "id": "badge_2", "label": "Badge 2", "default": "Performance" },
+    { "type": "text", "id": "title_2", "label": "Title 2", "default": "On and active styles" },
+    { "type": "textarea", "id": "copy_2", "label": "Copy 2", "default": "Modern performance shoes for movement, recovery, and a cleaner athletic look." },
+    { "type": "text", "id": "link_label_2", "label": "Link label 2", "default": "Shop performance" },
+    { "type": "url", "id": "link_2", "label": "Link 2" },
+    { "type": "text", "id": "badge_3", "label": "Badge 3", "default": "Men" },
+    { "type": "text", "id": "title_3", "label": "Title 3", "default": "Men's favorites" },
+    { "type": "textarea", "id": "copy_3", "label": "Copy 3", "default": "A clearer path into the brands and fits men actually want to browse first." },
+    { "type": "text", "id": "link_label_3", "label": "Link label 3", "default": "Shop men's" },
+    { "type": "url", "id": "link_3", "label": "Link 3" },
+    { "type": "text", "id": "badge_4", "label": "Badge 4", "default": "Style" },
+    { "type": "text", "id": "title_4", "label": "Title 4", "default": "Style-Forward Picks" },
+    { "type": "textarea", "id": "copy_4", "label": "Copy 4", "default": "Fresh silhouettes, modern brands, and newer looks that still feel great on your feet." },
+    { "type": "text", "id": "link_label_4", "label": "Link label 4", "default": "Shop style" },
+    { "type": "url", "id": "link_4", "label": "Link 4" },
+    { "type": "text", "id": "badge_5", "label": "Badge 5", "default": "Dance" },
+    { "type": "text", "id": "title_5", "label": "Title 5", "default": "Dance-ready picks" },
+    { "type": "textarea", "id": "copy_5", "label": "Copy 5", "default": "Styles made for Shag nights, events, and shoes that look right and move well." },
+    { "type": "text", "id": "link_label_5", "label": "Link label 5", "default": "Shop dance" },
+    { "type": "url", "id": "link_5", "label": "Link 5" }
+  ],
+  "presets": [
+    { "name": "Fit guide" }
+  ]
+}
+{% endschema %}

@@ -14,16 +14,21 @@
 {% endcomment %}
 
 {%- liquid
-  assign messages = '' | split: ''
-  if section.settings.message_1 != blank
-    assign messages = messages | push: section.settings.message_1
-  endif
-  if section.settings.message_2 != blank
-    assign messages = messages | push: section.settings.message_2
-  endif
-  if section.settings.message_3 != blank
-    assign messages = messages | push: section.settings.message_3
-  endif
+  capture messages_raw
+    if section.settings.message_1 != blank
+      echo section.settings.message_1
+      echo '||'
+    endif
+    if section.settings.message_2 != blank
+      echo section.settings.message_2
+      echo '||'
+    endif
+    if section.settings.message_3 != blank
+      echo section.settings.message_3
+    endif
+  endcapture
+
+  assign messages = messages_raw | split: '||'
 -%}
 
 {%- if section.settings.show_bar and messages.size > 0 -%}
@@ -156,14 +161,14 @@
       "type": "text",
       "id": "message_1",
       "label": "Message 1",
-      "default": "Free in-store pickup available in North Myrtle Beach, SC",
+      "default": "Expert shoe fitting in North Myrtle Beach since 1978",
       "info": "Keep it to one short line — wrapping looks cramped on mobile."
     },
     {
       "type": "text",
       "id": "message_2",
       "label": "Message 2",
-      "placeholder": "Free shipping on orders over $75",
+      "default": "Modern comfort and performance brands for women and men",
       "info": "Leave blank to disable rotation."
     },
     {
@@ -190,14 +195,14 @@
       "type": "color",
       "id": "color_bg",
       "label": "Background",
-      "default": "#F5E1E1",
-      "info": "Defaults to the brand accent (blush). Change for seasonal promos without touching global theme colors."
+      "default": "#18242E",
+      "info": "Defaults to the ink brand anchor for a stronger top-of-page presence."
     },
     {
       "type": "color",
       "id": "color_text",
       "label": "Text",
-      "default": "#000000"
+      "default": "#F6F4EF"
     }
   ],
   "presets": [

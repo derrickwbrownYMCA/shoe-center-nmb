@@ -13,31 +13,65 @@
   <div class="container">
     <ul class="feature-bar__grid" role="list">
 
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'feature' -%}
-          <li class="feature-bar__item" {{ block.shopify_attributes }}>
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'feature' -%}
+            <li class="feature-bar__item" {{ block.shopify_attributes }}>
 
-            {%- if block.settings.icon != blank and block.settings.icon != 'none' -%}
-              <div class="feature-bar__icon" aria-hidden="true">
-                {%- render 'icons', icon: block.settings.icon -%}
-              </div>
-            {%- endif -%}
+              {%- if block.settings.icon != blank and block.settings.icon != 'none' -%}
+                <div class="feature-bar__icon" aria-hidden="true">
+                  {%- render 'icons', icon: block.settings.icon -%}
+                </div>
+              {%- endif -%}
 
-            {%- if block.settings.heading != blank -%}
-              <p class="feature-bar__heading">
-                {{- block.settings.heading | escape -}}
-              </p>
-            {%- endif -%}
+              {%- if block.settings.heading != blank -%}
+                <p class="feature-bar__heading">
+                  {{- block.settings.heading | escape -}}
+                </p>
+              {%- endif -%}
 
-            {%- if block.settings.description != blank -%}
-              <p class="feature-bar__description">
-                {{- block.settings.description | escape -}}
-              </p>
-            {%- endif -%}
+              {%- if block.settings.description != blank -%}
+                <p class="feature-bar__description">
+                  {{- block.settings.description | escape -}}
+                </p>
+              {%- endif -%}
 
-          </li>
-        {%- endif -%}
-      {%- endfor -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        <li class="feature-bar__item">
+          <div class="feature-bar__icon" aria-hidden="true">
+            {%- render 'icons', icon: 'shoe' -%}
+          </div>
+          <p class="feature-bar__heading">Expert Fit Help</p>
+          <p class="feature-bar__description">Personal service for women and men looking for the right pair</p>
+        </li>
+
+        <li class="feature-bar__item">
+          <div class="feature-bar__icon" aria-hidden="true">
+            {%- render 'icons', icon: 'tag' -%}
+          </div>
+          <p class="feature-bar__heading">Modern Brands</p>
+          <p class="feature-bar__description">From On to comfort favorites and dance-ready styles</p>
+        </li>
+
+        <li class="feature-bar__item">
+          <div class="feature-bar__icon" aria-hidden="true">
+            {%- render 'icons', icon: 'pin' -%}
+          </div>
+          <p class="feature-bar__heading">Local Since 1978</p>
+          <p class="feature-bar__description">Trusted North Myrtle Beach service with fresh new energy</p>
+        </li>
+
+        <li class="feature-bar__item">
+          <div class="feature-bar__icon" aria-hidden="true">
+            {%- render 'icons', icon: 'refresh' -%}
+          </div>
+          <p class="feature-bar__heading">Pickup Available</p>
+          <p class="feature-bar__description">Reserve online and pick up locally on the Grand Strand</p>
+        </li>
+      {%- endif -%}
 
     </ul>
   </div>
@@ -46,9 +80,9 @@
 <style>
   /* ── Feature bar ──────────────────────────────────────────────────────── */
   .feature-bar {
-    background-color: var(--color-bg, #FAF9F6);
-    border-top: 1px solid var(--color-border, #EBEBEB);
-    border-bottom: 1px solid var(--color-border, #EBEBEB);
+    background-color: var(--color-card, #FFFFFF);
+    border-top: 1px solid rgba(24, 36, 46, 0.08);
+    border-bottom: 1px solid rgba(24, 36, 46, 0.08);
     padding: 40px 0;
   }
 
@@ -89,7 +123,7 @@
     justify-content: center;
     width: 52px;
     height: 52px;
-    background-color: var(--color-accent, #F5E1E1);
+    background-color: rgba(24, 36, 46, 0.08);
     border-radius: 50%;
     color: var(--color-heading, #000000);
     flex-shrink: 0;
@@ -102,7 +136,7 @@
 
   /* ── Heading ──────────────────────────────────────────────────────────── */
   .feature-bar__heading {
-    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-family: var(--font-heading, sans-serif);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -113,9 +147,9 @@
 
   /* ── Description ──────────────────────────────────────────────────────── */
   .feature-bar__description {
-    font-family: var(--font-body, 'Open Sans', sans-serif);
+    font-family: var(--font-body, sans-serif);
     font-size: 13px;
-    color: var(--color-text-secondary, #A8A8A8);
+    color: var(--color-text-secondary, #5b6368);
     line-height: 1.55;
     margin: 0;
     max-width: 22ch;
@@ -203,13 +237,13 @@
           "type": "text",
           "id": "heading",
           "label": "Heading",
-          "default": "Expert Fitting"
+          "default": "Expert Fit Help"
         },
         {
           "type": "text",
           "id": "description",
           "label": "Description",
-          "default": "We measure and fit every customer personally"
+          "default": "Personal service for women and men looking for the right pair"
         }
       ]
     }
@@ -222,32 +256,32 @@
           "type": "feature",
           "settings": {
             "icon": "shoe",
-            "heading": "Expert Fitting",
-            "description": "We measure and fit every customer personally"
+            "heading": "Expert Fit Help",
+            "description": "Personal service for women and men looking for the right pair"
           }
         },
         {
           "type": "feature",
           "settings": {
             "icon": "tag",
-            "heading": "50+ Brands",
-            "description": "From HOKA to Birkenstock and beyond"
+            "heading": "Modern Brands",
+            "description": "From On to comfort favorites and dance-ready styles"
           }
         },
         {
           "type": "feature",
           "settings": {
             "icon": "pin",
-            "heading": "Family Owned",
-            "description": "Serving North Myrtle Beach since 1976"
+            "heading": "Local Since 1978",
+            "description": "Trusted North Myrtle Beach service with fresh new energy"
           }
         },
         {
           "type": "feature",
           "settings": {
             "icon": "refresh",
-            "heading": "Easy Returns",
-            "description": "We stand behind every pair we sell"
+            "heading": "Pickup Available",
+            "description": "Reserve online and pick up locally on the Grand Strand"
           }
         }
       ]
@@ -255,3 +289,4 @@
   ]
 }
 {% endschema %}
+
