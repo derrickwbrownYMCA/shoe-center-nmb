@@ -1,0 +1,176 @@
+{% comment %}
+  snippets/on-card.liquid
+  On Running product card: large image + color swatches + image swap.
+  CSS and JS live in sections/main-collection.liquid for the On Running collection.
+
+  Parameters:
+    product   {object}  Required.
+    lazy_load {boolean} Optional. Default: true.
+{% endcomment %}
+
+{%- liquid
+  if lazy_load == nil
+    assign lazy_load = true
+  endif
+  if lazy_load
+    assign oc_loading  = 'lazy'
+    assign oc_decoding = 'async'
+  else
+    assign oc_loading  = 'eager'
+    assign oc_decoding = 'auto'
+  endif
+
+  assign oc_primary = product.featured_image
+
+  # Collect Color option values
+  assign oc_colors = nil
+  for opt in product.options_with_values
+    if opt.name == 'Color'
+      assign oc_colors = opt.values
+    endif
+  endfor
+-%}
+
+{%- comment -%}
+  Build a JSON object mapping each color value to the URL of its best-match product image.
+  Match rule: image.alt contains the color name with '/' replaced by ' | '
+  e.g. color "Black/Black" searches for " | Black | Black" in the image alt.
+       "On Cloudrunner 3 Men in Black | Black" is a match.
+  Images without a matching color get an empty string (swatch shows, no swap).
+{%- endcomment -%}
+{%- capture oc_color_json -%}
+{
+{%- assign oc_ci_first = true -%}
+{%- for oc_cv in oc_colors -%}
+  {%- assign oc_search = oc_cv | replace: '/', ' | ' -%}
+  {%- assign oc_slug = oc_cv | downcase | replace: '/', '_' | replace: ' ', '_' | replace: '-', '_' -%}
+  {%- assign oc_url = '' -%}
+  {%- for oc_variant in product.variants -%}
+    {%- if oc_url == '' -%}
+      {%- assign oc_variant_color = '' -%}
+      {%- for oc_option in oc_variant.options -%}
+        {%- if oc_option == oc_cv -%}
+          {%- assign oc_variant_color = oc_option -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if oc_variant_color != '' and oc_variant.featured_image != blank -%}
+        {%- assign oc_url = oc_variant.featured_image | image_url: width: 800 -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- for oc_img in product.images -%}
+    {%- assign oc_img_url = oc_img | image_url: width: 800 -%}
+    {%- assign oc_img_url_downcase = oc_img_url | downcase -%}
+    {%- if oc_url == '' -%}
+      {%- if oc_img.alt contains oc_search or oc_img_url_downcase contains oc_slug -%}
+        {%- assign oc_url = oc_img_url -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- unless oc_ci_first -%},{%- endunless -%}
+  {%- assign oc_ci_first = false -%}
+  "{{ oc_cv | replace: '"', '' }}":"{{ oc_url }}"
+{%- endfor -%}
+}
+{%- endcapture -%}
+
+<article
+  class="on-card"
+  data-color-images='{{ oc_color_json | strip_newlines | strip }}'
+  aria-label="{{ product.title | escape }}"
+>
+
+  <a href="{{ product.url }}" class="on-card__media-link" tabindex="-1" aria-hidden="true">
+    <div class="on-card__media">
+      {%- if oc_primary != blank -%}
+        {{
+          oc_primary
+          | image_url: width: 800
+          | image_tag:
+            loading: oc_loading,
+            decoding: oc_decoding,
+            class: 'on-card__img',
+            alt: oc_primary.alt | default: product.title,
+            width: oc_primary.width,
+            height: oc_primary.height,
+            widths: '400, 600, 800',
+            sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - 2 * 24px) / 3)'
+        }}
+      {%- else -%}
+        <div class="on-card__img on-card__img--placeholder">
+          {{- 'product-1' | placeholder_svg_tag: 'on-card__placeholder-svg' -}}
+        </div>
+      {%- endif -%}
+    </div>
+  </a>
+
+  <div class="on-card__body">
+
+    <h3 class="on-card__title">
+      <a href="{{ product.url }}" class="on-card__title-link">{{ product.title | escape }}</a>
+    </h3>
+
+    {%- if oc_colors != nil and oc_colors.size > 0 -%}
+      <div class="on-card__swatches" aria-label="Color options">
+        {%- assign oc_active_assigned = false -%}
+        {%- assign oc_first_mapped_label = oc_colors.first -%}
+        {%- for oc_cv in oc_colors -%}
+          {%- assign oc_has_image = false -%}
+          {%- assign oc_search = oc_cv | replace: '/', ' | ' -%}
+          {%- assign oc_slug = oc_cv | downcase | replace: '/', '_' | replace: ' ', '_' | replace: '-', '_' -%}
+          {%- for oc_variant in product.variants -%}
+            {%- unless oc_has_image -%}
+              {%- for oc_option in oc_variant.options -%}
+                {%- if oc_option == oc_cv and oc_variant.featured_image != blank -%}
+                  {%- assign oc_has_image = true -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endunless -%}
+          {%- endfor -%}
+          {%- for oc_img in product.images -%}
+            {%- unless oc_has_image -%}
+              {%- assign oc_img_url_downcase = oc_img | image_url: width: 800 | downcase -%}
+              {%- if oc_img.alt contains oc_search or oc_img_url_downcase contains oc_slug -%}
+                {%- assign oc_has_image = true -%}
+              {%- endif -%}
+            {%- endunless -%}
+          {%- endfor -%}
+          {%- if oc_has_image -%}
+            {%- assign oc_is_active = false -%}
+            {%- unless oc_active_assigned -%}
+              {%- assign oc_is_active = true -%}
+              {%- assign oc_active_assigned = true -%}
+              {%- assign oc_first_mapped_label = oc_cv -%}
+            {%- endunless -%}
+            {%- assign oc_first_color = oc_cv | split: '/' | first | strip | downcase -%}
+            <button
+              class="on-card__swatch{% if oc_is_active %} is-active{% endif %}"
+              type="button"
+              data-color="{{ oc_cv | escape }}"
+              data-first-color="{{ oc_first_color | escape }}"
+              title="{{ oc_cv | escape }}"
+              aria-label="{{ oc_cv | escape }}"
+            ></button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      <p class="on-card__color-label" aria-live="polite">{{ oc_first_mapped_label | escape }}</p>
+    {%- endif -%}
+
+    <div class="on-card__footer">
+      <div class="on-card__prices">
+        {%- render 'price', product: product, show_compare: true -%}
+      </div>
+      {%- if product.available -%}
+        <a
+          href="{{ product.url }}"
+          class="on-card__btn"
+          aria-label="Shop {{ product.title | escape }}"
+        >Shop Now</a>
+      {%- else -%}
+        <span class="on-card__btn on-card__btn--sold-out">Sold Out</span>
+      {%- endif -%}
+    </div>
+
+  </div>
+</article>
