@@ -136,7 +136,14 @@
     },
     "featured-products": {
       "type": "featured-products",
-      "settings": {}
+      "settings": {
+        "collection": "on-running",
+        "products_to_show": 8,
+        "heading": "New Arrivals",
+        "subheading": "Fresh performance and comfort styles just in.",
+        "view_all_text": "View All On Running",
+        "view_all_url": "shopify://collections/on-running"
+      }
     },
     "visit-store": {
       "type": "visit-store",
