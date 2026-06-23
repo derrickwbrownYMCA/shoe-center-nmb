@@ -30,23 +30,31 @@
     endif
   endfor
 
-  # Prefer a customer-friendly label by parsing the primary image alt (e.g. "White | Ivory")
-  # This fixes cases where the raw Color option value (e.g. "Frost/Glacier") does not match the image shown.
+  # Prefer a customer-friendly label by matching the primary image filename/alt to a color option.
+  # This ensures the label matches the actual image shown on the card.
   assign oc_display_label = ''
-  if oc_primary != blank and oc_primary.alt != blank
-    assign parts = oc_primary.alt | split: ' in '
-    if parts.size > 1
-      assign after = parts.last | split: ',' | first | strip
-      if after != ''
-        assign oc_display_label = after
-      endif
+  if oc_primary != blank
+    assign img_info = ''
+    if oc_primary.src != blank
+      assign img_info = oc_primary.src | downcase
     endif
+    if oc_primary.alt != blank
+      assign img_info = img_info | append: ' ' | append: (oc_primary.alt | downcase)
+    endif
+    for cv in oc_colors
+      assign search = cv | replace: '/', ' | ' | downcase
+      assign slug = cv | downcase | replace: '/', '_' | replace: ' ', '_' | replace: '-', '_'
+      if img_info contains slug or img_info contains search
+        assign oc_display_label = cv
+        break
+      endif
+    endfor
   endif
   if oc_display_label == ''
     assign oc_display_label = oc_colors.first | default: ''
   endif
 
-  # Normalize for display (e.g. Black/Black -> Black | Black, matches image alts)
+  # Normalize for display (e.g. Black/Black -> Black | Black)
   assign oc_display_label = oc_display_label | replace: '/', ' | '
 -%}
 

@@ -181,9 +181,6 @@
                       {% if option.selected_value == value %}checked{% endif %}
                     >
                     <label class="product-variant__label" for="{{ option_id }}">
-                      {%- if is_color_option -%}
-                        <span class="product-variant__swatch" style="--sw-bg: {{ swatch_bg }};"></span>
-                      {%- endif -%}
                       <span>{{ value | escape }}</span>
                     </label>
                   </div>
@@ -541,10 +538,10 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 42px;
-    padding: 9px 14px;
-    border: 1px solid var(--color-border, #EBEBEB);
-    border-radius: 999px;
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
     background: #fff;
     color: var(--color-text, #3D3D3D);
     font-size: 14px;
@@ -566,7 +563,7 @@
     height: 16px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: var(--sw-bg, #ccc);
+    background: var(--sw-bg, #ccc) !important;
     border: 1px solid rgba(0, 0, 0, 0.18);
   }
 
