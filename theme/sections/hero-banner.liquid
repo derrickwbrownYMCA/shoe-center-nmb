@@ -248,7 +248,7 @@
     <aside
       class="hero__launch-countdown"
       data-launch-countdown
-      data-target-date="{{ section.settings.launch_countdown_date | default: '2026-06-12' | escape }}"
+      data-target-date="{{ section.settings.launch_countdown_date | default: '2026-07-01' | escape }}"
       aria-labelledby="HeroLaunchCountdown-{{ section.id }}"
     >
       {%- if section.settings.launch_countdown_eyebrow != blank -%}
@@ -288,7 +288,7 @@
         var countdown = document.currentScript.previousElementSibling;
         if (!countdown || !countdown.matches('[data-launch-countdown]')) return;
 
-        var rawDate = countdown.getAttribute('data-target-date') || '2026-06-12';
+        var rawDate = countdown.getAttribute('data-target-date') || '2026-07-01';
         var target = new Date(rawDate + 'T09:00:00-04:00').getTime();
         var units = {
           days: countdown.querySelector('[data-launch-unit="days"]'),
@@ -835,32 +835,32 @@
       "type": "text",
       "id": "launch_countdown_date",
       "label": "Launch date",
-      "default": "2026-06-12",
+      "default": "2026-07-01",
       "info": "Use YYYY-MM-DD format. The countdown targets 9:00 AM Eastern on this date."
     },
     {
       "type": "text",
       "id": "launch_countdown_date_label",
       "label": "Displayed date label",
-      "default": "Full launch: June 12"
+      "default": "Go live July 1st"
     },
     {
       "type": "text",
       "id": "launch_countdown_eyebrow",
       "label": "Eyebrow",
-      "default": "Soft launch in progress"
+      "default": "Coming soon"
     },
     {
       "type": "text",
       "id": "launch_countdown_heading",
       "label": "Heading",
-      "default": "New site launch countdown"
+      "default": "Go live July 1st"
     },
     {
       "type": "textarea",
       "id": "launch_countdown_text",
       "label": "Text",
-      "default": "We are still tuning photos, inventory, and checkout details before marketing starts."
+      "default": "Official launch July 1, 2026"
     },
 
     {
@@ -902,11 +902,11 @@
         "cta_secondary_text": "Shop Men's",
         "story_text": "Discover Our Story",
         "launch_countdown_enabled": true,
-        "launch_countdown_date": "2026-06-12",
-        "launch_countdown_date_label": "Full launch: June 12",
-        "launch_countdown_eyebrow": "Soft launch in progress",
-        "launch_countdown_heading": "New site launch countdown",
-        "launch_countdown_text": "We are still tuning photos, inventory, and checkout details before marketing starts.",
+        "launch_countdown_date": "2026-07-01",
+        "launch_countdown_date_label": "Go live July 1st",
+        "launch_countdown_eyebrow": "Coming soon",
+        "launch_countdown_heading": "Go live July 1st",
+        "launch_countdown_text": "Official launch July 1, 2026",
         "overlay_opacity": 50,
         "section_height": "large",
         "text_align": "center",
