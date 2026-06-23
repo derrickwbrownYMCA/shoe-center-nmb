@@ -13,11 +13,11 @@
       "type": "hero-banner",
       "settings": {
         "launch_countdown_enabled": true,
-        "launch_countdown_date": "2026-07-01",
-        "launch_countdown_date_label": "Go live July 1st",
-        "launch_countdown_eyebrow": "Coming soon",
-        "launch_countdown_heading": "Go live July 1st",
-        "launch_countdown_text": "Official launch July 1, 2026"
+        "launch_countdown_date": "2026-06-12",
+        "launch_countdown_date_label": "Full launch: June 12",
+        "launch_countdown_eyebrow": "Soft launch in progress",
+        "launch_countdown_heading": "New site launch countdown",
+        "launch_countdown_text": "We are still tuning photos, inventory, and checkout details before marketing starts."
       }
     },
     "category-tiles": {
