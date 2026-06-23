@@ -683,10 +683,36 @@
           }
         });
 
+        // Sync initial active swatch + label to the actual image shown (fixes any server-side mismatch)
+        // Matches by current img src against the data-color-images map.
+        if (imgEl && colorImages && Object.keys(colorImages).length > 0) {
+          var currentSrc = (imgEl.getAttribute('src') || imgEl.src || '').split('?')[0];
+          if (currentSrc) {
+            Object.keys(colorImages).forEach(function (k) {
+              var mapUrl = colorImages[k];
+              if (mapUrl && mapUrl.split('?')[0] === currentSrc) {
+                var matchingSw = swatches.find ? swatches.find(function(s){ return s.getAttribute('data-color') === k; }) : null;
+                // fallback for older browsers
+                if (!matchingSw) {
+                  for (var i=0; i<swatches.length; i++) {
+                    if (swatches[i].getAttribute('data-color') === k) { matchingSw = swatches[i]; break; }
+                  }
+                }
+                if (matchingSw && setActive) {
+                  setActive(matchingSw);
+                }
+              }
+            });
+          }
+        }
+
         function setActive(sw) {
           swatches.forEach(function (s) { s.classList.remove('is-active'); });
           sw.classList.add('is-active');
-          if (label) label.textContent = sw.getAttribute('data-color') || '';
+          if (label) {
+            var c = sw.getAttribute('data-color') || '';
+            label.textContent = c.replace(/\//g, ' | ');
+          }
         }
 
         function swapImage(colorVal) {

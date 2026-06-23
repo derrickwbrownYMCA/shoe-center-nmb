@@ -29,6 +29,25 @@
       assign oc_colors = opt.values
     endif
   endfor
+
+  # Prefer a customer-friendly label by parsing the primary image alt (e.g. "White | Ivory")
+  # This fixes cases where the raw Color option value (e.g. "Frost/Glacier") does not match the image shown.
+  assign oc_display_label = ''
+  if oc_primary != blank and oc_primary.alt != blank
+    assign parts = oc_primary.alt | split: ' in '
+    if parts.size > 1
+      assign after = parts.last | split: ',' | first | strip
+      if after != ''
+        assign oc_display_label = after
+      endif
+    endif
+  endif
+  if oc_display_label == ''
+    assign oc_display_label = oc_colors.first | default: ''
+  endif
+
+  # Normalize for display (e.g. Black/Black -> Black | Black, matches image alts)
+  assign oc_display_label = oc_display_label | replace: '/', ' | '
 -%}
 
 {%- comment -%}
@@ -113,48 +132,35 @@
     {%- if oc_colors != nil and oc_colors.size > 0 -%}
       <div class="on-card__swatches" aria-label="Color options">
         {%- assign oc_active_assigned = false -%}
-        {%- assign oc_first_mapped_label = oc_colors.first -%}
         {%- for oc_cv in oc_colors -%}
-          {%- assign oc_has_image = false -%}
           {%- assign oc_search = oc_cv | replace: '/', ' | ' -%}
-          {%- assign oc_slug = oc_cv | downcase | replace: '/', '_' | replace: ' ', '_' | replace: '-', '_' -%}
-          {%- for oc_variant in product.variants -%}
-            {%- unless oc_has_image -%}
-              {%- for oc_option in oc_variant.options -%}
-                {%- if oc_option == oc_cv and oc_variant.featured_image != blank -%}
-                  {%- assign oc_has_image = true -%}
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endunless -%}
-          {%- endfor -%}
-          {%- for oc_img in product.images -%}
-            {%- unless oc_has_image -%}
-              {%- assign oc_img_url_downcase = oc_img | image_url: width: 800 | downcase -%}
-              {%- if oc_img.alt contains oc_search or oc_img_url_downcase contains oc_slug -%}
-                {%- assign oc_has_image = true -%}
-              {%- endif -%}
-            {%- endunless -%}
-          {%- endfor -%}
-          {%- if oc_has_image -%}
-            {%- assign oc_is_active = false -%}
+
+          {# Always render a swatch button for every Color option value.
+             This ensures the color selector UI is always visible on the On collection.
+             The data-color-images JSON (populated earlier) controls whether swapping is possible. #}
+          {%- assign oc_is_active = false -%}
+          {%- if oc_display_label == oc_cv or oc_primary.alt contains oc_search -%}
             {%- unless oc_active_assigned -%}
               {%- assign oc_is_active = true -%}
               {%- assign oc_active_assigned = true -%}
-              {%- assign oc_first_mapped_label = oc_cv -%}
             {%- endunless -%}
-            {%- assign oc_first_color = oc_cv | split: '/' | first | strip | downcase -%}
-            <button
-              class="on-card__swatch{% if oc_is_active %} is-active{% endif %}"
-              type="button"
-              data-color="{{ oc_cv | escape }}"
-              data-first-color="{{ oc_first_color | escape }}"
-              title="{{ oc_cv | escape }}"
-              aria-label="{{ oc_cv | escape }}"
-            ></button>
+          {%- elsif oc_active_assigned == false and forloop.first -%}
+            {%- assign oc_is_active = true -%}
+            {%- assign oc_active_assigned = true -%}
           {%- endif -%}
+
+          {%- assign oc_first_color = oc_cv | split: '/' | first | strip | downcase -%}
+          <button
+            class="on-card__swatch{% if oc_is_active %} is-active{% endif %}"
+            type="button"
+            data-color="{{ oc_cv | escape }}"
+            data-first-color="{{ oc_first_color | escape }}"
+            title="{{ oc_cv | escape }}"
+            aria-label="{{ oc_cv | escape }}"
+          ></button>
         {%- endfor -%}
       </div>
-      <p class="on-card__color-label" aria-live="polite">{{ oc_first_mapped_label | escape }}</p>
+      <p class="on-card__color-label" aria-live="polite">{{ oc_display_label | escape }}</p>
     {%- endif -%}
 
     <div class="on-card__footer">
