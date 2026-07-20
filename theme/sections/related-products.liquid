@@ -1,0 +1,72 @@
+{%- liquid
+  assign related_collection = product.collections.first
+  assign related_count = 0
+  if related_collection != blank
+    for related_product in related_collection.products limit: 8
+      if related_product.id != product.id and related_count < 4
+        assign related_count = related_count | plus: 1
+      endif
+    endfor
+  endif
+-%}
+
+{%- if related_count > 0 -%}
+  <section class="related-products section-padding" aria-labelledby="RelatedHeading-{{ section.id }}">
+    <div class="container">
+      <div class="related-products__header">
+        <div>
+          <p>Keep exploring</p>
+          <h2 id="RelatedHeading-{{ section.id }}">You may also like</h2>
+        </div>
+        <a href="{{ related_collection.url }}">View {{ related_collection.title | escape }}</a>
+      </div>
+      <div class="related-products__grid">
+        {%- assign rendered_related = 0 -%}
+        {%- for related_product in related_collection.products limit: 8 -%}
+          {%- if related_product.id != product.id and rendered_related < 4 -%}
+            {%- assign related_vendor = related_product.vendor | downcase | strip -%}
+            <article class="related-products__card">
+              <a href="{{ related_product.url }}" class="related-products__media">
+                {%- if related_product.featured_image != blank -%}
+                  {{ related_product.featured_image | image_url: width: 700 | image_tag: loading: 'lazy', class: 'related-products__image', alt: related_product.featured_image.alt | default: related_product.title }}
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'related-products__image related-products__placeholder' }}
+                {%- endif -%}
+                {%- if related_vendor == 'new balance' -%}<span>In store only</span>{%- endif -%}
+              </a>
+              <div class="related-products__body">
+                <p>{{ related_product.vendor | escape }}</p>
+                <h3><a href="{{ related_product.url }}">{{ related_product.title | escape }}</a></h3>
+                {%- render 'price', product: related_product, show_compare: true -%}
+              </div>
+            </article>
+            {%- assign rendered_related = rendered_related | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+<style>
+  .related-products { border-top: 1px solid var(--color-border); }
+  .related-products__header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+  .related-products__header p, .related-products__body > p { margin: 0 0 7px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--color-text-secondary); }
+  .related-products__header h2 { margin: 0; }
+  .related-products__header > a { color: inherit; font-size: 13px; font-weight: 700; text-underline-offset: 3px; }
+  .related-products__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .related-products__card { min-width: 0; }
+  .related-products__media { position: relative; display: block; overflow: hidden; border-radius: var(--radius-card); background: var(--color-card); }
+  .related-products__image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; transition: transform .25s ease; }
+  .related-products__media:hover .related-products__image { transform: scale(1.025); }
+  .related-products__media > span { position: absolute; top: 10px; left: 10px; padding: 7px 9px; border-radius: 999px; background: var(--color-heading); color: var(--color-bg); font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .related-products__body { padding-top: 14px; }
+  .related-products__body h3 { margin: 0 0 9px; font-size: 15px; line-height: 1.35; }
+  .related-products__body h3 a { color: inherit; text-decoration: none; }
+  @media (max-width: 899px) { .related-products__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 599px) { .related-products__header { align-items: start; flex-direction: column; } .related-products__grid { gap: 16px 12px; } }
+</style>
+
+{% schema %}
+{ "name": "Related products", "tag": "section", "class": "related-products-section" }
+{% endschema %}

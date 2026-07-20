@@ -48,7 +48,7 @@
     {%- if section.blocks.size > 0 -%}
       <div class="testimonials__grid" role="list">
         {%- for block in section.blocks -%}
-          {%- if block.type == 'testimonial' -%}
+          {%- if block.type == 'testimonial' and block.settings.quote != blank and block.settings.author != blank -%}
             {%- liquid
               assign rating = block.settings.rating | default: 5 | plus: 0
             -%}
@@ -77,6 +77,9 @@
 
               {%- if block.settings.author != blank -%}
                 <footer class="testimonial-card__author">{{ block.settings.author | escape }}</footer>
+              {%- endif -%}
+              {%- if block.settings.source_url != blank -%}
+                <a class="testimonial-card__source" href="{{ block.settings.source_url }}" rel="noopener">View Google reviews</a>
               {%- endif -%}
             </article>
           {%- endif -%}
@@ -108,7 +111,7 @@
     margin: 0;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary, #5b6368);
   }
@@ -160,7 +163,7 @@
   .testimonials__summary-label {
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     line-height: 1.5;
     color: var(--color-text-secondary, #5b6368);
@@ -207,6 +210,14 @@
     line-height: 0.6;
     color: rgba(24, 36, 46, 0.16);
     user-select: none;
+  }
+
+  .testimonial-card__source {
+    margin-top: auto;
+    color: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    text-underline-offset: 3px;
   }
 
   .testimonial-card__stars {
@@ -364,14 +375,12 @@
         {
           "type": "textarea",
           "id": "quote",
-          "label": "Quote",
-          "default": "Best shoe-fitting experience I've ever had. They actually measure your foot."
+          "label": "Quote"
         },
         {
           "type": "text",
           "id": "author",
-          "label": "Customer name",
-          "default": "Rachel T., NMB"
+          "label": "Customer name"
         },
         {
           "type": "select",
@@ -385,6 +394,12 @@
             { "value": "5", "label": "5 stars" }
           ],
           "default": "5"
+        },
+        {
+          "type": "url",
+          "id": "source_url",
+          "label": "Original review URL",
+          "info": "Required before this testimonial appears. Link to the original Google, Facebook, or review-platform post."
         }
       ]
     }
@@ -403,33 +418,7 @@
         "proof_3_value": "1:1",
         "proof_3_label": "Personal fit help in store",
         "background_style": "cream"
-      },
-      "blocks": [
-        {
-          "type": "testimonial",
-          "settings": {
-            "quote": "Best shoe-fitting experience I've ever had. They actually measure your foot and explain what will work.",
-            "author": "Rachel T., NMB",
-            "rating": "5"
-          }
-        },
-        {
-          "type": "testimonial",
-          "settings": {
-            "quote": "On Running selection is incredible. My Cloud 6s are perfect for the boardwalk and everyday wear.",
-            "author": "Marcus D., Myrtle Beach",
-            "rating": "5"
-          }
-        },
-        {
-          "type": "testimonial",
-          "settings": {
-            "quote": "Family-owned feel with big-store selection. We came in for one pair and left with three.",
-            "author": "Susan K., Conway",
-            "rating": "5"
-          }
-        }
-      ]
+      }
     }
   ]
 }

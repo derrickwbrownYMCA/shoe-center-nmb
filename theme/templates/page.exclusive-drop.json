@@ -16,7 +16,7 @@
         "heading": "A Leather Shoe Built for the South",
         "subheading": "Designed exclusively for Shoe Center. Comfortable enough for everyday wear, sharp enough for a night out, and smooth enough for casual dancing.",
         "primary_cta_label": "Shop the Drop",
-        "primary_cta_url": "shopify://pages/carolina-drift",
+        "primary_cta_url": "",
         "secondary_cta_label": "Enter Store",
         "secondary_cta_url": "",
         "proof_1": "Exclusive to Shoe Center",
@@ -35,25 +35,95 @@
         "colors_label": "Find your color",
         "colors_heading": "Three shades. One easygoing leather silhouette.",
         "benefits_label": "Made to wear. Made to move.",
-        "benefits_heading": "Everything the launch needs to communicate at a glance.",
+        "benefits_heading": "The details that make it easy to wear from day into night.",
         "lifestyle_label": "From everyday wear to the dance floor",
         "lifestyle_heading": "A versatile leather shoe for dinners out, beach music nights, and weekends around town.",
         "lifestyle_body": "<p>This is not a formal shoe that sits in the closet. It is meant to be lived in, from casual evenings on the boardwalk to local nights that call for a little movement.</p>",
         "lifestyle_image": "shopify://shop_images/man-putting-on-nice-pair-of-pikolinos-dress-shoes.png",
         "lifestyle_image_alt": "Man wearing leather shoes while walking outside in warm evening light",
         "urgency_label": "Exclusive first run",
-        "urgency_heading": "Limited by size and color. Restock is not guaranteed.",
-        "urgency_copy": "This design was made just for Shoe Center. Once this run is gone, there may not be another batch waiting behind it.",
-        "urgency_cta_label": "Get Yours Before They Are Gone",
+        "urgency_heading": "Available in the sizes and colors currently in stock.",
+        "urgency_copy": "Shop the current Carolina Drift assortment online, or visit the store for personal fit help before you choose.",
+        "urgency_cta_label": "Choose Your Pair",
         "urgency_cta_url": "",
+        "show_interest_form": true,
+        "interest_heading": "Want Carolina Drift updates?",
+        "interest_copy": "Join the list for new colors, restock news, and Carolina Drift events.",
+        "interest_button": "Keep Me Posted",
         "final_label": "The Carolina Drift",
         "final_heading": "Southern style, easy comfort, and a limited run worth moving on now.",
-        "final_copy": "Send shoppers back to the buy panel or into the main store without breaking the drop story.",
+        "final_copy": "Choose your color and size online, or visit us in North Myrtle Beach for personal fit help.",
         "final_primary_label": "Shop the Drop",
         "final_primary_url": "",
         "final_secondary_label": "Enter Store",
         "final_secondary_url": ""
-      }
+      },
+      "blocks": {
+        "color-navy": {
+          "type": "color_card",
+          "settings": {
+            "title": "Navy",
+            "copy": "An easy coastal neutral for denim, chinos, and relaxed evenings.",
+            "button_label": "View Navy",
+            "url": ""
+          }
+        },
+        "color-cognac": {
+          "type": "color_card",
+          "settings": {
+            "title": "Cognac",
+            "copy": "A warm leather tone that moves easily from daytime to dinner.",
+            "button_label": "View Cognac",
+            "url": ""
+          }
+        },
+        "color-black": {
+          "type": "color_card",
+          "settings": {
+            "title": "Black",
+            "copy": "A clean, versatile choice when the occasion calls for a sharper finish.",
+            "button_label": "View Black",
+            "url": ""
+          }
+        },
+        "benefit-exclusive": {
+          "type": "benefit",
+          "settings": {
+            "title": "Shoe Center exclusive",
+            "copy": "Carolina Drift is available through Shoe Center in North Myrtle Beach and online."
+          }
+        },
+        "benefit-fit": {
+          "type": "benefit",
+          "settings": {
+            "title": "Personal fit help",
+            "copy": "Call or visit the store when you want a second opinion on size and fit."
+          }
+        },
+        "benefit-pickup": {
+          "type": "benefit",
+          "settings": {
+            "title": "Paid local pickup",
+            "copy": "Buy online and choose pickup in North Myrtle Beach at checkout."
+          }
+        },
+        "benefit-returns": {
+          "type": "benefit",
+          "settings": {
+            "title": "Clear return policy",
+            "copy": "Unworn merchandise returned within 14 days receives store credit."
+          }
+        }
+      },
+      "block_order": [
+        "color-navy",
+        "color-cognac",
+        "color-black",
+        "benefit-exclusive",
+        "benefit-fit",
+        "benefit-pickup",
+        "benefit-returns"
+      ]
     }
   },
   "order": [

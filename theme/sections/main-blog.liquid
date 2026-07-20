@@ -1,0 +1,69 @@
+{%- paginate blog.articles by 12 -%}
+  <section class="main-blog section-padding">
+    <div class="container">
+      <header class="main-blog__header">
+        <p class="main-blog__eyebrow">Shoe Center NMB</p>
+        <h1>Fit &amp; Footwear Guides</h1>
+        <p>Practical guidance on fit, comfort, performance, and finding the right shoes for life on the Grand Strand.</p>
+      </header>
+
+      {%- if blog.articles != empty -%}
+        <div class="main-blog__grid">
+          {%- for article in blog.articles -%}
+            <article class="main-blog__card">
+              <a href="{{ article.url }}" class="main-blog__image-link" aria-label="Read {{ article.title | escape }}">
+                {%- if article.image != blank -%}
+                  {{ article.image | image_url: width: 900 | image_tag: loading: 'lazy', class: 'main-blog__image', alt: article.image.alt | default: article.title }}
+                {%- else -%}
+                  <div class="main-blog__placeholder" aria-hidden="true">Fit &amp; comfort</div>
+                {%- endif -%}
+              </a>
+              <div class="main-blog__body">
+                <p class="main-blog__date">{{ article.published_at | date: '%B %d, %Y' }}</p>
+                <h2><a href="{{ article.url }}">{{ article.title | escape }}</a></h2>
+                <p>{{ article.excerpt_or_content | strip_html | truncatewords: 24 }}</p>
+                <a href="{{ article.url }}" class="main-blog__read">Read guide</a>
+              </div>
+            </article>
+          {%- endfor -%}
+        </div>
+        {%- if paginate.pages > 1 -%}{%- render 'pagination', paginate: paginate -%}{%- endif -%}
+      {%- else -%}
+        <div class="main-blog__empty">
+          <h2>Footwear guides are on the way</h2>
+          <p>Until then, shop our current assortment or call the store for personal fit guidance.</p>
+          <div class="main-blog__actions">
+            <a class="btn" href="{{ routes.all_products_collection_url }}">Shop shoes</a>
+            <a class="btn btn--secondary" href="tel:+18432726515">Call (843) 272-6515</a>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endpaginate -%}
+
+<style>
+  .main-blog__header { max-width: 720px; margin: 0 auto 48px; text-align: center; }
+  .main-blog__header h1 { margin: 8px 0 14px; }
+  .main-blog__header > p:last-child { margin: 0; color: var(--color-text-secondary); line-height: 1.7; }
+  .main-blog__eyebrow, .main-blog__date { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--color-text-secondary); }
+  .main-blog__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .main-blog__card { overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-card); }
+  .main-blog__image-link { display: block; background: var(--color-accent); }
+  .main-blog__image, .main-blog__placeholder { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .main-blog__placeholder { display: grid; place-items: center; color: var(--color-heading); font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .main-blog__body { padding: 22px; }
+  .main-blog__body h2 { margin: 8px 0 12px; font-size: 20px; }
+  .main-blog__body h2 a, .main-blog__read { color: inherit; }
+  .main-blog__body > p:not(.main-blog__date) { color: var(--color-text-secondary); line-height: 1.65; }
+  .main-blog__read { display: inline-block; margin-top: 8px; font-weight: 700; text-underline-offset: 3px; }
+  .main-blog__empty { max-width: 680px; margin: 0 auto; padding: 48px 28px; border: 1px solid var(--color-border); border-radius: var(--radius-card); text-align: center; background: var(--color-card); }
+  .main-blog__empty h2 { margin-top: 0; }
+  .main-blog__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 24px; }
+  @media (max-width: 899px) { .main-blog__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 599px) { .main-blog__grid { grid-template-columns: 1fr; } }
+</style>
+
+{% schema %}
+{ "name": "Blog", "tag": "section", "class": "main-blog-section" }
+{% endschema %}

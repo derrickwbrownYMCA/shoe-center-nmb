@@ -1,0 +1,21 @@
+query {
+  productByHandle(handle: "on-cloudrunner-3-women") {
+    id
+    title
+    variants(first: 100) {
+      nodes {
+        id
+        sku
+        selectedOptions {
+          name
+          value
+        }
+        media(first: 3) {
+          nodes {
+            id
+          }
+        }
+      }
+    }
+  }
+}

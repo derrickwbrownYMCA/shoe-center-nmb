@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "qa:theme": "node --check theme/assets/theme.js && node tools/verify-storefront-theme.mjs"
+  },
   "devDependencies": {
     "sharp": "^0.34.5"
   }

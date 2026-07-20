@@ -1,0 +1,27 @@
+query GiftCardProductSchema {
+  productCreateInput: __type(name: "ProductCreateInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+  productInput: __type(name: "ProductInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+  mutationType: __type(name: "Mutation") {
+    fields {
+      name
+    }
+  }
+}

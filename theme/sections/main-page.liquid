@@ -9,6 +9,11 @@
   assign max_width   = section.settings.max_width | default: '700px'
   assign text_align  = section.settings.text_alignment | default: 'left'
   assign container_style = 'max-width:' | append: max_width | append: ';'
+  assign is_contact_page = false
+  if page.handle == 'contact'
+    assign is_contact_page = true
+    assign container_style = 'max-width:1100px;'
+  endif
   if text_align == 'center'
     assign container_style = container_style | append: 'text-align:center;'
   endif
@@ -19,7 +24,81 @@
 
     <h1 class="main-page__title">{{ page.title | escape }}</h1>
 
-    {%- if page.content != blank -%}
+    {%- if is_contact_page -%}
+      <div class="main-page__contact-grid">
+        <div class="main-page__contact-details">
+          {%- if page.content != blank -%}
+            <div class="main-page__content rte">
+              {{ page.content }}
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="contact-form-card">
+          <p class="contact-form-card__eyebrow">Personal service, online</p>
+          <h2 class="contact-form-card__title">How can we help?</h2>
+          <p class="contact-form-card__intro">Send us your question and our North Myrtle Beach team will follow up. For the fastest fit help, include the brand and style you are considering.</p>
+
+          {%- form 'contact', id: 'ContactForm' -%}
+            <input type="hidden" name="contact[tags]" value="website-contact,fit-help">
+
+            {%- if form.posted_successfully? -%}
+              <div class="contact-form-card__success" role="status" tabindex="-1">
+                Thank you. Your message has been sent to our team.
+              </div>
+            {%- endif -%}
+
+            {%- if form.errors -%}
+              <div class="contact-form-card__errors" role="alert">
+                <p>Please check the highlighted information and try again.</p>
+                {{ form.errors | default_errors }}
+              </div>
+            {%- endif -%}
+
+            <div class="contact-form-card__row">
+              <div class="contact-form-card__field">
+                <label for="ContactFormName">Name</label>
+                <input id="ContactFormName" type="text" name="contact[name]" value="{{ form.name | default: customer.name | escape }}" autocomplete="name" required>
+              </div>
+              <div class="contact-form-card__field">
+                <label for="ContactFormEmail">Email</label>
+                <input id="ContactFormEmail" type="email" name="contact[email]" value="{{ form.email | default: customer.email | escape }}" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+              </div>
+            </div>
+
+            <div class="contact-form-card__row">
+              <div class="contact-form-card__field">
+                <label for="ContactFormPhone">Phone <span>(optional)</span></label>
+                <input id="ContactFormPhone" type="tel" name="contact[phone]" value="{{ form.phone | escape }}" autocomplete="tel">
+              </div>
+              <div class="contact-form-card__field">
+                <label for="ContactFormReason">What can we help with?</label>
+                <select id="ContactFormReason" name="contact[Reason]">
+                  <option value="Fit or sizing help">Fit or sizing help</option>
+                  <option value="Product availability">Product availability</option>
+                  <option value="Paid store pickup">Paid store pickup</option>
+                  <option value="Existing order">Existing order</option>
+                  <option value="Something else">Something else</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="contact-form-card__field">
+              <label for="ContactFormOrder">Order number <span>(if applicable)</span></label>
+              <input id="ContactFormOrder" type="text" name="contact[Order number]" autocomplete="off">
+            </div>
+
+            <div class="contact-form-card__field">
+              <label for="ContactFormBody">Message</label>
+              <textarea id="ContactFormBody" name="contact[body]" rows="6" required>{{ form.body | escape }}</textarea>
+            </div>
+
+            <button class="btn contact-form-card__submit" type="submit">Send message</button>
+            <p class="contact-form-card__privacy">We will use your information only to respond to your request.</p>
+          {%- endform -%}
+        </div>
+      </div>
+    {%- elsif page.content != blank -%}
       <div class="main-page__content rte">
         {{ page.content }}
       </div>
@@ -43,6 +122,132 @@
     margin: 0 0 32px;
     letter-spacing: var(--heading-letter-spacing, 0.03em);
     line-height: 1.15;
+  }
+
+  .main-page__contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(32px, 6vw, 72px);
+    align-items: start;
+  }
+
+  .contact-form-card {
+    padding: clamp(24px, 4vw, 40px);
+    border: 1px solid var(--color-border, #EBEBEB);
+    border-radius: var(--radius-card, 12px);
+    background: var(--color-card, #FFFFFF);
+    box-shadow: 0 14px 40px rgba(31, 42, 48, 0.07);
+  }
+
+  .contact-form-card__eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-text-secondary, #6b7378);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .contact-form-card__title {
+    margin: 0 0 10px;
+    color: var(--color-heading, #000000);
+    font-family: var(--font-heading, sans-serif);
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.15;
+  }
+
+  .contact-form-card__intro {
+    margin: 0 0 24px;
+    color: var(--color-text, #3D3D3D);
+    line-height: 1.6;
+  }
+
+  .contact-form-card__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .contact-form-card__field {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 18px;
+  }
+
+  .contact-form-card__field label {
+    color: var(--color-heading, #000000);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .contact-form-card__field label span {
+    color: var(--color-text-secondary, #6b7378);
+    font-weight: 400;
+  }
+
+  .contact-form-card__field input,
+  .contact-form-card__field select,
+  .contact-form-card__field textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 11px 13px;
+    border: 1px solid var(--color-border, #D6D9DB);
+    border-radius: var(--radius-btn, 8px);
+    background: #FFFFFF;
+    color: var(--color-text, #3D3D3D);
+    font: inherit;
+  }
+
+  .contact-form-card__field textarea {
+    min-height: 150px;
+    resize: vertical;
+  }
+
+  .contact-form-card__field input:focus-visible,
+  .contact-form-card__field select:focus-visible,
+  .contact-form-card__field textarea:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+  }
+
+  .contact-form-card__submit {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .contact-form-card__privacy {
+    margin: 12px 0 0;
+    color: var(--color-text-secondary, #6b7378);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .contact-form-card__success,
+  .contact-form-card__errors {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: var(--radius-btn, 8px);
+    line-height: 1.5;
+  }
+
+  .contact-form-card__success {
+    background: #E7F4EA;
+    color: #1D5C2B;
+  }
+
+  .contact-form-card__errors {
+    background: #FCE8E6;
+    color: #7A2018;
+  }
+
+  .contact-form-card__errors p { margin: 0 0 8px; }
+
+  @media (max-width: 767px) {
+    .main-page__contact-grid,
+    .contact-form-card__row {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* ── Rich Text Editor output styles ────────────────────────────────────── */

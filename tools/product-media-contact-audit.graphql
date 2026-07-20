@@ -1,0 +1,44 @@
+query ProductMediaAndContactAudit {
+  products(first: 100, query: "status:active") {
+    nodes {
+      id
+      title
+      handle
+      featuredMedia {
+        id
+        alt
+        ... on MediaImage {
+          image { url width height }
+        }
+      }
+      media(first: 100) {
+        nodes {
+          id
+          alt
+          mediaContentType
+          ... on MediaImage {
+            image { url width height }
+          }
+        }
+      }
+      variants(first: 250) {
+        nodes {
+          id
+          title
+          availableForSale
+          selectedOptions { name value }
+          media(first: 3) { nodes { id alt } }
+        }
+      }
+    }
+  }
+  pages(first: 50, query: "handle:contact") {
+    nodes {
+      id
+      title
+      handle
+      body
+      isPublished
+    }
+  }
+}

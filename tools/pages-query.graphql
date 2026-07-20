@@ -1,0 +1,10 @@
+query PagesForPolicies {
+  pages(first: 50) {
+    nodes {
+      id
+      title
+      handle
+      body
+    }
+  }
+}

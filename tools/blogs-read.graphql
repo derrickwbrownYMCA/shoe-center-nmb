@@ -1,0 +1,9 @@
+query BlogsForContentDrafts {
+  blogs(first: 20) {
+    nodes {
+      id
+      handle
+      title
+    }
+  }
+}

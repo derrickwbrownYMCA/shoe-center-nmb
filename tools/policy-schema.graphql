@@ -1,0 +1,34 @@
+query PolicySchema {
+  shop {
+    name
+  }
+  policyType: __type(name: "ShopPolicyType") {
+    enumValues {
+      name
+    }
+  }
+  policyInput: __type(name: "ShopPolicyInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+          }
+        }
+      }
+    }
+  }
+  mutationType: __schema {
+    mutationType {
+      fields {
+        name
+      }
+    }
+  }
+}

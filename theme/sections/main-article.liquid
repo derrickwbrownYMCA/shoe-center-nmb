@@ -1,0 +1,33 @@
+<article class="main-article section-padding">
+  <div class="container main-article__inner">
+    <nav class="main-article__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a><span aria-hidden="true">/</span><a href="{{ blog.url }}">{{ blog.title | escape }}</a>
+    </nav>
+    <header class="main-article__header">
+      <p>{{ article.published_at | date: '%B %d, %Y' }}</p>
+      <h1>{{ article.title | escape }}</h1>
+    </header>
+    {%- if article.image != blank -%}
+      {{ article.image | image_url: width: 1400 | image_tag: loading: 'eager', fetchpriority: 'high', class: 'main-article__image', alt: article.image.alt | default: article.title }}
+    {%- endif -%}
+    <div class="main-article__content rte">{{ article.content }}</div>
+    <footer class="main-article__footer"><a href="{{ blog.url }}">Back to {{ blog.title | escape }}</a></footer>
+  </div>
+</article>
+
+<style>
+  .main-article__inner { max-width: 880px; }
+  .main-article__breadcrumb { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 32px; font-size: 13px; color: var(--color-text-secondary); }
+  .main-article__breadcrumb a { color: inherit; }
+  .main-article__header { max-width: 760px; margin-bottom: 32px; }
+  .main-article__header p { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--color-text-secondary); }
+  .main-article__header h1 { margin: 0; }
+  .main-article__image { width: 100%; margin-bottom: 40px; border-radius: var(--radius-card); }
+  .main-article__content { max-width: 720px; font-size: 17px; line-height: 1.8; }
+  .main-article__content img { height: auto; border-radius: var(--radius-card); }
+  .main-article__footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--color-border); }
+</style>
+
+{% schema %}
+{ "name": "Article", "tag": "section", "class": "main-article-section" }
+{% endschema %}

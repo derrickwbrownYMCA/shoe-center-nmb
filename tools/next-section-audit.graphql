@@ -1,0 +1,26 @@
+query NextSectionAudit {
+  collections(first: 100, sortKey: TITLE) {
+    nodes {
+      id
+      handle
+      title
+      descriptionHtml
+      productsCount {
+        count
+      }
+    }
+  }
+  articles(first: 50, sortKey: TITLE) {
+    nodes {
+      id
+      handle
+      title
+      isPublished
+      blog {
+        id
+        handle
+        title
+      }
+    }
+  }
+}

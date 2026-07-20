@@ -7,43 +7,11 @@
   ARCHITECTURE
   ─────────────
   The section reads products from a merchant-selected collection and renders
-  them in a responsive CSS Grid. All product card markup is inlined here so
-  the section is fully self-contained (no external snippet dependency).
-
-  PRODUCT CARD ANATOMY
-  ─────────────────────
-    ┌─────────────────────────────────────────┐
-    │ .product-card                           │
-    │  ├── .product-card__media               │  ← image(s) + badge + wishlist
-    │  │    ├── .product-card__img--primary   │  ← scales on hover
-    │  │    ├── .product-card__img--secondary │  ← cross-fades on hover (optional)
-    │  │    └── .product-card__badge          │  ← New / Best Seller / Sale
-    │  └── .product-card__body               │
-    │       ├── .product-card__vendor         │  ← product.vendor, small + muted
-    │       ├── .product-card__title          │  ← 2-line clamp, Montserrat
-    │       └── .product-card__footer         │
-    │            ├── .product-card__prices    │  ← regular / sale / compare-at
-    │            └── .product-card__btn       │  ← blush "Shop Now" CTA
-    └─────────────────────────────────────────┘
-
-  IMAGE HOVER
-  ────────────
-  If the product has a second image, it is rendered as an absolutely-positioned
-  sibling with opacity: 0, and cross-fades to 1 on :hover — entirely CSS, zero JS.
-  When there is only one image, the primary image scales to 1.03 on hover instead.
-
-  BADGE LOGIC (priority order, only one badge per card)
-  ──────────────────────────────────────────────────────
-    1. Tag "best-seller" or "bestseller"  → "Best Seller" (dark badge)
-    2. Tag "new"                          → "New" (blush badge)
-    3. Published within 60 days           → "New" (blush badge, automatic)
-    4. compare_at_price > price           → "Sale" (dark badge)
-
-  PERFORMANCE
-  ────────────
-  Product images below the hero are never the LCP element — they correctly
-  use loading="lazy" + decoding="async". The `sizes` attribute is calibrated
-  to the 4-column layout so browsers fetch the right resolution at every DPR.
+  them in a responsive CSS Grid. Product cards come from the shared
+  snippets/product-card.liquid + product-card-styles.liquid (same anatomy as
+  the collection and search grids: frameless image → swatch dots → short
+  name → price, whole card is the link). Only the section chrome (header,
+  grid, View All link, empty-state placeholders) lives here.
 
   EMPTY STATE
   ────────────
@@ -64,18 +32,24 @@
   assign products_limit   = section.settings.products_to_show | default: 8
   assign desktop_cols     = section.settings.columns_desktop   | default: '4'
 
-  # Which background token the section uses
-  # 'card' = light grey (#EDEDED) — visually separates from the cream sections above/below
-  # 'bg'   = site cream (#FAF9F6)
+  # Section surface. Frameless product photos (P1) merge with a WHITE
+  # surface, so 'card' now maps to #FFFFFF; 'bg' keeps the site cream.
   assign section_bg = section.settings.background | default: 'card'
+  if section_bg == 'bg'
+    assign section_bg_value = 'var(--color-bg, #FAF9F6)'
+  else
+    assign section_bg_value = '#FFFFFF'
+  endif
 
   # Determine heading tag level — h2 is correct for a homepage section heading
   assign heading_id = 'FeaturedHeading-' | append: section.id
 -%}
 
+{%- render 'product-card-styles' -%}
+
 <section
   class="featured-products section-padding"
-  style="background-color: var(--color-{{ section_bg }});"
+  style="background-color: {{ section_bg_value }};"
   aria-labelledby="{{ heading_id }}"
 >
   <div class="container">
@@ -111,181 +85,20 @@
 
       {%- if fp_collection != blank and fp_collection.products != blank and fp_collection.products.size > 0 -%}
 
+        {%- comment -%}
+          Cards come from the shared snippet (same anatomy as collection and
+          search grids): frameless image → swatch dots → short name → price.
+          Badge logic, placeholders, and pricing all live in the snippet.
+        {%- endcomment -%}
         {%- for product in fp_collection.products limit: products_limit -%}
-
-          {%- liquid
-            # ── Badge resolution ──────────────────────────────────────────
-            # Priority: best-seller tag > new tag > auto-new (< 60 days old) > sale
-            # Only one badge per card.
-            assign badge_text = ''
-            assign badge_mod  = ''
-
-            if product.tags contains 'best-seller' or product.tags contains 'bestseller'
-              assign badge_text = 'Best Seller'
-              assign badge_mod  = 'product-card__badge--dark'
-            elsif product.tags contains 'new'
-              assign badge_text = 'New'
-            else
-              # Auto-badge products published within 60 days
-              assign now_s   = 'now'              | date: '%s' | plus: 0
-              assign pub_s   = product.published_at | date: '%s' | plus: 0
-              assign age_days = now_s | minus: pub_s | divided_by: 86400
-              if age_days < 60
-                assign badge_text = 'New'
-              endif
-            endif
-
-            # Sale badge only if no other badge was set
-            if badge_text == blank and product.compare_at_price > product.price
-              assign badge_text = 'Sale'
-              assign badge_mod  = 'product-card__badge--dark'
-            endif
-
-            # ── Image availability ────────────────────────────────────────
-            assign primary_img   = product.featured_image
-            assign secondary_img = product.images[1]
-            assign has_secondary = false
-            if secondary_img != blank and secondary_img != primary_img
-              assign has_secondary = true
-            endif
-
-            # ── Price state ───────────────────────────────────────────────
-            assign is_on_sale = false
-            if product.compare_at_price > product.price
-              assign is_on_sale = true
-            endif
-          -%}
-
           <li class="featured-products__item">
-
-            {%- comment -%}
-              The wrapping <article> gives each card correct semantic identity.
-              The <a> wraps the entire card so the click target covers the image
-              AND the title — a larger, more accessible hit area.
-              The "Shop Now" button is an additional affordance inside the card body.
-            {%- endcomment -%}
-            <article class="product-card" aria-label="{{ product.title | escape }}{% if badge_text != blank %} — {{ badge_text }}{% endif %}">
-
-              <!-- ── Media (image + badge) ───────────────────────────── -->
-              <a
-                href="{{ product.url }}"
-                class="product-card__media-link"
-                tabindex="-1"
-                aria-hidden="true"
-              >
-                <div class="product-card__media">
-
-                  {%- if primary_img != blank -%}
-                    {%- assign fp_primary_alt = primary_img.alt | default: product.title -%}
-                    {{
-                      primary_img
-                      | image_url: width: 800
-                      | image_tag:
-                        loading: 'lazy',
-                        decoding: 'async',
-                        class: 'product-card__img product-card__img--primary',
-                        alt: fp_primary_alt,
-                        width: primary_img.width,
-                        height: primary_img.height,
-                        widths: '400, 600, 800, 1000',
-                        sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
-                    }}
-                  {%- else -%}
-                    {%- comment -%}
-                      Shopify placeholder SVG — displays a neutral product silhouette
-                      when no image is assigned to the product yet.
-                    {%- endcomment -%}
-                    <div class="product-card__img product-card__img--primary product-card__img--placeholder">
-                      {{- 'product-' | append: forloop.index | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
-                    </div>
-                  {%- endif -%}
-
-                  {%- if has_secondary -%}
-                    {%- comment -%}
-                      Secondary image: absolutely positioned, opacity 0.
-                      Cross-fades to opacity 1 on :hover via CSS — zero JS required.
-                      Only rendered if product has a second distinct image.
-                    {%- endcomment -%}
-                    {%- assign fp_secondary_alt = secondary_img.alt | default: product.title -%}
-                    {{
-                      secondary_img
-                      | image_url: width: 800
-                      | image_tag:
-                        loading: 'lazy',
-                        decoding: 'async',
-                        class: 'product-card__img product-card__img--secondary',
-                        alt: fp_secondary_alt,
-                        width: secondary_img.width,
-                        height: secondary_img.height,
-                        widths: '400, 600, 800, 1000',
-                        sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
-                    }}
-                  {%- endif -%}
-
-                  {%- if badge_text != blank -%}
-                    <span class="product-card__badge {{ badge_mod }}" aria-hidden="true">
-                      {{- badge_text -}}
-                    </span>
-                  {%- endif -%}
-
-                </div><!-- /.product-card__media -->
-              </a>
-
-              <!-- ── Card body ────────────────────────────────────────── -->
-              <div class="product-card__body">
-
-                {%- if product.vendor != blank -%}
-                  <p class="product-card__vendor">
-                    {{- product.vendor | escape -}}
-                  </p>
-                {%- endif -%}
-
-                <h3 class="product-card__title">
-                  <a href="{{ product.url }}" class="product-card__title-link">
-                    {{- product.title | escape -}}
-                  </a>
-                </h3>
-
-                <div class="product-card__footer">
-
-                  <!-- Price display ──────────────────────────────────── -->
-                  <div class="product-card__prices">
-                    {%- if is_on_sale -%}
-                      <span class="product-card__price product-card__price--sale">
-                        {{- product.price | money -}}
-                      </span>
-                      <s class="product-card__price product-card__price--compare">
-                        {{- product.compare_at_price | money -}}
-                      </s>
-                    {%- else -%}
-                      <span class="product-card__price">
-                        {{- product.price | money -}}
-                      </span>
-                    {%- endif -%}
-                  </div>
-
-                  <!-- CTA ────────────────────────────────────────────── -->
-                  {%- if product.available -%}
-                    <a
-                      href="{{ product.url }}"
-                      class="product-card__btn"
-                      aria-label="Shop {{ product.title | escape }}"
-                    >
-                      {{- section.settings.card_cta_text | default: 'Shop Now' -}}
-                    </a>
-                  {%- else -%}
-                    <span class="product-card__btn product-card__btn--sold-out">
-                      Sold Out
-                    </span>
-                  {%- endif -%}
-
-                </div><!-- /.product-card__footer -->
-
-              </div><!-- /.product-card__body -->
-
-            </article><!-- /.product-card -->
+            {%- render 'product-card',
+              product: product,
+              show_badges: true,
+              lazy_load: true,
+              strip_vendor: true
+            -%}
           </li>
-
         {%- endfor -%}
 
       {%- else -%}
@@ -298,23 +111,19 @@
         {%- for i in (1..products_limit) -%}
           <li class="featured-products__item">
             <article class="product-card product-card--placeholder" aria-label="Example product">
-              <div class="product-card__media-link">
-                <div class="product-card__media">
-                  <div class="product-card__img product-card__img--primary product-card__img--placeholder">
-                    {{- 'product-' | append: i | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
-                  </div>
+              <div class="product-card__media">
+                <div class="product-card__img product-card__img--placeholder">
+                  {%- comment -%} Shopify only ships product-1..product-6 — cycle within that range {%- endcomment -%}
+                  {%- assign fp_ph2 = i | minus: 1 | modulo: 6 | plus: 1 -%}
+                  {{- 'product-' | append: fp_ph2 | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
                 </div>
               </div>
               <div class="product-card__body">
-                <p class="product-card__vendor">Brand Name</p>
-                <h3 class="product-card__title product-card__title--placeholder">
-                  <span class="product-card__title-link">Product Title</span>
+                <h3 class="product-card__title">
+                  <span class="product-card__link">Product Title</span>
                 </h3>
-                <div class="product-card__footer">
-                  <div class="product-card__prices">
-                    <span class="product-card__price">$0.00</span>
-                  </div>
-                  <span class="product-card__btn product-card__btn--placeholder">Shop Now</span>
+                <div class="product-card__prices">
+                  <span class="price__current">$0.00</span>
                 </div>
               </div>
             </article>
@@ -349,11 +158,10 @@
 <style>
   /* ── Section ─────────────────────────────────────────────────────────── */
   .featured-products {
-    /*
-      background-color set via inline style from Liquid (--color-bg or --color-card).
-      Default to the card grey so this section reads as a distinct band
-      when placed between two cream sections.
-    */
+    /* White product band on the cream homepage — hairline rules top and
+       bottom mark it as the page's single deliberate surface change. */
+    border-top: 1px solid rgba(24, 36, 46, 0.08);
+    border-bottom: 1px solid rgba(24, 36, 46, 0.08);
   }
 
   /* ── Section header ──────────────────────────────────────────────────── */
@@ -410,312 +218,28 @@
   }
 
   /* ── Card ─────────────────────────────────────────────────────────────
-    The card is a flex column so the body grows to fill available height
-    and the footer CTA always sits at the bottom.
+    Card markup and styles come from snippets/product-card.liquid and
+    snippets/product-card-styles.liquid — single source shared with the
+    collection and search grids. Only the empty-state placeholder styling
+    is local to this section.
   ─────────────────────────────────────────────────────────────────────── */
-  .product-card {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    background-color: var(--color-bg, #FAF9F6);
-    border-radius: var(--radius-card, 12px);
-    overflow: hidden;
-    transition:
-      box-shadow 0.30s ease,
-      transform  0.30s ease;
-  }
-
-  .product-card:hover {
-    /*
-      Softer lift than the initial 3px — keeps the card feeling grounded
-      and premium rather than bouncy. Scout & Molly's aesthetic is
-      confident and still, not energetic.
-    */
-    box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.10));
-    transform: translateY(-1.5px);
-  }
-
-  /* Placeholder state — no lift effect */
   .product-card--placeholder {
     pointer-events: none;
     opacity: 0.65;
   }
 
-  /* ── Media (image area) ──────────────────────────────────────────────
-    overflow: hidden clips the scaled primary image and hides the
-    secondary image until it fades in on hover.
-  ─────────────────────────────────────────────────────────────────────── */
-  .product-card__media-link {
-    display: block;
-    text-decoration: none;
-  }
-
-  .product-card__media {
-    position: relative;
-    overflow: hidden;
-    /*
-      background-color shows during image load — uses the card token
-      so it matches the placeholder state visually.
-    */
-    background-color: var(--color-card, #EDEDED);
-    border-radius: var(--radius-card, 12px) var(--radius-card, 12px) 0 0;
-  }
-
-  /* ── Primary image ────────────────────────────────────────────────── */
-  .product-card__img--primary {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1 / 1; /* Square — shows the most of the shoe */
-    object-fit: cover;
-    object-position: center;
-    transition: transform 0.45s ease;
-  }
-
-  .product-card:hover .product-card__img--primary {
-    transform: scale(1.02);
-    /*
-      Feather-light zoom (1.02) — product cards are smaller and denser,
-      so a heavy zoom feels cheap. This barely-there scale creates just
-      enough motion to signal interactivity without disrupting the calm,
-      editorial stillness of the Scout & Molly's-inspired aesthetic.
-    */
-  }
-
-  /* ── Secondary image (hover swap) ────────────────────────────────────
-    Only rendered when the product has a second distinct image.
-    Sits absolutely on top of the primary, invisible at rest.
-    CSS cross-fade — no JS required.
-  ─────────────────────────────────────────────────────────────────────── */
-  .product-card__img--secondary {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    opacity: 0;
-    transition: opacity 0.40s ease;
-    /* No scale transform — the swap itself is the interaction signal */
-  }
-
-  .product-card:hover .product-card__img--secondary {
-    opacity: 1;
-  }
-
-  /* ── Placeholder image (no product image uploaded) ──────────────────── */
-  .product-card__img--placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color-card);
+  .product-card--placeholder .product-card__link {
+    color: var(--color-border, #A8A8A8);
   }
 
   .product-card__placeholder-svg {
     display: block;
     width: 100%;
     aspect-ratio: 1 / 1;
-    fill: #C8C8C8; /* fixed mid-grey — visible regardless of --color-card value */
+    fill: #C8C8C8;
     padding: 20px;
   }
 
-  /* ── Badge ────────────────────────────────────────────────────────────
-    Positioned in the top-left corner of the media area.
-    Z-index 1 places it above the image but interactions don't need
-    to reach it — it's decorative (aria-hidden="true").
-  ─────────────────────────────────────────────────────────────────────── */
-  .product-card__badge {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 11px;
-    background-color: var(--color-accent, #F5E1E1); /* blush */
-    color: var(--color-heading, #000000);
-    font-family: var(--font-body, sans-serif);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    border-radius: 20px;
-    white-space: nowrap;
-    line-height: 1;
-    pointer-events: none;
-  }
-
-  /* Dark variant — used for "Best Seller" and "Sale" */
-  .product-card__badge--dark {
-    background-color: var(--color-heading, #000000);
-    color: var(--color-bg, #FAF9F6);
-  }
-
-  /* ── Card body ────────────────────────────────────────────────────────
-    flex: 1 makes the body expand to fill the card height so cards in
-    the same row always have matching bottom edges.
-  ─────────────────────────────────────────────────────────────────────── */
-  .product-card__body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 22px 24px 28px;
-    gap: 6px;
-  }
-
-  /* ── Brand / vendor ───────────────────────────────────────────────── */
-  .product-card__vendor {
-    margin: 0;
-    font-family: var(--font-body, sans-serif);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-text-secondary, #A8A8A8);
-    line-height: 1;
-  }
-
-  /* ── Product title ────────────────────────────────────────────────── */
-  .product-card__title {
-    margin: 0;
-    font-family: var(--font-heading, sans-serif);
-    /*
-      Increased from 13–15px to 15–17px — Montserrat Bold at this size
-      reads as editorial and premium, not small and utilitarian.
-      The fluid clamp keeps it proportional across viewport widths.
-    */
-    font-size: clamp(15px, 1.4vw, 17px);
-    font-weight: var(--font-heading-weight, 700);
-    letter-spacing: 0.04em;
-    color: var(--color-heading, #000000);
-    line-height: 1.25;
-    /*
-      Two-line clamp keeps all cards the same height regardless of
-      whether the product title is short ("Bondi 8") or long
-      ("Professional Clog in Polished Black — Wide Width").
-    */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-top: 2px; /* Slight separation from vendor text above */
-  }
-
-  .product-card__title-link {
-    color: inherit;
-    text-decoration: none;
-    transition: opacity var(--transition, 0.2s ease);
-  }
-
-  .product-card__title-link:hover {
-    opacity: 0.72;
-  }
-
-  .product-card__title-link:focus-visible {
-    outline: 3px solid #005FCC;
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  /* Placeholder title — muted */
-  .product-card__title--placeholder {
-    color: var(--color-border, #A8A8A8);
-  }
-
-  /* ── Footer (price + CTA) ─────────────────────────────────────────── */
-  .product-card__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: auto; /* Push to bottom of card body */
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border, #A8A8A8);
-    opacity: 0.85; /* Softens the divider line — less structural, more editorial */
-  }
-
-  /* Override opacity on the price/button themselves so text stays crisp */
-  .product-card__footer > * {
-    opacity: 1;
-  }
-
-  /* ── Prices ────────────────────────────────────────────────────────── */
-  .product-card__prices {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .product-card__price {
-    font-family: var(--font-body, sans-serif);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--color-heading, #000000);
-    white-space: nowrap;
-  }
-
-  /* Sale price — dusty rose-red that reads as a value signal without
-     clashing with the blush palette; warm enough to feel intentional */
-  .product-card__price--sale {
-    color: #B85C54;
-  }
-
-  /* Compare-at / original price shown with strikethrough */
-  .product-card__price--compare {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--color-text-secondary, #A8A8A8);
-    text-decoration: line-through;
-  }
-
-  /* ── "Shop Now" CTA ────────────────────────────────────────────────── */
-  .product-card__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    /* Slightly taller padding than before — more comfortable touch target */
-    padding: 9px 16px;
-    background-color: var(--color-accent, #F5E1E1);
-    color: var(--color-heading, #000000);
-    border: none;
-    border-radius: var(--radius-btn, 8px);
-    font-family: var(--font-body, sans-serif);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    white-space: nowrap;
-    text-decoration: none;
-    line-height: 1;
-    transition: background-color var(--transition, 0.2s ease), box-shadow var(--transition, 0.2s ease);
-  }
-
-  .product-card__btn:hover {
-    background-color: var(--color-accent-hover, #E8C8C8);
-    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
-    opacity: 1;
-  }
-
-  .product-card__btn:focus-visible {
-    outline: 3px solid #005FCC;
-    outline-offset: 3px;
-  }
-
-  /* Placeholder button — no interaction */
-  .product-card__btn--placeholder {
-    background-color: var(--color-card, #EDEDED);
-    color: var(--color-border, #A8A8A8);
-    cursor: default;
-  }
-
-  /* Sold-out state — visually muted, not interactive */
-  .product-card__btn--sold-out {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
 
   /* ── "View All" footer ────────────────────────────────────────────── */
   .featured-products__footer {
@@ -725,38 +249,34 @@
   }
 
   /*
-    "View All" button — blush accent style to stay consistent with the
-    product card CTAs. Larger padding than the card button because it sits
-    in open space and needs to hold visual weight at the bottom of the section.
+    "View All" — demoted from a button to an underlined text link (P6:
+    buttons only where action happens; this CTA only navigates to a
+    collection). Quiet by design so the card CTAs keep the visual weight.
   */
   .featured-products__view-all-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 36px;
-    background-color: var(--color-accent, #F5E1E1);
-    color: var(--color-heading, #000000);
+    padding: 0;
+    background: none;
     border: none;
-    border-radius: var(--radius-btn, 8px);
+    border-radius: 0;
+    color: inherit;
     font-family: var(--font-body, sans-serif);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
     white-space: nowrap;
-    line-height: 1;
+    line-height: 1.4;
     cursor: pointer;
-    transition:
-      background-color var(--transition, 0.2s ease),
-      box-shadow var(--transition, 0.2s ease),
-      transform var(--transition, 0.2s ease);
+    transition: opacity var(--transition, 0.2s ease);
   }
 
   .featured-products__view-all-btn:hover {
-    background-color: var(--color-accent-hover, #E8C8C8);
-    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
-    transform: translateY(-1px);
+    opacity: 0.72;
   }
 
   .featured-products__view-all-btn:focus-visible {
@@ -782,46 +302,16 @@
     }
   }
 
-  /*
-    Mobile: 2 columns with comfortable spacing.
-    Touch targets enlarged — min-height on button meets WCAG 2.5.5.
-  */
+  /* Mobile: 2 columns with comfortable spacing. Card-internal responsive
+     rules live in snippets/product-card-styles.liquid. */
   @media (max-width: 599px) {
     .featured-products__grid {
       gap: 14px;
     }
 
-    .product-card__body {
-      padding: 14px 14px 16px;
-      gap: 5px;
-    }
-
-    .product-card__footer {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 12px;
-      padding-top: 12px;
-    }
-
-    .product-card__btn {
-      width: 100%;
-      justify-content: center;
-      /* Larger touch target on mobile — 44px+ recommended by WCAG 2.5.5 */
-      padding: 12px 16px;
-      font-size: 12px;
-    }
-
     .featured-products__footer {
       margin-top: 40px;
     }
-  }
-
-  /* ── Reduced motion: disable hover transforms ─────────────────────── */
-  @media (prefers-reduced-motion: reduce) {
-    .product-card__img--primary  { transition: none; }
-    .product-card__img--secondary { transition: none; }
-    .product-card { transition: box-shadow var(--transition); transform: none; }
-    .product-card:hover { transform: none; }
   }
 </style>
 

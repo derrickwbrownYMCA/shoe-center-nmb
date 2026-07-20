@@ -1,0 +1,8 @@
+query VaneliWorkingCollectionSource {
+  products(first: 50, query: "vendor:Vaneli status:draft") {
+    nodes { id title handle status }
+  }
+  collections(first: 20, query: "title:Vaneli") {
+    nodes { id title handle }
+  }
+}

@@ -48,21 +48,43 @@
 
   # Normalize for display (e.g. Black/Black -> Black | Black, matches image alts)
   assign oc_display_label = oc_display_label | replace: '/', ' | '
+
+  # Short usage descriptor (B2B Playbook: "introduce shorter list description:
+  # best for 10k, all day wear, etc."). Mapped per model; waterproof variants
+  # call out all-weather. Falls back silently for unmapped models.
+  assign oc_title_down = product.title | downcase
+  assign oc_descriptor = ''
+  if oc_title_down contains 'cloudrunner 3'
+    assign oc_descriptor = 'Cushioned, stable daily miles'
+  elsif oc_title_down contains 'cloudrunner 2'
+    if oc_title_down contains 'waterproof'
+      assign oc_descriptor = 'Daily runs, all-weather'
+    else
+      assign oc_descriptor = 'Supportive daily runs'
+    endif
+  elsif oc_title_down contains 'cloudsurfer'
+    assign oc_descriptor = 'Soft, fast road running'
+  elsif oc_title_down contains 'cloud 6'
+    if oc_title_down contains 'waterproof'
+      assign oc_descriptor = 'All-day wear, all-weather'
+    else
+      assign oc_descriptor = 'All-day wear'
+    endif
+  endif
 -%}
 
 {%- comment -%}
   Build a JSON object mapping each color value to the URL of its best-match product image.
-  Match rule: image.alt contains the color name with '/' replaced by ' | '
-  e.g. color "Black/Black" searches for " | Black | Black" in the image alt.
-       "On Cloudrunner 3 Men in Black | Black" is a match.
+  Match rule: normalize separators and compare the color token against the image alt
+  and file name. This handles values stored as "Black | White", "Black/White",
+  or "Black - White" without requiring the exact same punctuation in Shopify.
   Images without a matching color get an empty string (swatch shows, no swap).
 {%- endcomment -%}
 {%- capture oc_color_json -%}
 {
 {%- assign oc_ci_first = true -%}
 {%- for oc_cv in oc_colors -%}
-  {%- assign oc_search = oc_cv | replace: '/', ' | ' -%}
-  {%- assign oc_slug = oc_cv | downcase | replace: '/', '_' | replace: ' ', '_' | replace: '-', '_' -%}
+  {%- assign oc_search = oc_cv | downcase | replace: ' ', '' | replace: '/', '' | replace: '|', '' | replace: '_', '' | replace: '-', '' | replace: ',', '' -%}
   {%- assign oc_url = '' -%}
   {%- for oc_variant in product.variants -%}
     {%- if oc_url == '' -%}
@@ -79,9 +101,10 @@
   {%- endfor -%}
   {%- for oc_img in product.images -%}
     {%- assign oc_img_url = oc_img | image_url: width: 800 -%}
-    {%- assign oc_img_url_downcase = oc_img_url | downcase -%}
+    {%- assign oc_img_alt = oc_img.alt | default: '' | downcase | replace: ' ', '' | replace: '/', '' | replace: '|', '' | replace: '_', '' | replace: '-', '' | replace: ',', '' -%}
+    {%- assign oc_img_url_downcase = oc_img_url | downcase | replace: ' ', '' | replace: '/', '' | replace: '|', '' | replace: '_', '' | replace: '-', '' | replace: ',', '' -%}
     {%- if oc_url == '' -%}
-      {%- if oc_img.alt contains oc_search or oc_img_url_downcase contains oc_slug -%}
+      {%- if oc_img_alt contains oc_search or oc_img_url_downcase contains oc_search -%}
         {%- assign oc_url = oc_img_url -%}
       {%- endif -%}
     {%- endif -%}
@@ -129,15 +152,21 @@
       <a href="{{ product.url }}" class="on-card__title-link">{{ product.title | escape }}</a>
     </h3>
 
+    {%- if oc_descriptor != '' -%}
+      <p class="on-card__descriptor">{{ oc_descriptor }}</p>
+    {%- endif -%}
+
     {%- if oc_colors != nil and oc_colors.size > 0 -%}
       <div class="on-card__swatches" aria-label="Color options">
         {%- assign oc_active_assigned = false -%}
         {%- for oc_cv in oc_colors -%}
           {%- assign oc_search = oc_cv | replace: '/', ' | ' -%}
 
-          {# Always render a swatch button for every Color option value.
-             This ensures the color selector UI is always visible on the On collection.
-             The data-color-images JSON (populated earlier) controls whether swapping is possible. #}
+          {%- comment -%}
+            Always render a swatch button for every Color option value.
+            This ensures the color selector UI is always visible on the On collection.
+            The data-color-images JSON (populated earlier) controls whether swapping is possible.
+          {%- endcomment -%}
           {%- assign oc_is_active = false -%}
           {%- if oc_display_label == oc_cv or oc_primary.alt contains oc_search -%}
             {%- unless oc_active_assigned -%}
@@ -149,12 +178,10 @@
             {%- assign oc_active_assigned = true -%}
           {%- endif -%}
 
-          {%- assign oc_first_color = oc_cv | split: '/' | first | strip | downcase -%}
           <button
             class="on-card__swatch{% if oc_is_active %} is-active{% endif %}"
             type="button"
             data-color="{{ oc_cv | escape }}"
-            data-first-color="{{ oc_first_color | escape }}"
             title="{{ oc_cv | escape }}"
             aria-label="{{ oc_cv | escape }}"
           ></button>

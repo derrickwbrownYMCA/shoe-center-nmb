@@ -1,0 +1,35 @@
+query CollectionUpdateSchema {
+  input: __type(name: "CollectionInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+  updateInput: __type(name: "CollectionUpdateInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+  mutation: __type(name: "Mutation") {
+    fields {
+      name
+      args {
+        name
+        type {
+          kind
+          name
+          ofType { kind name }
+        }
+      }
+    }
+  }
+}

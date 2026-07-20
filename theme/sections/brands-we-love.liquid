@@ -105,6 +105,26 @@
                 assign has_image = true
               endif
               assign brand_label = block.settings.brand_name | default: 'Brand' | escape
+
+              assign brand_key   = block.settings.brand_name | downcase | strip
+              assign brand_asset = ''
+              assign brand_note = ''
+              case brand_key
+                when 'on', 'on running'
+                  assign brand_asset = 'brand-logo-on.svg'
+                when 'charleston shoe company', 'charleston shoe'
+                  assign brand_asset = 'brand-logo-charleston-shoe.png'
+                when 'bernie mev'
+                  assign brand_asset = 'brand-logo-bernie-mev.svg'
+                when 'saola'
+                  assign brand_asset = 'brand-logo-saola.png'
+                when 'new balance'
+                  assign brand_note = 'In store only'
+                when 'koko palenki'
+                  assign brand_asset = 'brand-logo-koko-palenki.png'
+                when 'chocolat blu'
+                  assign brand_asset = 'brand-logo-chocolat-blu.png'
+              endcase
             -%}
 
             <li
@@ -149,18 +169,28 @@
                       sizes: '(max-width: 599px) 108px, (max-width: 1023px) 20vw, 180px'
                   }}
 
+                {%- elsif brand_asset != '' -%}
+
+                  <img
+                    class="brands__logo-img"
+                    src="{{ brand_asset | asset_url }}"
+                    alt="{{ brand_label }}"
+                    loading="lazy"
+                    decoding="async"
+                    width="240"
+                    height="80"
+                  >
+
                 {%- else -%}
 
-                  {%- comment -%}
-                    Text placeholder — visible in Theme Editor before the
-                    merchant uploads an image. aria-hidden keeps it invisible
-                    to screen readers; the parent's aria-label already names it.
-                  {%- endcomment -%}
                   <span
                     class="brands__logo-placeholder"
                     aria-hidden="true"
                   >
                     {{- brand_label -}}
+                    {%- if brand_note != blank -%}
+                      <small>{{ brand_note | escape }}</small>
+                    {%- endif -%}
                   </span>
 
                 {%- endif -%}
@@ -361,6 +391,17 @@
     text-align: center;
     line-height: 1.35;
     max-width: 14ch;
+  }
+
+  .brands__logo-placeholder small {
+    display: block;
+    margin-top: 5px;
+    font-family: var(--font-body, sans-serif);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.62;
   }
 
   /* ── Empty state ─────────────────────────────────────────────────────── */

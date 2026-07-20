@@ -1,0 +1,15 @@
+query ExistingGiftCardProducts {
+  products(first: 50, query: "gift_card:true") {
+    nodes {
+      id
+      title
+      handle
+      status
+      isGiftCard
+      onlineStoreUrl
+      variants(first: 20) {
+        nodes { id title price }
+      }
+    }
+  }
+}

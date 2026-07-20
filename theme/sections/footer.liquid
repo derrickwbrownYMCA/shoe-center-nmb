@@ -81,6 +81,12 @@
   assign shop_menu    = linklists[section.settings.shop_menu]
   assign about_menu   = linklists[section.settings.about_menu]
   assign current_year = 'now' | date: '%Y'
+  assign footer_has_fit_guides = false
+  for link in about_menu.links
+    if link.url contains '/blogs/news'
+      assign footer_has_fit_guides = true
+    endif
+  endfor
 -%}
 
 <footer
@@ -254,6 +260,9 @@
                   </a>
                 </li>
               {%- endfor -%}
+              {%- unless footer_has_fit_guides -%}
+                <li><a href="/blogs/news" class="footer__nav-link">Fit Guides</a></li>
+              {%- endunless -%}
             </ul>
           </nav>
         {%- else -%}
@@ -263,10 +272,11 @@
           {%- endcomment -%}
           <nav aria-labelledby="footer-about-heading-{{ section.id }}">
             <ul class="footer__nav-list" role="list">
-              <li><a href="/pages/about" class="footer__nav-link">Our Story</a></li>
+              <li><a href="/pages/our-story" class="footer__nav-link">Our Story</a></li>
               <li><a href="/pages/contact" class="footer__nav-link">Contact Us</a></li>
               <li><a href="/pages/shipping-returns" class="footer__nav-link">Shipping &amp; Returns</a></li>
               <li><a href="/pages/size-guide" class="footer__nav-link">Size Guide</a></li>
+              <li><a href="/blogs/news" class="footer__nav-link">Fit Guides</a></li>
               <li><a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}" class="footer__nav-link">Privacy Policy</a></li>
             </ul>
           </nav>
@@ -296,7 +306,7 @@
         {%- endcomment -%}
         {%- form 'customer', id: 'footer-newsletter-form-{{ section.id }}' -%}
 
-          <input type="hidden" name="contact[tags]" value="newsletter,email-subscriber">
+          <input type="hidden" name="contact[tags]" value="newsletter,email-subscriber,fit-notes">
 
           <div
             class="footer__newsletter-form"
@@ -363,6 +373,11 @@
           </div><!-- /.footer__newsletter-form -->
 
         {%- endform -%}
+
+        <p class="footer__newsletter-privacy">
+          Useful emails only. Unsubscribe anytime. See our
+          <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}">privacy policy</a>.
+        </p>
 
       </div><!-- /.footer__newsletter-col -->
 
@@ -596,7 +611,7 @@
     font-family: var(--font-body, sans-serif);
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-heading, #000000);
     line-height: 1;
@@ -674,6 +689,19 @@
     font-size: 13px;
     color: var(--color-text, #3D3D3D);
     line-height: 1.7;
+  }
+
+  .footer__newsletter-privacy {
+    margin: -6px 0 0;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--color-text-secondary, #6F6F6F);
+  }
+
+  .footer__newsletter-privacy a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .footer__newsletter-form {
@@ -986,13 +1014,13 @@
       "type": "text",
       "id": "newsletter_heading",
       "label": "Column heading",
-      "default": "Stay in the Loop"
+      "default": "Get the Shoe Center Fit Notes"
     },
     {
       "type": "textarea",
       "id": "newsletter_copy",
       "label": "Sign-up copy",
-      "default": "New arrivals, comfort tips, and a little North Myrtle Beach sunshine — straight to your inbox. No spam, ever.",
+      "default": "New arrivals, practical fit and walking tips, local events, and store updates — useful emails, not daily noise.",
       "info": "1–2 sentences. Reassure customers you will not spam them."
     },
     {
@@ -1005,13 +1033,13 @@
       "type": "text",
       "id": "newsletter_button",
       "label": "Button label",
-      "default": "Subscribe"
+      "default": "Join the List"
     },
     {
       "type": "text",
       "id": "newsletter_success",
       "label": "Success message",
-      "default": "You're on the list — welcome to the Shoe Center NMB family.",
+      "default": "You're on the list. Watch your inbox for fit tips, new arrivals, and local store updates.",
       "info": "Shown after a successful subscription. Warm and personal works best."
     },
 

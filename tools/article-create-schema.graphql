@@ -1,0 +1,39 @@
+query ArticleCreateSchema {
+  input: __type(name: "ArticleCreateInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType { kind name }
+        }
+      }
+    }
+  }
+  author: __type(name: "AuthorInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+  mutation: __type(name: "Mutation") {
+    fields {
+      name
+      args {
+        name
+        type {
+          kind
+          name
+          ofType { kind name }
+        }
+      }
+    }
+  }
+}

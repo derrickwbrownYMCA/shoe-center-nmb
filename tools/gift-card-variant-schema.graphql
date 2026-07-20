@@ -1,0 +1,17 @@
+query GiftCardVariantSchema {
+  optionInput: __type(name: "OptionCreateInput") {
+    inputFields { name type { kind name ofType { kind name } } }
+  }
+  optionValueInput: __type(name: "OptionValueCreateInput") {
+    inputFields { name type { kind name ofType { kind name } } }
+  }
+  bulkVariantInput: __type(name: "ProductVariantsBulkInput") {
+    inputFields { name type { kind name ofType { kind name } } }
+  }
+  mutationType: __type(name: "Mutation") {
+    fields(includeDeprecated: true) {
+      name
+      args { name type { kind name ofType { kind name } } }
+    }
+  }
+}

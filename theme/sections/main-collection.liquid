@@ -19,7 +19,21 @@
   if collection.handle == 'on-running'
     assign is_on_running_collection = true
   endif
+
+  # Grid context for display titles: on /collections/womens the word "Women"
+  # in a product title is redundant — the card drops it (presentation only).
+  # 'women' is checked first because 'womens' also contains 'men'.
+  assign context_gender = ''
+  if collection.handle contains 'women'
+    assign context_gender = 'Women'
+  elsif collection.handle contains 'men'
+    assign context_gender = 'Men'
+  endif
 -%}
+
+{%- unless is_on_running_collection -%}
+  {%- render 'product-card-styles' -%}
+{%- endunless -%}
 
 {%- paginate collection.products by products_per_page -%}
 
@@ -57,6 +71,58 @@
     </div>
   </div>
 
+  {%- if is_on_running_collection -%}
+    {%- comment -%}
+      On Brand Shop band (per On's B2B Digital Playbook): brand story +
+      CloudTec explainer using On's approved copy, with an optional large
+      visual set in the theme editor. Collapses to text-only when no image.
+    {%- endcomment -%}
+    <div class="on-brandshop">
+      <div class="container on-brandshop__inner{% unless section.settings.on_brand_image %} on-brandshop__inner--no-image{% endunless %}">
+
+        {%- if section.settings.on_brand_image -%}
+          <div class="on-brandshop__media">
+            {{
+              section.settings.on_brand_image
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'lazy',
+                decoding: 'async',
+                class: 'on-brandshop__img',
+                alt: 'On — born in the Swiss Alps',
+                widths: '600, 900, 1200',
+                sizes: '(max-width: 1023px) 100vw, 50vw'
+            }}
+          </div>
+        {%- endif -%}
+
+        <div class="on-brandshop__content">
+          <p class="on-brandshop__eyebrow">About On</p>
+          <h2 class="on-brandshop__heading">Born in the Swiss Alps</h2>
+          <p class="on-brandshop__body">
+            On was born in the Swiss Alps with one goal: to revolutionize the
+            sensation of running by empowering all to run on clouds.
+          </p>
+          <details class="on-brandshop__tech">
+            <summary class="on-brandshop__tech-trigger">
+              <span>So, what is CloudTec&reg;?</span>
+              <svg class="on-brandshop__tech-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <p class="on-brandshop__tech-body">
+              Look at (almost) any On shoe. Those little elements underneath?
+              We call them Clouds. CloudTec&reg; is all those little elements
+              formed into one outsole. The Clouds compress as you land to form
+              a flat surface, then rapidly expand as you lift off — cushioned
+              landings and explosive take-offs, designed to benefit any and
+              every runner.
+            </p>
+          </details>
+        </div>
+
+      </div>
+    </div>
+  {%- endif -%}
+
   <!-- ── Toolbar: count + sort ──────────────────────────────────────────── -->
   <div class="collection-toolbar">
     <div class="container collection-toolbar__inner">
@@ -77,7 +143,7 @@
             class="collection-toolbar__sort-select"
             name="sort_by"
             aria-label="Sort collection"
-            onchange="window.location.href = window.location.pathname + '?sort_by=' + this.value + '{%- if paginate.current_page > 1 -%}&amp;page={{ paginate.current_page }}{%- endif -%}';"
+            onchange="var url = new URL(window.location.href); url.searchParams.set('sort_by', this.value); url.searchParams.delete('page'); window.location.href = url.toString();"
           >
             {%- for option in collection.sort_options -%}
               <option
@@ -93,6 +159,90 @@
 
     </div>
   </div>
+
+  <!-- ── Faceted filters ─────────────────────────────────────────────────── -->
+  {%- if show_filters and collection.filters.size > 0 -%}
+    <div class="collection-facets">
+      <div class="container">
+        <form class="collection-facets__form" action="{{ collection.url }}" method="get" id="CollectionFiltersForm">
+          {%- if collection.sort_by != blank -%}
+            <input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">
+          {%- endif -%}
+
+          <div class="collection-facets__heading-row">
+            <p class="collection-facets__heading">Filter shoes</p>
+            <a href="{{ collection.url }}" class="collection-facets__clear">Clear all</a>
+          </div>
+
+          <div class="collection-facets__groups">
+            {%- for filter in collection.filters -%}
+              <details class="collection-facet" name="collection-filters">
+                <summary class="collection-facet__summary">
+                  <span>{{ filter.label | escape }}</span>
+                  {%- if filter.active_values.size > 0 -%}
+                    <span class="collection-facet__count" aria-label="{{ filter.active_values.size }} selected">{{ filter.active_values.size }}</span>
+                  {%- endif -%}
+                  <span class="collection-facet__chevron" aria-hidden="true">⌄</span>
+                </summary>
+
+                <div class="collection-facet__panel">
+                  {%- case filter.type -%}
+                    {%- when 'boolean', 'list' -%}
+                      <ul class="collection-facet__values" role="list">
+                        {%- for value in filter.values -%}
+                          <li>
+                            <label class="collection-facet__option{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                              <input
+                                type="checkbox"
+                                name="{{ value.param_name }}"
+                                value="{{ value.value | escape }}"
+                                {% if value.active %}checked{% endif %}
+                                {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                              >
+                              <span>{{ value.label | escape }}</span>
+                              <span class="collection-facet__value-count">{{ value.count }}</span>
+                            </label>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    {%- when 'price_range' -%}
+                      <div class="collection-facet__price">
+                        <label>
+                          <span>Minimum</span>
+                          <input
+                            type="number"
+                            inputmode="decimal"
+                            name="{{ filter.min_value.param_name }}"
+                            value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                            min="0"
+                            max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                            placeholder="0"
+                          >
+                        </label>
+                        <label>
+                          <span>Maximum</span>
+                          <input
+                            type="number"
+                            inputmode="decimal"
+                            name="{{ filter.max_value.param_name }}"
+                            value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                            min="0"
+                            max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                            placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                          >
+                        </label>
+                      </div>
+                  {%- endcase -%}
+                  <button class="btn collection-facet__apply" type="submit">Apply {{ filter.label | escape }}</button>
+                </div>
+              </details>
+            {%- endfor -%}
+          </div>
+
+        </form>
+      </div>
+    </div>
+  {%- endif -%}
 
   <!-- ── Active filters ─────────────────────────────────────────────────── -->
   {%- if show_filters and collection.filters.size > 0 -%}
@@ -169,7 +319,9 @@
                 {%- render 'product-card',
                   product: product,
                   show_badges: true,
-                  lazy_load: card_lazy
+                  lazy_load: card_lazy,
+                  strip_vendor: true,
+                  context_gender: context_gender
                 -%}
               {%- endif -%}
             </li>
@@ -200,6 +352,43 @@
 {%- endpaginate -%}
 
 <style>
+  .collection-facets {
+    border-top: 1px solid var(--color-border, #e4ded6);
+    border-bottom: 1px solid var(--color-border, #e4ded6);
+    background: var(--color-card, #fff);
+  }
+
+  .collection-facets__form { padding: 18px 0; }
+  .collection-facets__heading-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+  .collection-facets__heading { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-heading); }
+  .collection-facets__clear { color: var(--color-text-secondary); font-size: 13px; text-underline-offset: 3px; }
+  .collection-facets__groups { display: flex; flex-wrap: wrap; gap: 10px; }
+  .collection-facet { position: relative; }
+  .collection-facet__summary { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 9px 13px; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-background); cursor: pointer; font-size: 13px; font-weight: 700; list-style: none; }
+  .collection-facet__summary::-webkit-details-marker { display: none; }
+  .collection-facet__summary:focus-visible { outline: 3px solid #005fcc; outline-offset: 2px; }
+  .collection-facet__count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--color-heading); color: #fff; font-size: 11px; }
+  .collection-facet__chevron { font-size: 14px; transition: transform .18s ease; }
+  .collection-facet[open] .collection-facet__chevron { transform: rotate(180deg); }
+  .collection-facet__panel { position: absolute; z-index: 12; top: calc(100% + 8px); left: 0; min-width: 250px; max-width: min(340px, calc(100vw - 32px)); max-height: 360px; overflow: auto; padding: 14px; border: 1px solid var(--color-border); border-radius: var(--radius-card, 12px); background: var(--color-background); box-shadow: 0 12px 30px rgba(26, 31, 38, .14); }
+  .collection-facet__values { display: grid; gap: 4px; margin: 0; padding: 0; }
+  .collection-facet__option { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; min-height: 38px; cursor: pointer; font-size: 14px; }
+  .collection-facet__option input { width: 18px; height: 18px; accent-color: var(--color-heading); }
+  .collection-facet__option.is-disabled { opacity: .45; cursor: not-allowed; }
+  .collection-facet__value-count { color: var(--color-text-secondary); font-size: 12px; }
+  .collection-facet__price { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .collection-facet__price label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 12px; }
+  .collection-facet__price input { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-background); color: var(--color-text); }
+  .collection-facet__apply { width: 100%; min-height: 42px; margin-top: 14px; padding: 10px 18px; }
+
+  @media (max-width: 899px) {
+    .collection-facets__groups { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .collection-facet { position: static; width: 100%; }
+    .collection-facet__summary { justify-content: space-between; width: 100%; border-radius: 8px; }
+    .collection-facet__summary > span:first-child { margin-right: auto; }
+    .collection-facet__panel { position: static; min-width: 0; max-width: none; max-height: none; margin-top: 8px; box-shadow: none; }
+  }
+
   /* ── Collection hero ──────────────────────────────────────────────────── */
   .collection-hero--compact {
     padding-bottom: 0;
@@ -359,10 +548,17 @@
   }
 
   /* ── Product grid ────────────────────────────────────────────────────── */
+  /* White surface so frameless product photos merge with the page (P1).
+     The WHOLE collection page below the header is one continuous white
+     surface — hero, toolbar, facets, grid — so nothing stripes. */
+  .main-collection {
+    background: #FFFFFF;
+  }
+
   .collection-grid {
     display: grid;
     grid-template-columns: repeat(var(--coll-cols, 4), 1fr);
-    gap: 32px;
+    gap: 40px 24px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -429,6 +625,107 @@
   }
 
   {% if is_on_running_collection %}
+    /* ── On Brand Shop band (B2B Digital Playbook: brand story + tech) ── */
+    .on-brandshop {
+      background: var(--color-card, #FFFFFF);
+      border-top: 1px solid var(--color-border, #EBEBEB);
+      border-bottom: 1px solid var(--color-border, #EBEBEB);
+    }
+
+    .on-brandshop__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+
+    .on-brandshop__inner--no-image {
+      grid-template-columns: 1fr;
+      max-width: 720px;
+      margin-inline: auto;
+      text-align: center;
+    }
+
+    .on-brandshop__media { min-width: 0; }
+
+    .on-brandshop__img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .on-brandshop__eyebrow {
+      margin: 0 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary, #6B7378);
+    }
+
+    .on-brandshop__heading {
+      margin: 0 0 12px;
+      font-family: var(--font-heading, sans-serif);
+      font-weight: var(--font-heading-weight, 700);
+      font-size: clamp(22px, 2.6vw, 32px);
+      line-height: 1.15;
+      color: var(--color-heading, #000000);
+    }
+
+    .on-brandshop__body {
+      margin: 0 0 18px;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--color-text, #3D3D3D);
+    }
+
+    .on-brandshop__tech {
+      border-top: 1px solid var(--color-border, #EBEBEB);
+      padding-top: 4px;
+    }
+
+    .on-brandshop__tech-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+      cursor: pointer;
+      list-style: none;
+      font-family: var(--font-heading, sans-serif);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-heading, #000000);
+    }
+
+    .on-brandshop__inner--no-image .on-brandshop__tech-trigger { justify-content: center; }
+
+    .on-brandshop__tech-trigger::-webkit-details-marker { display: none; }
+
+    .on-brandshop__tech[open] .on-brandshop__tech-icon { transform: rotate(180deg); }
+
+    .on-brandshop__tech-icon { transition: transform 0.2s ease; flex-shrink: 0; }
+
+    .on-brandshop__tech-body {
+      margin: 0 0 12px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--color-text, #3D3D3D);
+    }
+
+    @media (max-width: 1023px) {
+      .on-brandshop__inner {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding-top: 28px;
+        padding-bottom: 28px;
+      }
+    }
+
     .on-card {
       display: flex;
       flex-direction: column;
@@ -513,7 +810,7 @@
       outline: 1px solid rgba(0, 0, 0, 0.18);
       cursor: pointer;
       padding: 0;
-      background-color: var(--sw-bg, #999999);
+      background: var(--sw-bg, #999999);
       transition: border-color 0.15s ease, transform 0.15s ease, outline-color 0.15s ease;
       flex-shrink: 0;
     }
@@ -536,6 +833,14 @@
       color: var(--color-text-secondary, #888888);
       min-height: 1.4em;
       line-height: 1.4;
+    }
+
+    /* Short usage descriptor under the title (playbook listing pattern) */
+    .on-card__descriptor {
+      margin: -6px 0 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--color-text-secondary, #6B7378);
     }
 
     .on-card__footer {
@@ -616,14 +921,45 @@
   <script>
     (function () {
       var COLOR_CSS = {
+        aloe: '#d9e8c6',
         black: '#111111',
+        blueberry: '#3f4e7a',
+        blonde: '#d8bd8c',
+        caper: '#6d7655',
+        castor: '#8b7f6b',
+        chai: '#c8a979',
+        cinder: '#6c625d',
+        cream: '#f3ead8',
+        dew: '#d5e7df',
+        dust: '#c8beb4',
+        fade: '#bfaeba',
+        flint: '#5f6266',
+        fog: '#cfd4d3',
+        green: '#6f8a55',
+        heron: '#9aa7ad',
+        honeydew: '#ddeac8',
+        ice: '#d8e7ec',
+        ink: '#182333',
         white: '#f0f0f0',
         ivory: '#f5f2e7',
         glacier: '#b8d8ec',
         alloy: '#9ba8b0',
         frost: '#e4f0f6',
+        lilac: '#c8b7d9',
+        limelight: '#d7e66f',
+        metal: '#8d9194',
         pearl: '#e8d5c5',
+        pearlwhite: '#eee9df',
+        petal: '#e2b8be',
+        salmon: '#df927b',
+        silver: '#c8cdd1',
+        steele: '#66727a',
+        stone: '#a7aaa5',
+        tangerine: '#df7b42',
+        thistle: '#9a88a8',
+        truffle: '#6d574b',
         wolf: '#7a7a7a',
+        zodiac: '#2f4c5e',
         sand: '#c2a882',
         magnet: '#5c5c6e',
         tin: '#8e9aaa',
@@ -640,6 +976,7 @@
         nimbus: '#e0e8f0',
         iceberg: '#c8e0e8',
         undyed: '#f0ede0',
+        undyedwhite: '#f0ede0',
         seedling: '#b0c8a0',
         chambray: '#7090b0',
         sage: '#8baf8b',
@@ -655,18 +992,62 @@
         mahogany: '#7a3020',
         evergreen: '#2a5028',
         safari: '#7a6840',
-        ghost: '#d8d8d8'
+        ghost: '#d8d8d8',
+        navy: '#1e2d46',
+        rock: '#696a64'
       };
 
       var LIGHT_COLORS = new Set([
-        'white', 'ivory', 'frost', 'pelican', 'nimbus', 'iceberg', 'undyed', 'ghost', 'glacier', 'pearl'
+        'aloe', 'blonde', 'cream', 'dew', 'dust', 'fog', 'glacier', 'ghost', 'honeydew', 'ice', 'iceberg',
+        'ivory', 'limelight', 'nimbus', 'pearl', 'pearlwhite', 'pelican', 'petal', 'salmon', 'silver',
+        'undyed', 'undyedwhite', 'white'
       ]);
+
+      function normalizeColorKey(value) {
+        return String(value || '')
+          .toLowerCase()
+            .replace(/[\s\/|,_\-]+/g, '');
+      }
+
+      function normalizeColorName(value) {
+        return String(value || '')
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, '')
+          .replace(/[^a-z0-9]/g, '');
+      }
+
+      function getColorParts(value) {
+        return String(value || '')
+          .split(/\s*(?:\||\/)\s*/)
+          .map(normalizeColorName)
+          .filter(Boolean);
+      }
+
+      function getSwatchBackground(value) {
+        var parts = getColorParts(value);
+        var colors = parts.map(function (part) {
+          return COLOR_CSS[part] || '#aaaaaa';
+        });
+
+        if (!colors.length) return '#aaaaaa';
+        if (colors.length === 1) return colors[0];
+
+        return 'linear-gradient(135deg, ' + colors[0] + ' 0 49%, ' + colors[1] + ' 51% 100%)';
+      }
+
+      function isLightSwatch(value) {
+        return getColorParts(value).some(function (part) {
+          return LIGHT_COLORS.has(part);
+        });
+      }
 
       document.querySelectorAll('.on-card').forEach(function (card) {
         var imgEl = card.querySelector('.on-card__img');
         var swatches = Array.from(card.querySelectorAll('.on-card__swatch'));
         var label = card.querySelector('.on-card__color-label');
         var colorImages = {};
+        var normalizedColorImages = {};
 
         try {
           colorImages = JSON.parse(card.getAttribute('data-color-images') || '{}');
@@ -674,11 +1055,14 @@
           colorImages = {};
         }
 
+        Object.keys(colorImages).forEach(function (key) {
+          normalizedColorImages[normalizeColorKey(key)] = colorImages[key];
+        });
+
         swatches.forEach(function (sw) {
-          var first = (sw.getAttribute('data-first-color') || '').toLowerCase();
-          var css = COLOR_CSS[first] || '#aaaaaa';
-          sw.style.setProperty('--sw-bg', css);
-          if (LIGHT_COLORS.has(first)) {
+          var colorValue = sw.getAttribute('data-color') || '';
+          sw.style.setProperty('--sw-bg', getSwatchBackground(colorValue));
+          if (isLightSwatch(colorValue)) {
             sw.style.outline = '1px solid rgba(0,0,0,0.3)';
           }
         });
@@ -717,7 +1101,7 @@
 
         function swapImage(colorVal) {
           if (!imgEl || !imgEl.tagName) return;
-          var url = colorImages[colorVal];
+          var url = colorImages[colorVal] || normalizedColorImages[normalizeColorKey(colorVal)];
           if (url && url.length > 0 && imgEl.src.split('?')[0] !== url.split('?')[0]) {
             imgEl.src = url;
             imgEl.srcset = '';
@@ -783,6 +1167,16 @@
       "id": "show_filters",
       "label": "Show active filter tags",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "On Brand Shop (On collection only)"
+    },
+    {
+      "type": "image_picker",
+      "id": "on_brand_image",
+      "label": "Brand visual",
+      "info": "Large lifestyle or product close-up shown beside the About On story on /collections/on-running. Use imagery from the On Marketing Library. Leave blank for a text-only band."
     }
   ]
 }

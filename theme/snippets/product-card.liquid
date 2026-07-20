@@ -1,24 +1,33 @@
 {% comment %}
   snippets/product-card.liquid
   ─────────────────────────────────────────────────────────────────────────────
-  Reusable product card. Extracted from featured-products.liquid so collection,
-  search, and other grids can share identical markup.
+  Product card for collection and search grids — Yellow Box-style anatomy:
+  image → swatch dots → short name → price. No per-card buttons; the whole
+  card is one link (stretched title link).
 
   Parameters:
-    product     {object}  Required. The product object.
-    show_badges {boolean} Optional. Show New/Sale/Best Seller badge. Default: true.
-    lazy_load   {boolean} Optional. Use loading="lazy" on image. Default: true.
-                          Set false for the first card in a collection (LCP image).
+    product        {object}  Required. The product object.
+    show_badges    {boolean} Optional. Show badge (In Store Only/Sold Out/New/
+                             Sale/Best Seller). Default: true.
+    lazy_load      {boolean} Optional. Use loading="lazy" on image. Default: true.
+                             Set false for above-the-fold cards (LCP).
+    strip_vendor   {boolean} Optional. Strip the vendor prefix from the display
+                             title ("On Cloud 6" → "Cloud 6"). Presentation only;
+                             full title stays on the PDP and in structured data.
+    context_gender {string}  Optional. "Women" or "Men". When the grid context
+                             already says it (e.g. /collections/womens), the
+                             matching word is dropped from the display title.
 
-  CSS classes are defined in sections/featured-products.liquid which is always
-  loaded before any grid that uses this snippet.
+  CSS classes are provided by snippets/product-card-styles.liquid on collection
+  and search templates.
 
   BADGE LOGIC (priority order — only one badge per card):
-    1. Tag "best-seller" or "bestseller"  → "Best Seller" (dark badge)
-    2. Tag "new"                          → "New"          (blush badge)
-    3. Sold out                           → "Sold Out"     (dark badge)
-    4. Published within 60 days           → "New"          (blush badge, auto)
-    5. compare_at_price > price           → "Sale"         (dark badge)
+    1. Vendor "New Balance"                   → "In Store Only" (dark badge)
+    2. Tag "best-seller" or "bestseller"      → "Best Seller"   (dark badge)
+    3. Tag "new"                              → "New"           (blush badge)
+    4. Sold out                               → "Sold Out"      (dark badge)
+    5. Published within 60 days               → "New"           (blush badge, auto)
+    6. compare_at_price > price               → "Sale"          (dark badge)
 {% endcomment %}
 
 {%- liquid
@@ -31,7 +40,6 @@
   endif
 
   # ── Image loading strategy ────────────────────────────────────────────────
-  # First card on collection pages can pass lazy_load: false for the LCP image
   if lazy_load
     assign img_loading  = 'lazy'
     assign img_decoding = 'async'
@@ -45,9 +53,18 @@
   # ── Badge resolution ──────────────────────────────────────────────────────
   assign badge_text  = ''
   assign badge_class = ''
+  assign product_vendor_downcase = product.vendor | downcase | strip
+  assign is_in_store_only = false
+
+  if product_vendor_downcase == 'new balance'
+    assign is_in_store_only = true
+  endif
 
   if show_badges
-    if product.tags contains 'best-seller' or product.tags contains 'bestseller'
+    if is_in_store_only
+      assign badge_text  = 'In Store Only'
+      assign badge_class = 'product-card__badge--dark'
+    elsif product.tags contains 'best-seller' or product.tags contains 'bestseller'
       assign badge_text  = 'Best Seller'
       assign badge_class = 'product-card__badge--dark'
     elsif product.tags contains 'new'
@@ -69,15 +86,37 @@
     endif
   endif
 
-  # ── Image availability ────────────────────────────────────────────────────
-  assign primary_img   = product.featured_image
-  assign secondary_img = product.images[1]
-  assign has_secondary = false
-  if secondary_img != blank and secondary_img != primary_img
-    assign has_secondary = true
+  # ── Display title (presentation-layer only) ──────────────────────────────
+  assign display_title = product.title
+
+  if strip_vendor and product.vendor != blank
+    assign pc_vprefix = product.vendor | append: ' '
+    assign pc_vlen    = pc_vprefix.size
+    assign pc_head    = display_title | slice: 0, pc_vlen
+    if pc_head == pc_vprefix
+      assign pc_rest_len  = display_title.size | minus: pc_vlen
+      assign display_title = display_title | slice: pc_vlen, pc_rest_len
+    endif
   endif
 
-  # ── Sale state for price display ──────────────────────────────────────────
+  if context_gender != blank
+    # Drop the gender word anywhere in the title when the grid context already
+    # states it ("On Cloud 6 Women Waterproof" → "Cloud 6 Waterproof").
+    assign pc_gsearch    = ' ' | append: context_gender | append: ' '
+    assign pc_padded     = display_title | append: ' '
+    assign display_title = pc_padded | replace: pc_gsearch, ' ' | strip
+  endif
+
+  # ── Color swatch dots ─────────────────────────────────────────────────────
+  assign pc_colors = nil
+  for pc_opt in product.options_with_values
+    if pc_opt.name == 'Color'
+      assign pc_colors = pc_opt.values
+    endif
+  endfor
+
+  # ── Primary image ─────────────────────────────────────────────────────────
+  assign primary_img = product.featured_image
 -%}
 
 <article
@@ -86,132 +125,128 @@
 >
 
   {%- comment -%} ── Media area (image + badge) ─────────────────────────── {%- endcomment -%}
-  <a
-    href="{{ product.url }}"
-    class="product-card__media-link"
-    tabindex="-1"
-    aria-hidden="true"
-  >
-    <div class="product-card__media">
+  <div class="product-card__media">
 
-      {%- if primary_img != blank -%}
-        {%- assign pc_primary_alt = primary_img.alt | default: product.title -%}
-        {{
-          primary_img
-          | image_url: width: 800
-          | image_tag:
-            loading: img_loading,
-            decoding: img_decoding,
-            fetchpriority: img_priority,
-            class: 'product-card__img product-card__img--primary',
-            alt: pc_primary_alt,
-            width: primary_img.width,
-            height: primary_img.height,
-            widths: '400, 600, 800, 1000',
-            sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
-        }}
-      {%- else -%}
-        <div class="product-card__img product-card__img--primary product-card__img--placeholder">
-          {{- 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
-        </div>
-      {%- endif -%}
+    {%- if primary_img != blank -%}
+      {%- assign pc_primary_alt = primary_img.alt | default: product.title -%}
+      {{
+        primary_img
+        | image_url: width: 800
+        | image_tag:
+          loading: img_loading,
+          decoding: img_decoding,
+          fetchpriority: img_priority,
+          class: 'product-card__img',
+          alt: pc_primary_alt,
+          width: primary_img.width,
+          height: primary_img.height,
+          widths: '400, 600, 800, 1000',
+          sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
+      }}
+    {%- else -%}
+      <div class="product-card__img product-card__img--placeholder">
+        {{- 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
+      </div>
+    {%- endif -%}
 
-      {%- if has_secondary -%}
-        {%- assign pc_secondary_alt = secondary_img.alt | default: product.title -%}
-        {{
-          secondary_img
-          | image_url: width: 800
-          | image_tag:
-            loading: 'lazy',
-            decoding: 'async',
-            class: 'product-card__img product-card__img--secondary',
-            alt: pc_secondary_alt,
-            width: secondary_img.width,
-            height: secondary_img.height,
-            widths: '400, 600, 800, 1000',
-            sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
-        }}
-      {%- endif -%}
+    {%- if badge_text != blank -%}
+      <span class="product-card__badge {{ badge_class }}" aria-hidden="true">
+        {{- badge_text -}}
+      </span>
+    {%- endif -%}
 
-      {%- if badge_text != blank -%}
-        <span class="product-card__badge {{ badge_class }}" aria-hidden="true">
-          {{- badge_text -}}
-        </span>
-      {%- endif -%}
+  </div><!-- /.product-card__media -->
 
-    </div><!-- /.product-card__media -->
-  </a>
-
-  {%- comment -%} ── Card body ──────────────────────────────────────────── {%- endcomment -%}
+  {%- comment -%} ── Card body: swatches → title → price ────────────────── {%- endcomment -%}
   <div class="product-card__body">
 
-    {%- if product.vendor != blank -%}
-      <p class="product-card__vendor">{{- product.vendor | escape -}}</p>
+    {%- if pc_colors != nil and pc_colors.size > 1 -%}
+      {%- comment -%}
+        Decorative dots (whole card links to the PDP — no nested interactive
+        elements). Each dot is a zoomed center-crop of that color's variant
+        featured image; hex fallback when no variant image is bound.
+        Max 5 dots + "+N" overflow.
+      {%- endcomment -%}
+      <div class="product-card__swatches" aria-hidden="true">
+        {%- for pc_cv in pc_colors limit: 5 -%}
+          {%- liquid
+            assign pc_dot_url = ''
+            for pc_variant in product.variants
+              if pc_dot_url == '' and pc_variant.featured_image != blank
+                for pc_vopt in pc_variant.options
+                  if pc_vopt == pc_cv
+                    assign pc_dot_url = pc_variant.featured_image | image_url: width: 72, height: 72, crop: 'center'
+                  endif
+                endfor
+              endif
+            endfor
+
+            # Hex fallback — first recognizable color word wins
+            assign pc_hex = '#CFC9C0'
+            assign pc_cv_down = pc_cv | downcase
+            if pc_cv_down contains 'black'
+              assign pc_hex = '#1A1A1A'
+            elsif pc_cv_down contains 'white' or pc_cv_down contains 'ivory'
+              assign pc_hex = '#F4F2ED'
+            elsif pc_cv_down contains 'navy'
+              assign pc_hex = '#1F2A44'
+            elsif pc_cv_down contains 'blue' or pc_cv_down contains 'denim'
+              assign pc_hex = '#3A6EA5'
+            elsif pc_cv_down contains 'grey' or pc_cv_down contains 'gray' or pc_cv_down contains 'fossil'
+              assign pc_hex = '#9A9A9A'
+            elsif pc_cv_down contains 'sand' or pc_cv_down contains 'tan' or pc_cv_down contains 'beige' or pc_cv_down contains 'gobi'
+              assign pc_hex = '#D8C4A4'
+            elsif pc_cv_down contains 'pink' or pc_cv_down contains 'mauve' or pc_cv_down contains 'rose'
+              assign pc_hex = '#D9A7A7'
+            elsif pc_cv_down contains 'green' or pc_cv_down contains 'olive' or pc_cv_down contains 'moss'
+              assign pc_hex = '#5C7C5C'
+            elsif pc_cv_down contains 'red'
+              assign pc_hex = '#A7473E'
+            elsif pc_cv_down contains 'brown' or pc_cv_down contains 'moro' or pc_cv_down contains 'cuoio' or pc_cv_down contains 'sigaro' or pc_cv_down contains 'chocolate'
+              assign pc_hex = '#7A5C44'
+            elsif pc_cv_down contains 'camel' or pc_cv_down contains 'cognac'
+              assign pc_hex = '#B8865C'
+            elsif pc_cv_down contains 'cream' or pc_cv_down contains 'pearl' or pc_cv_down contains 'undyed'
+              assign pc_hex = '#EFE8D8'
+            elsif pc_cv_down contains 'silver' or pc_cv_down contains 'platino'
+              assign pc_hex = '#C9C9C9'
+            endif
+          -%}
+          {%- if pc_dot_url != '' -%}
+            <span
+              class="product-card__dot"
+              style="background-image: url('{{ pc_dot_url }}');"
+              title="{{ pc_cv | escape }}"
+            ></span>
+          {%- else -%}
+            <span
+              class="product-card__dot product-card__dot--hex"
+              style="background-color: {{ pc_hex }};"
+              title="{{ pc_cv | escape }}"
+            ></span>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if pc_colors.size > 5 -%}
+          <span class="product-card__dot-more">+{{ pc_colors.size | minus: 5 }}</span>
+        {%- endif -%}
+      </div>
+      <span class="product-card__sr">{{ pc_colors.size }} colors available</span>
     {%- endif -%}
 
     <h3 class="product-card__title">
-      <a href="{{ product.url }}" class="product-card__title-link">
-        {{- product.title | escape -}}
+      {%- comment -%}
+        Stretched link — the ::after pseudo-element covers the whole card,
+        so the entire card is clickable while this stays the only link.
+      {%- endcomment -%}
+      <a href="{{ product.url }}" class="product-card__link">
+        {{- display_title | escape -}}
       </a>
     </h3>
 
-    <div class="product-card__footer">
+    <div class="product-card__prices">
+      {%- render 'price', product: product, show_compare: true -%}
+    </div>
 
-      {%- comment -%} Price ─────────────────────────────────────────────── {%- endcomment -%}
-      <div class="product-card__prices">
-        {%- render 'price', product: product, show_compare: true -%}
-      </div>
-
-      {%- comment -%}
-        CTA button — linked when available, inert span when sold out.
-        The sold-out state uses opacity + cursor:not-allowed to communicate
-        unavailability without removing the element from the DOM (which would
-        cause layout shift between hover and non-hover states).
-      {%- endcomment -%}
-      {%- if product.available -%}
-        <a
-          href="{{ product.url }}"
-          class="product-card__btn"
-          aria-label="Shop {{ product.title | escape }}"
-        >
-          Shop Now
-        </a>
-      {%- else -%}
-        <span class="product-card__btn product-card__btn--sold-out">
-          Sold Out
-        </span>
-      {%- endif -%}
-
-    </div><!-- /.product-card__footer -->
   </div><!-- /.product-card__body -->
 
 </article><!-- /.product-card -->
-
-<style>
-  /* ── Sold-out button state ─────────────────────────────────────────────
-     Intentionally not pointer-events: none — screen readers can still
-     focus the element and read "Sold Out". Visual users see the cursor change.
-  ─────────────────────────────────────────────────────────────────────── */
-  .product-card__btn--sold-out {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    padding: 9px 16px;
-    background-color: var(--color-accent, #F5E1E1);
-    color: var(--color-heading, #000000);
-    border: none;
-    border-radius: var(--radius-btn, 8px);
-    font-family: var(--font-body, sans-serif);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    line-height: 1;
-  }
-</style>
-

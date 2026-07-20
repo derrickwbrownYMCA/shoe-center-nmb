@@ -1,0 +1,24 @@
+query VaneliCatalogAudit {
+  products(first: 50, query: "vendor:Vaneli status:draft") {
+    nodes {
+      id
+      title
+      handle
+      status
+      totalInventory
+      description
+      featuredMedia { id }
+      priceRangeV2 {
+        minVariantPrice { amount currencyCode }
+        maxVariantPrice { amount currencyCode }
+      }
+      variants(first: 100) {
+        nodes {
+          sku
+          price
+          inventoryQuantity
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+query ArticleUpdateSchema {
+  input: __type(name: "ArticleUpdateInput") {
+    inputFields {
+      name
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+}

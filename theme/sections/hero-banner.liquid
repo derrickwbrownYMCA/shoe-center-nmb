@@ -233,7 +233,7 @@
 
       {%- if section.settings.story_text != blank -%}
         <a
-          href="{{ section.settings.story_url | default: '/pages/about' }}"
+          href="{{ section.settings.story_url | default: '/pages/our-story' }}"
           class="hero__story-link"
           aria-label="{{ section.settings.story_text | escape }} — learn about Shoe Center"
         >
@@ -818,7 +818,7 @@
       "type": "url",
       "id": "story_url",
       "label": "Link URL",
-      "info": "Defaults to /pages/about if left blank."
+      "info": "Defaults to /pages/our-story if left blank."
     },
 
     {

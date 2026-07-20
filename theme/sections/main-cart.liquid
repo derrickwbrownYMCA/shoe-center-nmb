@@ -13,6 +13,15 @@
 
     {%- if cart.item_count > 0 -%}
 
+      {%- liquid
+        assign free_shipping_threshold = 20000
+        assign amount_to_free_shipping = free_shipping_threshold | minus: cart.total_price
+        assign shipping_progress = cart.total_price | times: 100.0 | divided_by: free_shipping_threshold
+        if shipping_progress > 100
+          assign shipping_progress = 100
+        endif
+      -%}
+
       <form action="{{ routes.cart_url }}" method="post" id="CartPageForm" novalidate>
 
         <div class="main-cart__layout">
@@ -162,6 +171,23 @@
                   <span class="cart-summary__value">−{{ cart.total_discounts | money }}</span>
                 </div>
               {%- endif -%}
+
+              <div class="cart-summary__shipping-progress" aria-live="polite">
+                {%- if amount_to_free_shipping > 0 -%}
+                  <p><strong>{{ amount_to_free_shipping | money }}</strong> away from free standard shipping.</p>
+                {%- else -%}
+                  <p><strong>Free standard shipping unlocked.</strong></p>
+                {%- endif -%}
+                <div class="cart-summary__progress-track" role="progressbar" aria-label="Progress toward free standard shipping" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ shipping_progress | round }}">
+                  <span style="width: {{ shipping_progress }}%"></span>
+                </div>
+              </div>
+
+              <ul class="cart-summary__reassurance" role="list">
+                <li>Paid pickup available in North Myrtle Beach</li>
+                <li>$7.95 standard shipping under $200</li>
+                <li>14-day store credit on unworn merchandise</li>
+              </ul>
 
               <p class="cart-summary__shipping-note">
                 Shipping and taxes calculated at checkout.
@@ -484,6 +510,51 @@
     margin: 0;
     line-height: 1.5;
     text-align: center;
+  }
+
+  .cart-summary__shipping-progress {
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--color-accent, #F5E1E1);
+  }
+
+  .cart-summary__shipping-progress p {
+    margin: 0 0 9px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-heading, #000000);
+  }
+
+  .cart-summary__progress-track {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  .cart-summary__progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-heading, #000000);
+  }
+
+  .cart-summary__reassurance {
+    display: grid;
+    gap: 7px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--color-text, #3D3D3D);
+  }
+
+  .cart-summary__reassurance li::before {
+    content: "✓";
+    margin-right: 7px;
+    color: var(--color-heading, #000000);
+    font-weight: 700;
   }
 
   .cart-summary__checkout {

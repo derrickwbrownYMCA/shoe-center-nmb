@@ -15,6 +15,8 @@
   assign desktop_cols      = section.settings.columns | default: '4'
 -%}
 
+{%- render 'product-card-styles' -%}
+
 {%- paginate search.results by results_per_page -%}
 
 <div class="main-search section-padding">
@@ -88,10 +90,18 @@
           >
             {%- for item in product_results -%}
               <li class="search-grid__item">
+                {%- liquid
+                  if forloop.index <= 4
+                    assign card_lazy = false
+                  else
+                    assign card_lazy = true
+                  endif
+                -%}
                 {%- render 'product-card',
                   product: item,
                   show_badges: true,
-                  lazy_load: forloop.first ? false : true
+                  lazy_load: card_lazy,
+                  strip_vendor: true
                 -%}
               </li>
             {%- endfor -%}
@@ -220,10 +230,15 @@
   .search-header__submit:focus-visible { outline: 3px solid #005FCC; outline-offset: 2px; border-radius: 4px; }
 
   /* ── Product grid ──────────────────────────────────────────────────────── */
+  /* White surface so frameless product photos merge with the page (P1) */
+  .main-search {
+    background: #FFFFFF;
+  }
+
   .search-grid {
     display: grid;
     grid-template-columns: repeat(var(--search-cols, 4), 1fr);
-    gap: 32px;
+    gap: 40px 24px;
     list-style: none;
     padding: 0;
     margin: 0 0 48px;

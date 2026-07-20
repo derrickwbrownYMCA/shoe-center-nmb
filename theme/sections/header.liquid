@@ -36,7 +36,15 @@
   5. Cart count badge update (listens for custom 'cart:updated' event).
 {% endcomment %}
 
-{%- assign nav = linklists[section.settings.menu] -%}
+{%- liquid
+  assign nav = linklists[section.settings.menu]
+  assign has_fit_guides_link = false
+  for link in nav.links
+    if link.url contains '/blogs/news'
+      assign has_fit_guides_link = true
+    endif
+  endfor
+-%}
 
 <!-- ── HEADER ──────────────────────────────────────────────────── -->
 <header
@@ -94,7 +102,7 @@
                    CSS :focus-within handles the visual state automatically. -->
               <a
                 href="{{ link.url }}"
-                class="header__nav-link"
+                class="header__nav-link{% if link.title == 'On' %} header__nav-link--brand-case{% endif %}"
                 aria-haspopup="true"
                 {% if link.active %}aria-current="page"{% endif %}
               >
@@ -180,7 +188,7 @@
 
               <a
                 href="{{ link.url }}"
-                class="header__nav-link"
+                class="header__nav-link{% if link.title == 'On' %} header__nav-link--brand-case{% endif %}"
                 {% if link.active %}aria-current="page"{% endif %}
               >
                 {{- link.title -}}
@@ -189,6 +197,12 @@
             {%- endif -%}
           </li>
         {%- endfor -%}
+
+        {%- unless has_fit_guides_link -%}
+          <li class="header__nav-item">
+            <a href="/blogs/news" class="header__nav-link">Fit Guides</a>
+          </li>
+        {%- endunless -%}
 
       </ul>
     </nav>
@@ -211,7 +225,7 @@
 
       <a
         href="{{ routes.account_url }}"
-        class="header__icon-btn"
+        class="header__icon-btn header__account-btn"
         aria-label="{% if customer %}My account — {{ customer.first_name }}{% else %}Sign in{% endif %}"
       >
         <svg aria-hidden="true" focusable="false" width="19" height="19" viewBox="0 0 20 20" fill="none">
@@ -337,7 +351,7 @@
         {%- else -%}
           <a
             href="{{ link.url }}"
-            class="mobile-nav__link"
+            class="mobile-nav__link{% if link.title == 'On' %} header__nav-link--brand-case{% endif %}"
             {% if link.active %}aria-current="page"{% endif %}
           >
             {{- link.title -}}
@@ -346,6 +360,11 @@
 
       </li>
     {%- endfor -%}
+    {%- unless has_fit_guides_link -%}
+      <li class="mobile-nav__item">
+        <a href="/blogs/news" class="mobile-nav__link">Fit Guides</a>
+      </li>
+    {%- endunless -%}
   </ul>
 
   <!-- Utility links at the bottom of the drawer -->
@@ -481,6 +500,13 @@
     background-color: rgba(24, 36, 46, 0.08);
     color: var(--color-heading);
     opacity: 1; /* Override global a:hover opacity */
+  }
+
+  /* On brand-name compliance: the brand is written "On", never "ON".
+     Applied to nav items titled exactly "On" (desktop and mobile). */
+  .header__nav-link--brand-case {
+    text-transform: none;
+    letter-spacing: 0.06em;
   }
 
   /* Active page — blush pill + underline so it's visually distinct from hover */
@@ -947,7 +973,35 @@
   }
 
   @media (max-width: 1023px) {
-    .header__inner { height: 64px; }
+    .header__inner {
+      height: 64px;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .header__logo {
+      min-width: 0;
+    }
+
+    .header__logo-img {
+      max-width: min({{ section.settings.logo_max_width }}px, 42vw);
+    }
+
+    .header__logo-text {
+      display: block;
+      max-width: 46vw;
+      overflow: hidden;
+      font-size: 15px;
+      letter-spacing: 0.11em;
+      text-overflow: ellipsis;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .header__account-btn { display: none; }
+    .header__actions { gap: 0; }
+    .header__icon-btn,
+    .header__hamburger { width: 38px; height: 38px; }
   }
 </style>
 

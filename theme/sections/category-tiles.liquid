@@ -60,6 +60,8 @@
               assign fallback_alt = 'Man tying a shoe'
             elsif title_downcase contains 'on' or title_downcase contains 'athletic' or title_downcase contains 'performance'
               assign fallback_alt = 'Woman tying an athletic shoe'
+            elsif title_downcase contains 'comfort'
+              assign fallback_alt = 'Woman wearing casual sandals while walking through a coastal town'
             elsif title_downcase contains 'dance'
               assign fallback_alt = 'Dance lifestyle image'
             elsif title_downcase contains 'sale'
@@ -96,6 +98,8 @@
                     <img class="cat-tile__img" src="{{ 'tile-mens-lace-up.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
                   {%- elsif title_downcase contains 'on' or title_downcase contains 'athletic' or title_downcase contains 'performance' -%}
                     <img class="cat-tile__img" src="{{ 'tile-athletic-lacing.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
+                  {%- elsif title_downcase contains 'comfort' -%}
+                    <img class="cat-tile__img" src="{{ 'Women selection picture.jpg' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
                   {%- elsif title_downcase contains 'dance' -%}
                     <img class="cat-tile__img" src="{{ 'tile-dance-lifestyle.webp' | asset_url }}" alt="{{ fallback_alt }}" width="800" height="1000" loading="lazy" decoding="async">
                   {%- elsif title_downcase contains 'sale' -%}
@@ -141,13 +145,13 @@
           </a>
         </li>
         <li class="cat-tiles__item">
-          <a href="{{ routes.collections_url }}" class="cat-tile" aria-label="On Running - Performance favorites">
+          <a href="{{ routes.collections_url }}" class="cat-tile" aria-label="On - Performance favorites">
             <div class="cat-tile__media">
-              <img class="cat-tile__img" src="{{ 'tile-athletic-lacing.webp' | asset_url }}" alt="On Running category image" width="800" height="1000" loading="lazy" decoding="async">
+              <img class="cat-tile__img" src="{{ 'tile-athletic-lacing.webp' | asset_url }}" alt="On category image" width="800" height="1000" loading="lazy" decoding="async">
             </div>
             <div class="cat-tile__content">
               <p class="cat-tile__subtitle">Performance favorites</p>
-              <h3 class="cat-tile__title">On Running</h3>
+              <h3 class="cat-tile__title">On</h3>
             </div>
           </a>
         </li>
@@ -276,9 +280,9 @@
 
   .cat-tile__subtitle {
     margin: 0;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     line-height: 1;
     color: rgba(255, 255, 255, 0.70);
@@ -452,7 +456,7 @@
         {
           "type": "tile",
           "settings": {
-            "title": "On Running",
+            "title": "On",
             "subtitle": "Performance Favorites"
           }
         },

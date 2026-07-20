@@ -1,0 +1,18 @@
+query VaneliWorkingCollectionRead {
+  collection(id: "gid://shopify/Collection/287055118382") {
+    id
+    title
+    handle
+    ruleSet {
+      appliedDisjunctively
+      rules { column relation condition }
+    }
+    resourcePublications(first: 20) {
+      nodes {
+        isPublished
+        publication { id name }
+      }
+    }
+    products(first: 100) { nodes { id title handle status } }
+  }
+}

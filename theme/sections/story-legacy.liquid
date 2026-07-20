@@ -8,7 +8,7 @@
   Desktop (≥ 1024px): Two-column CSS Grid
     • Left column  — lifestyle / family photo (sticky, aligned to top)
     • Right column — eyebrow label, large heading, body copy,
-                     vertical milestone timeline, blush CTA button
+                     vertical milestone timeline, underlined text-link CTA
 
   Below both columns: full-width stats band with 3 figures (48 Years · 50+
   Brands · 1 Location) separated by hairline dividers.
@@ -190,7 +190,7 @@
         {%- if section.settings.cta_text != blank -%}
           <div class="story-legacy__cta-wrap" data-sl-reveal data-sl-delay="200">
             <a
-              href="{{ section.settings.cta_url | default: '#' }}"
+              href="{{ section.settings.cta_url | default: '/pages/our-story' }}"
               class="story-legacy__cta"
             >
               {{- section.settings.cta_text | escape -}}
@@ -369,7 +369,7 @@
     font-family: var(--font-body, sans-serif);
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary, #A8A8A8);
     line-height: 1;
@@ -489,9 +489,9 @@
   .story-legacy__year {
     display: inline-block;
     font-family: var(--font-body, sans-serif);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary, #A8A8A8);
     line-height: 1;
@@ -521,37 +521,33 @@
   }
 
   /*
-    Blush accent style — matches the "View All" and card buttons for a
-    consistent brand language throughout the homepage.
+    Demoted from a blush button to an underlined text link (P6: buttons
+    only where action happens — this CTA merely navigates to the story
+    page). Matches the "View All" text-link treatment for consistency.
   */
   .story-legacy__cta {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 14px 36px;
-    background-color: var(--color-accent, #F5E1E1);
-    color: var(--color-heading, #000000);
+    padding: 0;
+    background: none;
+    color: inherit;
     border: none;
-    border-radius: var(--radius-btn, 8px);
+    border-radius: 0;
     font-family: var(--font-body, sans-serif);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
     white-space: nowrap;
-    line-height: 1;
+    line-height: 1.4;
     cursor: pointer;
-    transition:
-      background-color var(--transition, 0.2s ease),
-      box-shadow       var(--transition, 0.2s ease),
-      transform        var(--transition, 0.2s ease);
+    transition: opacity var(--transition, 0.2s ease);
   }
 
   .story-legacy__cta:hover {
-    background-color: var(--color-accent-hover, #E8C8C8);
-    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
-    transform: translateY(-1px);
+    opacity: 0.72;
   }
 
   .story-legacy__cta:focus-visible {
@@ -616,7 +612,7 @@
     font-family: var(--font-body, sans-serif);
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary, #A8A8A8);
     line-height: 1.3;
@@ -686,7 +682,7 @@
     }
 
     .story-legacy__cta {
-      width: 100%;
+      /* Text link — no full-width stretch needed on mobile */
       justify-content: center;
     }
 

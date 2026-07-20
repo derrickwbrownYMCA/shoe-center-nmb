@@ -1,0 +1,16 @@
+mutation($productId: ID!, $media: [CreateMediaInput!]!) {
+  productCreateMedia(productId: $productId, media: $media) {
+    media {
+      ... on MediaImage {
+        id
+        image {
+          url
+        }
+      }
+    }
+    mediaUserErrors {
+      field
+      message
+    }
+  }
+}

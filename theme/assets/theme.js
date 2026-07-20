@@ -460,6 +460,14 @@ class ProductForm extends HTMLElement {
   }
 
   async _handleSubmit(e) {
+    const requiredOption = this._getRequiredOptionMissing();
+    if (requiredOption) {
+      e.preventDefault();
+      this._showError('Please choose a size before adding this item to your cart.');
+      requiredOption.focus();
+      return;
+    }
+
     // Only intercept if the cart drawer feature is active
     const cartType = window.ShoeCenter?.cartType || 'page';
     if (cartType !== 'drawer') return; // Let native form submit proceed
@@ -473,7 +481,10 @@ class ProductForm extends HTMLElement {
     const variantId = parseInt(idInput.value, 10);
     const quantity = qtyInput ? parseInt(qtyInput.value, 10) : 1;
 
-    if (!variantId) return;
+    if (!variantId) {
+      this._showError('Please choose an available option before adding this item to your cart.');
+      return;
+    }
 
     // Loading state
     this._setLoading(true);
@@ -491,6 +502,15 @@ class ProductForm extends HTMLElement {
     } finally {
       this._setLoading(false);
     }
+  }
+
+  _getRequiredOptionMissing() {
+    const scope = this.parentElement?.closest('[data-section-id]')
+      || this.closest('[data-section-id]')
+      || this.parentElement
+      || document;
+    return Array.from(scope.querySelectorAll('variant-selector [data-required-option="true"]'))
+      .find(select => !select.value) || null;
   }
 
   _setLoading(loading) {
@@ -561,24 +581,36 @@ class VariantSelector extends HTMLElement {
   }
 
   _onOptionChange() {
-    const selectedOptions = Array.from(this.querySelectorAll('select')).map(s => s.value);
-    const matchingVariant = this._findVariant(selectedOptions);
+    const selects = Array.from(this.querySelectorAll('select'));
+    const selectedOptions = selects.map(select => select.value);
+    const incomplete = selects.some(select => select.dataset.requiredOption === 'true' && !select.value);
+    const matchingVariant = incomplete ? null : this._findVariant(selectedOptions);
 
     // Update the hidden variant ID input
     const sectionId = this.dataset.sectionId;
-    const idInput = document.querySelector(
+    const scope = this.parentElement?.closest('[data-section-id]')
+      || this.closest('[data-section-id]')
+      || this.parentElement
+      || document;
+    const idInput = scope.querySelector(
       `#ProductVariantId${sectionId ? '-' + sectionId : ''}`
-    ) || document.querySelector('[name="id"]');
+    ) || scope.querySelector('product-form [name="id"]');
 
-    if (idInput && matchingVariant) {
-      idInput.value = matchingVariant.id;
+    if (idInput) {
+      idInput.value = matchingVariant ? matchingVariant.id : '';
+    }
+
+    if (matchingVariant && this.dataset.url && window.history?.replaceState) {
+      const url = new URL(this.dataset.url, window.location.origin);
+      url.searchParams.set('variant', matchingVariant.id);
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
     }
 
     // Dispatch custom event — price.liquid and other elements listen for this
     this.dispatchEvent(
       new CustomEvent('variant:change', {
         bubbles: true,
-        detail: { variant: matchingVariant, selectedOptions },
+        detail: { variant: matchingVariant, selectedOptions, incomplete },
       })
     );
   }
@@ -599,8 +631,9 @@ customElements.define('variant-selector', VariantSelector);
 
 // Listen for variant:change to update price and availability displays
 document.addEventListener('variant:change', (e) => {
-  const { variant } = e.detail;
+  const { variant, incomplete } = e.detail;
   const scope =
+    e.target?.parentElement?.closest?.('[data-section-id]') ||
     e.target?.closest?.('[data-section-id]') ||
     e.target?.closest?.('.shopify-section') ||
     document;
@@ -618,25 +651,65 @@ document.addEventListener('variant:change', (e) => {
   // Update add-to-cart button
   const addBtn = scope.querySelector('.js-add-to-cart');
   if (addBtn) {
-    if (!variant) {
+    if (addBtn.dataset.inStoreOnly === 'true') {
       addBtn.disabled = true;
+      addBtn.setAttribute('aria-disabled', 'true');
+      addBtn.textContent = 'Available In Store Only';
+    } else if (incomplete) {
+      addBtn.disabled = true;
+      addBtn.setAttribute('aria-disabled', 'true');
+      addBtn.textContent = 'Choose a Size';
+    } else if (!variant) {
+      addBtn.disabled = true;
+      addBtn.setAttribute('aria-disabled', 'true');
       addBtn.textContent = 'Unavailable';
     } else if (!variant.available) {
       addBtn.disabled = true;
+      addBtn.setAttribute('aria-disabled', 'true');
       addBtn.textContent = 'Sold Out';
     } else {
       addBtn.disabled = false;
+      addBtn.removeAttribute('aria-disabled');
       addBtn.textContent = addBtn.dataset.addText || 'Add to Cart';
     }
+  }
+
+  const mediaNote = scope.querySelector('.product-info__media-note');
+  if (mediaNote) {
+    mediaNote.hidden = !(variant && !variant.featured_image);
   }
 
   // Update featured image if variant has one
   if (variant?.featured_image) {
     const mainImg = scope.querySelector('.js-main-product-img');
+    const imageId = String(variant.featured_image.id || '');
+    const matchingThumb = Array.from(scope.querySelectorAll('.product-gallery__thumb'))
+      .find(thumb => thumb.dataset.imageId === imageId);
+    const imageSrc = matchingThumb?.dataset.imageSrc || variant.featured_image.src;
+    const imageAlt = matchingThumb?.dataset.imageAlt || variant.featured_image.alt || '';
     if (mainImg) {
-      const newSrc = variant.featured_image.src.replace(/(\.[a-z]+)(\?.*)?$/, '_800x800$1');
-      mainImg.src = newSrc;
-      mainImg.alt = variant.featured_image.alt || '';
+      mainImg.src = imageSrc;
+      mainImg.removeAttribute('srcset');
+      mainImg.alt = imageAlt;
+    }
+
+    const zoomTrigger = scope.querySelector('.product-gallery__zoom-trigger');
+    if (zoomTrigger) {
+      zoomTrigger.dataset.imageSrc = matchingThumb?.dataset.imageFullSrc || imageSrc;
+      zoomTrigger.dataset.imageAlt = imageAlt;
+    }
+
+    scope.querySelectorAll('.product-gallery__thumb').forEach(thumb => {
+      thumb.classList.toggle('is-active', thumb.dataset.imageId === imageId);
+    });
+  }
+
+  // Filter the thumbnail strip to the newly selected color's media
+  const filterGallery = scope.querySelector('.product-gallery');
+  if (filterGallery && window.applyGalleryColorFilter && e.detail.selectedOptions) {
+    const colorIdx = parseInt(filterGallery.dataset.colorOptionIndex ?? '-1', 10);
+    if (colorIdx > -1) {
+      window.applyGalleryColorFilter(filterGallery, e.detail.selectedOptions[colorIdx]);
     }
   }
 });
@@ -797,9 +870,49 @@ customElements.define('predictive-search', PredictiveSearch);
 
 /* ═══════════════════════════════════════════════════════════════════════════
    § 9 — Product Image Gallery (main-product.liquid)
-   Thumbnail strip → swap main image. Plain JS, no library.
-   Activated only when .product-gallery exists on the page.
+   Thumbnail strip → swap main image, filtered to the selected color's media.
+   Plain JS, no library. Activated only when .product-gallery exists.
+
+   Color filter: each thumb carries data-color-key (set in Liquid from the
+   variant image binding, falling back to the alt convention
+   "<Title> in <ColorA> | <ColorB>"). applyGalleryColorFilter shows only the
+   selected color's thumbs (max 6) and re-labels "view X of Y" to match.
+   Colors with no mapped media fall back to the full unfiltered strip — the
+   photo-coming-soon note (media-note) covers the messaging for those.
 ═══════════════════════════════════════════════════════════════════════════ */
+
+function normalizeColorKey(value) {
+  return (value || '').toLowerCase().replace(/[\s/|,_-]/g, '');
+}
+
+window.applyGalleryColorFilter = function (gallery, colorValue) {
+  const thumbs = Array.from(gallery.querySelectorAll('.product-gallery__thumb'));
+  if (thumbs.length < 2) return;
+
+  const MAX_THUMBS_PER_COLOR = 6;
+  const key = normalizeColorKey(colorValue);
+  let matching = key ? thumbs.filter(t => t.dataset.colorKey === key) : [];
+  if (!matching.length) matching = thumbs; // unmapped color → keep full set
+
+  const visible = matching.slice(0, MAX_THUMBS_PER_COLOR);
+  thumbs.forEach(t => { t.hidden = !visible.includes(t); });
+
+  // Re-label so "view X of Y" reflects the filtered set
+  visible.forEach((t, i) => {
+    t.setAttribute('aria-label', `View image ${i + 1} of ${visible.length}`);
+    if (t.dataset.imageAlt) {
+      t.dataset.imageAlt = t.dataset.imageAlt.replace(
+        /product view \d+ of \d+/,
+        `product view ${i + 1} of ${visible.length}`
+      );
+    }
+  });
+
+  // If the active thumb got filtered out, activate the first visible one
+  // (activating syncs the main image, zoom trigger, and active state).
+  const active = gallery.querySelector('.product-gallery__thumb.is-active');
+  if ((!active || active.hidden) && visible[0]) visible[0].click();
+};
 
 (function initProductGallery() {
   const gallery = document.querySelector('.product-gallery');
@@ -807,14 +920,24 @@ customElements.define('predictive-search', PredictiveSearch);
 
   const mainImg = gallery.querySelector('.product-gallery__main-img');
   const thumbnails = gallery.querySelectorAll('.product-gallery__thumb');
+  const zoomTrigger = gallery.querySelector('.product-gallery__zoom-trigger');
+  const lightbox = gallery.querySelector('.product-gallery__lightbox');
+  const lightboxImg = lightbox?.querySelector('.product-gallery__lightbox-img');
+  const lightboxCaption = lightbox?.querySelector('.product-gallery__lightbox-caption');
 
   thumbnails.forEach(thumb => {
     thumb.addEventListener('click', () => {
       const src = thumb.dataset.imageSrc;
+      const fullSrc = thumb.dataset.imageFullSrc || src;
       const alt = thumb.dataset.imageAlt || '';
       if (!src || !mainImg) return;
       mainImg.src = src;
+      mainImg.removeAttribute('srcset');
       mainImg.alt = alt;
+      if (zoomTrigger) {
+        zoomTrigger.dataset.imageSrc = fullSrc;
+        zoomTrigger.dataset.imageAlt = alt;
+      }
       // Update active state
       thumbnails.forEach(t => t.classList.remove('is-active'));
       thumb.classList.add('is-active');
@@ -828,6 +951,34 @@ customElements.define('predictive-search', PredictiveSearch);
       }
     });
   });
+
+  zoomTrigger?.addEventListener('click', () => {
+    if (!lightbox || !lightboxImg) return;
+    const src = zoomTrigger.dataset.imageSrc;
+    const alt = zoomTrigger.dataset.imageAlt || mainImg?.alt || '';
+    if (!src) return;
+    lightboxImg.src = src;
+    lightboxImg.alt = alt;
+    if (lightboxCaption) lightboxCaption.textContent = alt;
+    if (typeof lightbox.showModal === 'function') {
+      lightbox.showModal();
+    } else {
+      lightbox.setAttribute('open', '');
+    }
+  });
+
+  lightbox?.addEventListener('click', (event) => {
+    if (event.target === lightbox) lightbox.close();
+  });
+
+  // Initial color filter: match the strip to the color selected on load
+  const colorIdx = parseInt(gallery.dataset.colorOptionIndex ?? '-1', 10);
+  if (colorIdx > -1) {
+    const colorSelect = document.querySelector(
+      `variant-selector select[data-option-index="${colorIdx}"]`
+    );
+    if (colorSelect?.value) window.applyGalleryColorFilter(gallery, colorSelect.value);
+  }
 })();
 
 

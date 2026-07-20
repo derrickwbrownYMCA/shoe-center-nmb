@@ -12,7 +12,9 @@
     "hero-banner": {
       "type": "hero-banner",
       "settings": {
-        "launch_countdown_enabled": true,
+        "cta_primary_url": "shopify://collections/womens",
+        "cta_secondary_url": "shopify://collections/mens",
+        "launch_countdown_enabled": false,
         "launch_countdown_date": "2026-07-01",
         "launch_countdown_date_label": "Go live July 1st",
         "launch_countdown_eyebrow": "Coming soon",
@@ -42,7 +44,7 @@
         "cat-3": {
           "type": "tile",
           "settings": {
-            "title": "On Running",
+            "title": "On",
             "subtitle": "Performance favorites",
             "link": "shopify://collections/on-running"
           }
@@ -50,12 +52,18 @@
         "cat-4": {
           "type": "tile",
           "settings": {
-            "title": "Dance",
-            "subtitle": "Move well",
-            "link": "shopify://collections/dance"
+            "title": "Everyday Comfort",
+            "subtitle": "All-day favorites",
+            "link": "shopify://collections/everyday-comfort"
           }
         }
       },
+      "block_order": [
+        "cat-1",
+        "cat-2",
+        "cat-3",
+        "cat-4"
+      ],
       "settings": {
         "heading": "Shop the store",
         "subheading": "Browse the departments and brands people look for first.",
@@ -95,10 +103,16 @@
           "settings": {
             "icon": "refresh",
             "heading": "Pickup Available",
-            "description": "Reserve online and pick up locally on the Grand Strand"
+            "description": "Buy online and pick up locally on the Grand Strand"
           }
         }
       },
+      "block_order": [
+        "feature-1",
+        "feature-2",
+        "feature-3",
+        "feature-4"
+      ],
       "settings": {}
     },
     "fit-guide": {
@@ -126,12 +140,12 @@
         "title_4": "Style-Forward Picks",
         "copy_4": "Fresh silhouettes, modern brands, and newer looks that still feel great on your feet.",
         "link_label_4": "Shop style",
-        "link_4": "shopify://collections/style-forward",
+        "link_4": "shopify://collections/womens",
         "badge_5": "Dance",
         "title_5": "Dance-ready picks",
         "copy_5": "Styles made for Shag nights, events, and shoes that look right and move well.",
         "link_label_5": "Shop dance",
-        "link_5": "shopify://collections/dance-ready"
+        "link_5": "shopify://pages/carolina-drift"
       }
     },
     "featured-products": {
@@ -141,7 +155,7 @@
         "products_to_show": 8,
         "heading": "New Arrivals",
         "subheading": "Fresh performance and comfort styles just in.",
-        "view_all_text": "View All On Running",
+        "view_all_text": "View All On Styles",
         "view_all_url": "shopify://collections/on-running"
       }
     },
@@ -151,10 +165,10 @@
         "eyebrow": "Visit the store",
         "heading": "See what local service still feels like",
         "copy": "Visit Shoe Center NMB for expert fitting, modern brands, and a better chance of leaving in the right pair the first time.",
-        "address": "710 Hwy 17 S, North Myrtle Beach, SC 29582",
-        "hours": "Mon-Sat 10:00a-6:00p • Sun 12:00p-5:00p",
+        "address": "710 Hwy 17 S, Suite I, North Myrtle Beach, SC 29582",
+        "hours": "Mon-Sat 10:00a-6:00p • Sun 11:00a-5:00p through Labor Day, then 12:00p-5:00p",
         "phone": "(843) 272-6515",
-        "pickup": "Reserve online and pick up in store",
+        "pickup": "Buy online and pick up in store",
         "primary_label": "Get Directions",
         "secondary_label": "Call the Store",
         "secondary_link": "tel:+18432726515",
@@ -171,38 +185,46 @@
         "testimonial-1": {
           "type": "testimonial",
           "settings": {
-            "quote": "Best shoe-fitting experience I've ever had. They actually measure your foot.",
-            "author": "Rachel T., NMB",
-            "rating": "5"
+            "quote": "Great selection of quality shoes. Fantastic service! Amanda made sure our shoes fit perfectly!",
+            "author": "Linda Pettigrew — Google Review",
+            "rating": "5",
+            "source_url": "https://www.google.com/maps/place/Shoe+Center+of+North+Myrtle+Beach,+Comfort,+Dance,+Fashion+Footwear+for+Men+%26+Women/@33.8245582,-78.6871344,847m/data=!3m1!1e3!4m8!3m7!1s0x89007d3becac1d6f:0x32f582f1af139870!8m2!3d33.8245582!4d-78.6871344!9m1!1b1!16s%2Fg%2F1vfn7h_f?entry=ttu"
           }
         },
         "testimonial-2": {
           "type": "testimonial",
           "settings": {
-            "quote": "On Running selection is incredible. My Cloud 6s are perfect for the boardwalk.",
-            "author": "Marcus D., Myrtle Beach",
-            "rating": "5"
+            "quote": "I was looking for a new pair of shoes for walking and they asked all the right questions and gave me a number of options.",
+            "author": "Barbara Mollica — Google Review",
+            "rating": "5",
+            "source_url": "https://www.google.com/maps/place/Shoe+Center+of+North+Myrtle+Beach,+Comfort,+Dance,+Fashion+Footwear+for+Men+%26+Women/@33.8245582,-78.6871344,847m/data=!3m1!1e3!4m8!3m7!1s0x89007d3becac1d6f:0x32f582f1af139870!8m2!3d33.8245582!4d-78.6871344!9m1!1b1!16s%2Fg%2F1vfn7h_f?entry=ttu"
           }
         },
         "testimonial-3": {
           "type": "testimonial",
           "settings": {
-            "quote": "Family-owned feel with big-store selection. Worth the drive.",
-            "author": "Susan K., Conway SC",
-            "rating": "5"
+            "quote": "One of the best experiences buying shoes I’ve ever had. Rachel and her staff are so kind and helpful.",
+            "author": "Krista DeSocio — Google Review",
+            "rating": "5",
+            "source_url": "https://www.google.com/maps/place/Shoe+Center+of+North+Myrtle+Beach,+Comfort,+Dance,+Fashion+Footwear+for+Men+%26+Women/@33.8245582,-78.6871344,847m/data=!3m1!1e3!4m8!3m7!1s0x89007d3becac1d6f:0x32f582f1af139870!8m2!3d33.8245582!4d-78.6871344!9m1!1b1!16s%2Fg%2F1vfn7h_f?entry=ttu"
           }
         }
       },
+      "block_order": [
+        "testimonial-1",
+        "testimonial-2",
+        "testimonial-3"
+      ],
       "settings": {
-        "eyebrow": "Trusted locally",
-        "heading": "What Our Customers Say",
-        "subheading": "Real comfort. Real people. Real North Myrtle Beach.",
-        "proof_1_value": "48",
-        "proof_1_label": "Years serving North Myrtle Beach",
-        "proof_2_value": "50+",
-        "proof_2_label": "Brands across comfort, style, performance, and dance",
-        "proof_3_value": "1:1",
-        "proof_3_label": "Personal fit help in store"
+        "eyebrow": "Verified Google reviews",
+        "heading": "What customers say about the fit and service",
+        "subheading": "Selected public Google reviews from customers who came in for comfort, walking shoes, personal guidance, and the right fit.",
+        "proof_1_value": "4.7",
+        "proof_1_label": "Google rating",
+        "proof_2_value": "181",
+        "proof_2_label": "Google reviews",
+        "proof_3_value": "48",
+        "proof_3_label": "Years in North Myrtle Beach"
       }
     },
     "story-legacy": {
@@ -212,6 +234,7 @@
         "heading": "A Local Favorite, Moving Forward",
         "body_copy": "<p>Shoe Center NMB has been part of North Myrtle Beach since 1978, and that history still matters. Longtime customers know us for comfort, personal service, and the kind of fit help that is hard to find in a chain store.</p><p>Today, that same trust is carrying the store into a new chapter. Under the Brown family, Rachel has been expanding the mix with fresher brands, younger styles, and stronger performance footwear while keeping the comfort-first service the store has always been known for.</p><p>We are here for the customers who have loved this store for years and for the ones discovering it for the first time. Whether you come in for On, everyday comfort, men's favorites, or dance-ready styles, the goal is the same: help you leave in the right pair.</p>",
         "cta_text": "Visit Our Story",
+        "cta_url": "shopify://pages/our-story",
         "show_stats": false,
         "stat_1_number": "48",
         "stat_1_label": "Years in North Myrtle Beach",
@@ -259,8 +282,42 @@
           "settings": {
             "brand_name": "New Balance"
           }
+        },
+        "brand-7": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Brooks"
+          }
+        },
+        "brand-8": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Koko Palenki"
+          }
+        },
+        "brand-9": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Rieker"
+          }
+        },
+        "brand-10": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Chocolat Blu"
+          }
+        },
+        "brand-11": {
+          "type": "logo",
+          "settings": {
+            "brand_name": "Johnston Murphy"
+          }
         }
       },
+      "block_order": [
+        "brand-1", "brand-2", "brand-3", "brand-4", "brand-5", "brand-6",
+        "brand-7", "brand-8", "brand-9", "brand-10", "brand-11"
+      ],
       "settings": {
         "heading": "The brands people come in asking for",
         "subheading": "From On and performance favorites to trusted comfort names and dance staples, we carry brands we know how to fit and recommend with confidence.",

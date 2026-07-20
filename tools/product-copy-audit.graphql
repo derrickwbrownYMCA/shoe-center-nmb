@@ -1,0 +1,11 @@
+query ActiveProductCopyAudit {
+  products(first: 100, query: "status:active") {
+    nodes {
+      id
+      title
+      handle
+      vendor
+      descriptionHtml
+    }
+  }
+}

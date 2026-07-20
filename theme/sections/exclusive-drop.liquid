@@ -7,6 +7,19 @@
   assign hero_image = section.settings.hero_image
   assign lifestyle_image = section.settings.lifestyle_image
   assign buy_anchor = '#DropBuy-' | append: section.id
+  assign requires_size_selection = false
+  assign has_explicit_variant = false
+  if launch_product != blank
+    if launch_product.selected_variant != blank
+      assign has_explicit_variant = true
+    endif
+    for launch_option in launch_product.options_with_values
+      assign launch_option_name = launch_option.name | downcase
+      if launch_option_name contains 'size'
+        assign requires_size_selection = true
+      endif
+    endfor
+  endif
 -%}
 
 <section class="exclusive-drop">
@@ -56,13 +69,19 @@
           <div class="exclusive-drop__price js-variant-price">{% render 'price', product: launch_product, variant: current_variant %}</div>
 
           {%- unless launch_product.has_only_default_variant -%}
-            <variant-selector class="exclusive-drop__variants" data-section-id="{{ section.id }}">
+            <variant-selector class="exclusive-drop__variants" data-section-id="{{ section.id }}" data-url="{{ launch_product.url }}">
               {%- for option in launch_product.options_with_values -%}
+                {%- assign drop_option_name = option.name | downcase -%}
+                {%- assign is_drop_size = false -%}
+                {%- if drop_option_name contains 'size' -%}{%- assign is_drop_size = true -%}{%- endif -%}
                 <label class="exclusive-drop__option">
                   <span>{{ option.name | escape }}</span>
-                  <select name="options[{{ option.name | escape }}]" class="exclusive-drop__select">
+                  <select name="options[{{ option.name | escape }}]" class="exclusive-drop__select" {% if is_drop_size %}data-required-option="true" required{% endif %}>
+                    {%- if is_drop_size and has_explicit_variant == false -%}
+                      <option value="" selected disabled>Select a size</option>
+                    {%- endif -%}
                     {%- for value in option.values -%}
-                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value | escape }}</option>
+                      <option value="{{ value | escape }}" {% if option.selected_value == value and is_drop_size == false or option.selected_value == value and has_explicit_variant %}selected{% endif %}>{{ value | escape }}</option>
                     {%- endfor -%}
                   </select>
                 </label>
@@ -74,10 +93,10 @@
           <product-form>
             {%- assign drop_product_form_id = 'DropProductForm-' | append: section.id -%}
             {%- form 'product', launch_product, id: drop_product_form_id, novalidate: 'novalidate' -%}
-              <input type="hidden" name="id" id="ProductVariantId-{{ section.id }}" value="{{ current_variant.id }}">
+              <input type="hidden" name="id" id="ProductVariantId-{{ section.id }}" value="{% if requires_size_selection and has_explicit_variant == false %}{% else %}{{ current_variant.id }}{% endif %}">
               <input type="hidden" name="quantity" value="1">
-              <button class="btn btn--full js-add-to-cart" type="submit" name="add" data-add-text="{{ section.settings.add_to_cart_label | escape }}" {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}>
-                {% if current_variant.available %}{{ section.settings.add_to_cart_label | escape }}{% else %}Sold Out{% endif %}
+              <button class="btn btn--full js-add-to-cart" type="submit" name="add" data-add-text="{{ section.settings.add_to_cart_label | escape }}" {% if requires_size_selection and has_explicit_variant == false or current_variant.available == false %}disabled aria-disabled="true"{% endif %}>
+                {% if requires_size_selection and has_explicit_variant == false %}Choose a Size{% elsif current_variant.available %}{{ section.settings.add_to_cart_label | escape }}{% else %}Sold Out{% endif %}
               </button>
             {%- endform -%}
           </product-form>
@@ -158,6 +177,26 @@
       <h2 class="exclusive-drop__heading exclusive-drop__heading--light">{{ section.settings.urgency_heading | escape }}</h2>
       <p class="exclusive-drop__copy exclusive-drop__copy--light">{{ section.settings.urgency_copy | escape }}</p>
       <a href="{{ section.settings.urgency_cta_url | default: buy_anchor }}" class="btn">{{ section.settings.urgency_cta_label | escape }}</a>
+      {%- if section.settings.show_interest_form -%}
+        <div class="exclusive-drop__interest">
+          <h3>{{ section.settings.interest_heading | escape }}</h3>
+          <p>{{ section.settings.interest_copy | escape }}</p>
+          {%- form 'customer', id: 'CarolinaDriftInterest-' | append: section.id -%}
+            <input type="hidden" name="contact[tags]" value="newsletter,email-subscriber,carolina-drift-interest">
+            {%- if form.posted_successfully? -%}
+              <p class="exclusive-drop__interest-success" role="status">You're on the Carolina Drift update list.</p>
+            {%- else -%}
+              {%- if form.errors -%}<p class="exclusive-drop__interest-error" role="alert">Please enter a valid email address.</p>{%- endif -%}
+              <div class="exclusive-drop__interest-form">
+                <label class="visually-hidden" for="CarolinaDriftEmail-{{ section.id }}">Email address</label>
+                <input id="CarolinaDriftEmail-{{ section.id }}" type="email" name="contact[email]" autocomplete="email" placeholder="Email address" required>
+                <button type="submit" class="btn">{{ section.settings.interest_button | escape }}</button>
+              </div>
+            {%- endif -%}
+          {%- endform -%}
+          <small>This is an update list, not a reservation or preorder. Unsubscribe anytime.</small>
+        </div>
+      {%- endif -%}
     </div>
   </div>
 
@@ -182,7 +221,7 @@
   .exclusive-drop__hero-overlay { background: linear-gradient(180deg, rgba(17, 23, 30, 0.18), rgba(17, 23, 30, 0.82)), linear-gradient(120deg, rgba(121, 82, 41, 0.34), rgba(24, 36, 46, 0.16)); }
   .exclusive-drop__hero-inner { position: relative; z-index: 1; width: 100%; padding-top: 140px; padding-bottom: 72px; color: #f7f1e6; }
   .exclusive-drop__narrow { max-width: 760px; margin: 0 auto; }
-  .exclusive-drop__eyebrow, .exclusive-drop__label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
+  .exclusive-drop__eyebrow, .exclusive-drop__label { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
   .exclusive-drop__label { color: rgba(24, 36, 46, 0.62); }
   .exclusive-drop__label--light { color: rgba(247, 241, 230, 0.7); }
   .exclusive-drop__title { max-width: 12ch; margin: 0; font-size: clamp(42px, 7vw, 78px); line-height: 0.96; color: #f7f1e6; }
@@ -204,7 +243,7 @@
   .exclusive-drop__price .price__current { font-size: 26px; }
   .exclusive-drop__variants { display: grid; gap: 14px; margin-top: 22px; }
   .exclusive-drop__option { display: grid; gap: 8px; }
-  .exclusive-drop__option span { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-heading); }
+  .exclusive-drop__option span { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-heading); }
   .exclusive-drop__select { width: 100%; min-height: 48px; padding: 12px 16px; border: 1px solid rgba(24, 36, 46, 0.14); border-radius: var(--radius-btn); background: #fff; color: var(--color-text); font: inherit; }
   .exclusive-drop__text-link { display: inline-block; margin-top: 16px; border-bottom: 1px solid currentColor; color: var(--color-heading); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
   .exclusive-drop__rte { margin-top: 18px; color: var(--color-text); font-size: 17px; line-height: 1.8; }
@@ -218,12 +257,22 @@
   .exclusive-drop__card-body .btn { margin-top: 18px; }
   .exclusive-drop__band { background: linear-gradient(125deg, rgba(16, 24, 31, 0.96), rgba(47, 33, 18, 0.92)); }
   .exclusive-drop__band-inner { text-align: center; }
+  .exclusive-drop__interest { max-width: 620px; margin: 32px auto 0; padding-top: 28px; border-top: 1px solid rgba(247, 241, 230, 0.2); }
+  .exclusive-drop__interest h3 { margin: 0; color: #f7f1e6; font-size: 22px; }
+  .exclusive-drop__interest p { margin: 8px 0 16px; color: rgba(247, 241, 230, 0.82); }
+  .exclusive-drop__interest small { display: block; margin-top: 10px; color: rgba(247, 241, 230, 0.64); }
+  .exclusive-drop__interest-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+  .exclusive-drop__interest-form input { min-height: 50px; padding: 12px 16px; border: 1px solid rgba(247, 241, 230, 0.3); border-radius: var(--radius-btn); background: rgba(255, 255, 255, 0.96); color: var(--color-heading); font: inherit; }
+  .exclusive-drop__interest-success { font-weight: 700; }
+  .exclusive-drop__interest-error { color: #ffd1d1 !important; }
   @media (max-width: 1023px) { .exclusive-drop__grid--benefits { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 767px) {
     .exclusive-drop__hero { min-height: 82svh; }
     .exclusive-drop__hero-inner { padding-top: 120px; padding-bottom: 48px; }
     .exclusive-drop__buy, .exclusive-drop__grid--colors, .exclusive-drop__grid--benefits { grid-template-columns: 1fr; }
     .exclusive-drop__actions .btn { width: 100%; }
+    .exclusive-drop__interest-form { grid-template-columns: 1fr; }
+    .exclusive-drop__interest-form .btn { width: 100%; }
   }
 </style>
 
@@ -254,20 +303,24 @@
     { "type": "text", "id": "colors_label", "label": "Colors label", "default": "Find your color" },
     { "type": "text", "id": "colors_heading", "label": "Colors heading", "default": "Three shades. One easygoing leather silhouette." },
     { "type": "text", "id": "benefits_label", "label": "Benefits label", "default": "Made to wear. Made to move." },
-    { "type": "text", "id": "benefits_heading", "label": "Benefits heading", "default": "Everything the launch needs to communicate at a glance." },
+    { "type": "text", "id": "benefits_heading", "label": "Benefits heading", "default": "The details that make it easy to wear from day into night." },
     { "type": "text", "id": "lifestyle_label", "label": "Lifestyle label", "default": "From everyday wear to the dance floor" },
     { "type": "text", "id": "lifestyle_heading", "label": "Lifestyle heading", "default": "A versatile leather shoe for dinners out, beach music nights, and weekends around town." },
     { "type": "richtext", "id": "lifestyle_body", "label": "Lifestyle body", "default": "<p>This is not a formal shoe that sits in the closet. It is meant to be lived in, from casual evenings on the boardwalk to local nights that call for a little movement.</p>" },
     { "type": "image_picker", "id": "lifestyle_image", "label": "Lifestyle image" },
     { "type": "text", "id": "lifestyle_image_alt", "label": "Lifestyle image alt text", "default": "Man wearing leather shoes while walking outside in warm evening light" },
     { "type": "text", "id": "urgency_label", "label": "Urgency label", "default": "Exclusive first run" },
-    { "type": "text", "id": "urgency_heading", "label": "Urgency heading", "default": "Limited by size and color. Restock is not guaranteed." },
-    { "type": "textarea", "id": "urgency_copy", "label": "Urgency copy", "default": "This design was made just for Shoe Center. Once this run is gone, there may not be another batch waiting behind it." },
-    { "type": "text", "id": "urgency_cta_label", "label": "Urgency button label", "default": "Get Yours Before They Are Gone" },
+    { "type": "text", "id": "urgency_heading", "label": "Urgency heading", "default": "Available in the sizes and colors currently in stock." },
+    { "type": "textarea", "id": "urgency_copy", "label": "Urgency copy", "default": "Shop the current Carolina Drift assortment online, or visit the store for personal fit help before you choose." },
+    { "type": "text", "id": "urgency_cta_label", "label": "Urgency button label", "default": "Choose Your Pair" },
     { "type": "url", "id": "urgency_cta_url", "label": "Urgency button link" },
+    { "type": "checkbox", "id": "show_interest_form", "label": "Show Carolina Drift email update form", "default": true },
+    { "type": "text", "id": "interest_heading", "label": "Update form heading", "default": "Want Carolina Drift updates?" },
+    { "type": "textarea", "id": "interest_copy", "label": "Update form copy", "default": "Join the list for new colors, restock news, and Carolina Drift events." },
+    { "type": "text", "id": "interest_button", "label": "Update form button", "default": "Keep Me Posted" },
     { "type": "text", "id": "final_label", "label": "Final label", "default": "The Carolina Drift" },
     { "type": "text", "id": "final_heading", "label": "Final heading", "default": "Southern style, easy comfort, and a limited run worth moving on now." },
-    { "type": "textarea", "id": "final_copy", "label": "Final copy", "default": "Send shoppers back to the buy panel or into the main store without breaking the drop story." },
+    { "type": "textarea", "id": "final_copy", "label": "Final copy", "default": "Choose your color and size online, or visit us in North Myrtle Beach for personal fit help." },
     { "type": "text", "id": "final_primary_label", "label": "Final primary button label", "default": "Shop the Drop" },
     { "type": "url", "id": "final_primary_url", "label": "Final primary button link" },
     { "type": "text", "id": "final_secondary_label", "label": "Final secondary button label", "default": "Enter Store" },

@@ -44,3 +44,20 @@ On Images Optimized/
 *.csv
 
 # Keep curated docs and code in git; keep raw data dumps out
+
+# Raw media & source-asset dumps (live theme assets live under theme/assets)
+Media/
+Milwaukee Images/
+brand-logos/
+Brand Guidelines/
+content/
+QA/
+membership_dashboard/
+*.avif
+
+# Tooling backups, state files, and one-off artifacts (not source)
+tools/.*/
+tools/vaneli_state.json
+tools/vaneli_publish_state.json
+tools/vaneli_publish_plan.json
+tools/policy-pages-confirmed.html
