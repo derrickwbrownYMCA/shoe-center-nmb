@@ -50,6 +50,9 @@
   endif
 
   assign featured_product_image = current_variant.featured_image | default: product.featured_image
+  if product.handle == 'vaneli-paris' and has_explicit_variant == false and product.images.size > 1
+    assign featured_product_image = product.images[1]
+  endif
   assign featured_product_image_index = 1
   for gallery_image in product.images
     if gallery_image.id == featured_product_image.id
@@ -1015,4 +1018,3 @@
   ]
 }
 {% endschema %}
-
