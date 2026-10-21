@@ -181,7 +181,8 @@
         <div class="exclusive-drop__interest">
           <h3>{{ section.settings.interest_heading | escape }}</h3>
           <p>{{ section.settings.interest_copy | escape }}</p>
-          {%- form 'customer', id: 'CarolinaDriftInterest-' | append: section.id -%}
+          {%- assign interest_form_id = 'CarolinaDriftInterest-' | append: section.id -%}
+          {%- form 'customer', id: interest_form_id -%}
             <input type="hidden" name="contact[tags]" value="newsletter,email-subscriber,carolina-drift-interest">
             {%- if form.posted_successfully? -%}
               <p class="exclusive-drop__interest-success" role="status">You're on the Carolina Drift update list.</p>

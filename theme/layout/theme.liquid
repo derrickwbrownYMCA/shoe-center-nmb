@@ -20,10 +20,10 @@
 
       if request.page_type == 'index'
         assign seo_title = 'Comfort Shoes in North Myrtle Beach | Shoe Center NMB'
-        assign seo_description = 'Shop comfort, performance, and dance-ready shoes from Shoe Center NMB. Get expert fit help, selected styles online, and convenient paid pickup.'
+        assign seo_description = 'Shop comfort, performance, and dance-ready shoes from Shoe Center NMB. Get expert fit help, selected styles online, and easy in-store pickup.'
       elsif request.page_type == 'page' and page.handle == 'contact'
         assign seo_title = 'Contact & Store Hours | Shoe Center NMB'
-        assign seo_description = 'Call or visit Shoe Center NMB for expert shoe fitting, paid online pickup, current store hours, directions, and help choosing the right pair.'
+        assign seo_description = 'Call or visit Shoe Center NMB for expert shoe fitting, buy-online pickup in store, current store hours, directions, and help choosing the right pair.'
       elsif request.page_type == 'page' and page.handle == 'our-story'
         assign seo_title = 'Our Story | Shoe Center NMB Since 1978'
         assign seo_description = 'Meet the North Myrtle Beach shoe store pairing trusted fit service since 1978 with modern comfort, performance, lifestyle, and dance footwear.'
@@ -109,9 +109,29 @@
 
     {%- assign font_heading = settings.type_header_font -%}
     {%- assign font_body    = settings.type_body_font -%}
+    {%- assign use_fraunces = settings.use_fraunces_headings | default: true -%}
+
+    {%- if use_fraunces -%}
+      {%- comment -%}
+        Fraunces 600 is self-hosted (not in Shopify's font library).
+        Preload prevents a flash of fallback serif on the hero headline;
+        crossorigin is required for font preloads even on same-origin CDNs.
+      {%- endcomment -%}
+      <link rel="preload" as="font" type="font/woff2" href="{{ 'fraunces-600.woff2' | asset_url }}" crossorigin>
+    {%- endif -%}
 
     <style>
+      {%- if use_fraunces -%}
+      @font-face {
+        font-family: 'Fraunces';
+        src: url('{{ 'fraunces-600.woff2' | asset_url }}') format('woff2');
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+      }
+      {%- else -%}
       {{ font_heading | font_face: font_display: 'swap' }}
+      {%- endif -%}
       {{ font_body    | font_face: font_display: 'swap' }}
 
       /* ============================================================
@@ -125,7 +145,17 @@
           • Footer background  = --color-heading (black) — inverted
           • Footer text        = --color-bg (cream) — inverted
           • Muted / secondary  = --color-border (#A8A8A8 serves both)
-        This keeps the palette to exactly 6 vision colors.
+
+        Coastal Ink roles (approved 2026-07-19):
+          • --color-accent      = quiet tint only — soft fills/hovers,
+                                  never a text carrier
+          • --color-cta         = Sunset Coral — buying actions only
+          • --color-highlight   = Coral Bright — badges/accents, pairs
+                                  with ink text, never white
+          • --color-support     = Sea Glass — trust icons, in-stock,
+                                  brand eyebrows
+          • --color-gold        = review stars & award moments only
+          • --color-sandbar     = warm alternate section band
       ============================================================ */
       :root {
         /* ── Brand Palette ─────────────────────────────────────── */
@@ -136,6 +166,15 @@
         --color-border:       {{ settings.color_border }};
         --color-text:         {{ settings.color_text }};
         --color-heading:      {{ settings.color_heading }};
+
+        /* ── Coastal Ink accents ───────────────────────────────── */
+        --color-cta:          {{ settings.color_cta | default: '#C7502F' }};
+        --color-cta-hover:    {{ settings.color_cta_hover | default: '#A93F22' }};
+        --color-highlight:    {{ settings.color_highlight | default: '#E76F51' }};
+        --color-support:      {{ settings.color_support | default: '#476F68' }};
+        --color-support-tint: {{ settings.color_support_tint | default: '#DCE8E5' }};
+        --color-gold:         {{ settings.color_gold | default: '#E2B04A' }};
+        --color-sandbar:      {{ settings.color_sandbar | default: '#F3EBDD' }};
 
         /* Semantic aliases — components use these, not raw palette vars */
         --color-text-secondary: #5b6368;
@@ -150,10 +189,16 @@
         --color-announcement-text: var(--color-bg);
 
         /* ── Typography ────────────────────────────────────────── */
+        {%- if use_fraunces %}
+        --font-heading:         'Fraunces', Georgia, 'Times New Roman', serif;
+        --font-heading-weight:  600;
+        --font-heading-style:   normal;
+        {%- else %}
         --font-heading:         {{ font_heading.family }}, {{ font_heading.fallback_families }};
-        --font-body:            {{ font_body.family }}, {{ font_body.fallback_families }};
         --font-heading-weight:  {{ font_heading.weight }};
         --font-heading-style:   {{ font_heading.style }};
+        {%- endif %}
+        --font-body:            {{ font_body.family }}, {{ font_body.fallback_families }};
         --font-body-weight:     {{ font_body.weight }};
 
         /* Font sizes — values come from select presets (e.g. "48px") */
@@ -176,12 +221,11 @@
         --label-color:    var(--color-text-secondary);
 
         /* ── Interactive accent (P4) ───────────────────────────────
-          Reserved single accent for links-or-prices + interactive
-          states. Deep coastal teal placeholder — NOT applied
-          anywhere yet. Derrick must confirm the final color before
-          this token is wired into links/prices.
+          Confirmed 2026-07-19: interactive emphasis is Sunset Coral,
+          same hue as commerce actions so "clickable" reads as one
+          consistent signal across links, prices, and buttons.
         */
-        --accent-interactive: #0E6D66;
+        --accent-interactive: var(--color-cta);
 
         /* ── Layout ────────────────────────────────────────────── */
         /* page_width is stored as a unitless string ("1280") */
@@ -343,6 +387,20 @@
       .btn--secondary:focus-visible {
         background-color: rgba(24, 36, 46, 0.08);
         box-shadow: none;
+      }
+
+      /* .btn--cta — Sunset Coral, reserved for buying moments only:
+         Add to Cart, checkout, and the sticky purchase bar.
+         Navigation and content CTAs stay ink (.btn). Declared after
+         .btn:hover so the coral hover wins at equal specificity. */
+      .btn--cta {
+        background-color: var(--color-cta);
+        color: #FFFFFF;
+      }
+      .btn--cta:hover,
+      .btn--cta:focus-visible {
+        background-color: var(--color-cta-hover);
+        box-shadow: var(--shadow-sm);
       }
 
       .btn--full { width: 100%; }

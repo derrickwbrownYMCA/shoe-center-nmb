@@ -13,7 +13,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "These six colors are the complete brand palette from the Shoe Center NMB vision document. Header and footer tones are derived automatically - no separate overrides needed."
+        "content": "The Coastal Ink palette (approved July 2026). Ink and cream carry the brand; coral acts, sea glass supports, gold celebrates. Header and footer tones are derived automatically - no separate overrides needed."
       },
       {
         "type": "color",
@@ -25,16 +25,65 @@
       {
         "type": "color",
         "id": "color_accent",
-        "label": "Accent (CTAs & hover states)",
-        "default": "#BFD3CF",
-        "info": "Muted sea-glass accent used for CTAs, hover fills, and highlight bands."
+        "label": "Quiet tint (soft fills & hovers)",
+        "default": "#DCE8E5",
+        "info": "Pale sea-glass tint for quiet backgrounds: pagination hovers, soft fills, subtle bands. Never carries text alone."
       },
       {
         "type": "color",
         "id": "color_accent_hover",
-        "label": "Accent hover",
-        "default": "#9FB7B1",
-        "info": "Slightly deeper sea-glass tone for button hover and active states."
+        "label": "Quiet tint - hover",
+        "default": "#C9DBD6",
+        "info": "Slightly deeper tint for hover and active states of quiet fills."
+      },
+      {
+        "type": "color",
+        "id": "color_cta",
+        "label": "Action (Add to Cart & checkout)",
+        "default": "#C7502F",
+        "info": "Sunset Coral. Reserved for buying moments - Add to Cart, checkout, key commerce links. 4.6:1 with white text (AA)."
+      },
+      {
+        "type": "color",
+        "id": "color_cta_hover",
+        "label": "Action - hover",
+        "default": "#A93F22",
+        "info": "Deeper coral for action button hover and active states."
+      },
+      {
+        "type": "color",
+        "id": "color_highlight",
+        "label": "Highlight (badges & accents)",
+        "default": "#E76F51",
+        "info": "Coral Bright. NEW badges, eyebrow accents, hero underline. Always pairs with ink text - never white."
+      },
+      {
+        "type": "color",
+        "id": "color_support",
+        "label": "Support (trust icons & in-stock)",
+        "default": "#476F68",
+        "info": "Sea Glass. Trust-bar icons, in-stock states, brand eyebrows, Shag-Ready badges. 5.2:1 on cream (AA)."
+      },
+      {
+        "type": "color",
+        "id": "color_support_tint",
+        "label": "Support tint (quiet badge fill)",
+        "default": "#DCE8E5",
+        "info": "Pale sea-glass fill behind support-colored badge text."
+      },
+      {
+        "type": "color",
+        "id": "color_gold",
+        "label": "Celebrate (review stars & awards)",
+        "default": "#E2B04A",
+        "info": "Golden Hour. Review stars and award moments only - sparingly. 7.9:1 with ink text (AA)."
+      },
+      {
+        "type": "color",
+        "id": "color_sandbar",
+        "label": "Sandbar (alternate section band)",
+        "default": "#F3EBDD",
+        "info": "Warm alternate surface that gives pages rhythm the cream alone can't."
       },
       {
         "type": "color",
@@ -47,8 +96,8 @@
         "type": "color",
         "id": "color_border",
         "label": "Border & secondary text",
-        "default": "#CFC7BC",
-        "info": "Applies to dividers, input borders, captions, and metadata."
+        "default": "#E3DDD1",
+        "info": "Light warm hairline for dividers and input borders - elevation comes from shadow, not outline weight."
       },
       {
         "type": "color",
@@ -74,11 +123,18 @@
         "content": "Fonts"
       },
       {
+        "type": "checkbox",
+        "id": "use_fraunces_headings",
+        "label": "Use Fraunces for headings (brand serif)",
+        "default": true,
+        "info": "Self-hosted Fraunces 600 — the approved launch heading face. Uncheck to fall back to the heading font picker below."
+      },
+      {
         "type": "font_picker",
         "id": "type_header_font",
-        "label": "Heading font",
+        "label": "Heading font (fallback)",
         "default": "montserrat_n7",
-        "info": "Vision spec: Montserrat Bold. Applied to H1–H4 and all display text."
+        "info": "Only used when Fraunces headings are turned off."
       },
       {
         "type": "font_picker",
@@ -103,11 +159,11 @@
         "options": [
           { "value": "36px", "label": "Compact — 36px" },
           { "value": "40px", "label": "Small — 40px" },
-          { "value": "48px", "label": "Default — 48px (Vision spec)" },
-          { "value": "56px", "label": "Large — 56px" },
+          { "value": "48px", "label": "Medium — 48px" },
+          { "value": "56px", "label": "Default — 56px (Launch spec)" },
           { "value": "64px", "label": "Display — 64px" }
         ],
-        "default": "48px"
+        "default": "56px"
       },
       {
         "type": "select",
@@ -139,12 +195,12 @@
         "id": "heading_letter_spacing",
         "label": "Heading letter spacing",
         "options": [
-          { "value": "0",      "label": "None — 0" },
+          { "value": "0",      "label": "Default — 0 (Launch spec, serif headings)" },
           { "value": "0.03em", "label": "Subtle — 0.03em" },
-          { "value": "0.06em", "label": "Default — 0.06em" },
+          { "value": "0.06em", "label": "Roomy — 0.06em" },
           { "value": "0.1em",  "label": "Airy — 0.1em" }
         ],
-        "default": "0.06em"
+        "default": "0"
       },
 
       {
@@ -158,11 +214,11 @@
         "options": [
           { "value": "14px", "label": "Small — 14px" },
           { "value": "15px", "label": "Compact — 15px" },
-          { "value": "16px", "label": "Default — 16px (Vision spec)" },
-          { "value": "17px", "label": "Comfortable — 17px" },
+          { "value": "16px", "label": "Compact — 16px" },
+          { "value": "17px", "label": "Default — 17px (Launch spec)" },
           { "value": "18px", "label": "Large — 18px" }
         ],
-        "default": "16px"
+        "default": "17px"
       }
     ]
   },

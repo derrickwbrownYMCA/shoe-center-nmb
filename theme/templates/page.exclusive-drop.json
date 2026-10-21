@@ -103,8 +103,8 @@
         "benefit-pickup": {
           "type": "benefit",
           "settings": {
-            "title": "Paid local pickup",
-            "copy": "Buy online and choose pickup in North Myrtle Beach at checkout."
+            "title": "Local pickup",
+            "copy": "Buy online and pick up in North Myrtle Beach — usually ready within 2 hours."
           }
         },
         "benefit-returns": {

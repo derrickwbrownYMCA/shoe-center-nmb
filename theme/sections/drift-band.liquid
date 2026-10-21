@@ -1,0 +1,248 @@
+{% comment %}
+  sections/drift-band.liquid
+  ─────────────────────────────────────────────────────────────────
+  Carolina Drift teaser — the single ink-dark "moment" in the
+  homepage surface rhythm. Everything around it is cream/white/
+  sandbar/sea-glass; this full-width ink band is the dramatic beat
+  for the store's only house-exclusive product line.
+
+  Uses global tokens (--color-heading ink, --color-bg cream,
+  --color-highlight coral, --color-cta coral action) and the shared
+  .container / .section-padding / .btn utilities. No JS.
+{% endcomment %}
+
+{%- liquid
+  assign drift_image = section.settings.image
+  assign has_secondary = false
+  if section.settings.secondary_label != blank
+    assign has_secondary = true
+  endif
+-%}
+
+<section class="drift-band section-padding" aria-labelledby="DriftBand-{{ section.id }}">
+  <div class="container drift-band__inner{% unless drift_image != blank %} drift-band__inner--text-only{% endunless %}">
+
+    <div class="drift-band__text">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="drift-band__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      <h2 class="drift-band__heading" id="DriftBand-{{ section.id }}">
+        {{ section.settings.heading | escape }}
+      </h2>
+
+      {%- if section.settings.text != blank -%}
+        <p class="drift-band__copy">{{ section.settings.text | escape }}</p>
+      {%- endif -%}
+
+      <div class="drift-band__ctas">
+        <a
+          href="{{ section.settings.cta_url | default: '/pages/carolina-drift' }}"
+          class="btn btn--cta drift-band__btn"
+        >
+          {{- section.settings.cta_label | default: 'Shop the Drop' | escape -}}
+        </a>
+        {%- if has_secondary -%}
+          <a
+            href="{{ section.settings.secondary_url | default: '/pages/our-story' }}"
+            class="btn drift-band__btn drift-band__btn--ghost"
+          >
+            {{- section.settings.secondary_label | escape -}}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if drift_image != blank -%}
+      <div class="drift-band__media">
+        {{
+          drift_image
+          | image_url: width: 900
+          | image_tag:
+            loading: 'lazy',
+            decoding: 'async',
+            class: 'drift-band__img',
+            alt: section.settings.image_alt | default: section.settings.heading,
+            width: drift_image.width,
+            height: drift_image.height,
+            widths: '450, 700, 900',
+            sizes: '(max-width: 767px) calc(100vw - 32px), 460px'
+        }}
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  .drift-band {
+    background-color: var(--color-heading, #18242E);
+    color: var(--color-bg, #F6F4EF);
+  }
+
+  .drift-band__inner {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .drift-band__inner--text-only {
+    grid-template-columns: 1fr;
+    max-width: 720px;
+    text-align: center;
+    justify-items: center;
+  }
+
+  .drift-band__eyebrow {
+    margin: 0 0 14px;
+    font-family: var(--font-body, sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-highlight, #E76F51);
+  }
+
+  .drift-band__heading {
+    margin: 0;
+    font-family: var(--font-heading, serif);
+    font-size: clamp(30px, 4.4vw, 46px);
+    line-height: 1.08;
+    color: var(--color-bg, #F6F4EF);
+  }
+
+  .drift-band__copy {
+    margin: 16px 0 0;
+    max-width: 46ch;
+    font-size: clamp(15px, 1.6vw, 17px);
+    line-height: 1.6;
+    color: var(--color-bg, #F6F4EF);
+    opacity: 0.82;
+  }
+
+  .drift-band__inner--text-only .drift-band__copy { margin-inline: auto; }
+
+  .drift-band__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .drift-band__inner--text-only .drift-band__ctas { justify-content: center; }
+
+  /* Ghost button reads on the ink ground: outlined cream */
+  .drift-band__btn--ghost {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(246, 244, 239, 0.7);
+    color: var(--color-bg, #F6F4EF);
+  }
+  .drift-band__btn--ghost:hover,
+  .drift-band__btn--ghost:focus-visible {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: #FFFFFF;
+    box-shadow: none;
+  }
+
+  .drift-band__media {
+    justify-self: end;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .drift-band__img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-card, 12px);
+  }
+
+  @media (max-width: 767px) {
+    .drift-band__inner {
+      grid-template-columns: 1fr;
+      gap: 28px;
+      text-align: center;
+      justify-items: center;
+    }
+    .drift-band__copy { margin-inline: auto; }
+    .drift-band__ctas { justify-content: center; }
+    .drift-band__media { order: -1; max-width: 320px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Carolina Drift Band",
+  "tag": "section",
+  "class": "drift-band-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Exclusive first run"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Carolina Drift"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Copy",
+      "default": "A leather shoe built for the South — everyday comfort, sharp enough for a night out, smooth enough for the Shag."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Primary button label",
+      "default": "Shop the Drop"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Primary button link",
+      "info": "Defaults to the Carolina Drift page."
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "Secondary link label",
+      "default": "Our story",
+      "info": "Leave blank to hide."
+    },
+    {
+      "type": "url",
+      "id": "secondary_url",
+      "label": "Secondary link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Product image (optional)",
+      "info": "A cutout of the Carolina Drift loafer works best. Shown right on desktop, above the text on mobile. Text-only if left blank."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "Carolina Drift leather loafer"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carolina Drift Band",
+      "category": "Custom",
+      "settings": {
+        "eyebrow": "Exclusive first run",
+        "heading": "Carolina Drift",
+        "text": "A leather shoe built for the South — everyday comfort, sharp enough for a night out, smooth enough for the Shag.",
+        "cta_label": "Shop the Drop",
+        "secondary_label": "Our story"
+      }
+    }
+  ]
+}
+{% endschema %}

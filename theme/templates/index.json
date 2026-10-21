@@ -14,6 +14,8 @@
       "settings": {
         "cta_primary_url": "shopify://collections/womens",
         "cta_secondary_url": "shopify://collections/mens",
+        "heading_accent_word": "Right",
+        "scrim_style": "ink",
         "launch_countdown_enabled": false,
         "launch_countdown_date": "2026-07-01",
         "launch_countdown_date_label": "Go live July 1st",
@@ -113,7 +115,9 @@
         "feature-3",
         "feature-4"
       ],
-      "settings": {}
+      "settings": {
+        "background_style": "white"
+      }
     },
     "fit-guide": {
       "type": "fit-guide",
@@ -157,6 +161,18 @@
         "subheading": "Fresh performance and comfort styles just in.",
         "view_all_text": "View All On Styles",
         "view_all_url": "shopify://collections/on-running"
+      }
+    },
+    "drift-band": {
+      "type": "drift-band",
+      "settings": {
+        "eyebrow": "Exclusive first run",
+        "heading": "Carolina Drift",
+        "text": "A leather shoe built for the South — everyday comfort, sharp enough for a night out, smooth enough for the Shag.",
+        "cta_label": "Shop the Drop",
+        "cta_url": "shopify://pages/carolina-drift",
+        "secondary_label": "Our story",
+        "secondary_url": "shopify://pages/our-story"
       }
     },
     "visit-store": {
@@ -224,7 +240,8 @@
         "proof_2_value": "181",
         "proof_2_label": "Google reviews",
         "proof_3_value": "48",
-        "proof_3_label": "Years in North Myrtle Beach"
+        "proof_3_label": "Years in North Myrtle Beach",
+        "background_style": "seaglass"
       }
     },
     "story-legacy": {
@@ -331,6 +348,7 @@
     "feature-bar",
     "fit-guide",
     "featured-products",
+    "drift-band",
     "visit-store",
     "testimonials",
     "story-legacy",

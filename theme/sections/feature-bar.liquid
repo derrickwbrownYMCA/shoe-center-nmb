@@ -9,7 +9,11 @@
   Available icon values: shoe, tag, pin, heart, refresh, truck, award, check.
 {% endcomment %}
 
-<div class="feature-bar">
+{%- liquid
+  assign bg_style = section.settings.background_style | default: 'default'
+-%}
+
+<div class="feature-bar feature-bar--bg-{{ bg_style }}">
   <div class="container">
     <ul class="feature-bar__grid" role="list">
 
@@ -80,13 +84,19 @@
 <style>
   /* ── Feature bar ──────────────────────────────────────────────────────── */
   .feature-bar {
-    /* Sits on the page cream — hairline rules alone mark the band so the
-       homepage doesn't stripe between cream and white surfaces. */
-    background-color: var(--color-bg, #F6F4EF);
+    /* Background color comes from the background_style modifier classes
+       below — hairline rules alone still mark the band edges regardless
+       of which surface tone is chosen. */
     border-top: 1px solid rgba(24, 36, 46, 0.08);
     border-bottom: 1px solid rgba(24, 36, 46, 0.08);
     padding: 40px 0;
   }
+
+  /* ── Background style (Coastal Ink surface rhythm) ───────────────────── */
+  .feature-bar--bg-default  { background-color: var(--color-bg, #F6F4EF); }
+  .feature-bar--bg-white    { background-color: var(--color-card, #FFFFFF); }
+  .feature-bar--bg-sandbar  { background-color: var(--color-sandbar, #F3EBDD); }
+  .feature-bar--bg-seaglass { background-color: var(--color-support-tint, #DCE8E5); }
 
   /* ── Grid ─────────────────────────────────────────────────────────────── */
   .feature-bar__grid {
@@ -127,7 +137,9 @@
     height: 52px;
     background-color: rgba(24, 36, 46, 0.08);
     border-radius: 50%;
-    color: var(--color-heading, #000000);
+    /* Trust-bar line icons use Sea Glass (--color-support) rather than ink —
+       a quieter "trust" signal, consistent with brand eyebrows elsewhere. */
+    color: var(--color-support, #476F68);
     flex-shrink: 0;
   }
 
@@ -212,7 +224,20 @@
   "name": "Feature bar",
   "tag": "div",
   "class": "feature-bar-section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "select",
+      "id": "background_style",
+      "label": "Background",
+      "options": [
+        { "value": "default",  "label": "Default (cream)" },
+        { "value": "white",    "label": "White" },
+        { "value": "sandbar",  "label": "Sandbar" },
+        { "value": "seaglass", "label": "Sea glass" }
+      ],
+      "default": "default"
+    }
+  ],
   "blocks": [
     {
       "type": "feature",

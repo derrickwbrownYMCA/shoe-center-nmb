@@ -61,3 +61,10 @@ tools/vaneli_state.json
 tools/vaneli_publish_state.json
 tools/vaneli_publish_plan.json
 tools/policy-pages-confirmed.html
+tools/remote-review-check/
+
+# Codex Sept-4 release package: keep the two review docs, drop the data bulk
+# (hero PNG, live/catalog baselines, embedded theme snapshot, payload JSON)
+release-sept4/*
+!release-sept4/README.md
+!release-sept4/RELEASE-REVIEW.md

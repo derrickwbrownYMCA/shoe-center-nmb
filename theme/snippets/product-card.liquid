@@ -115,8 +115,35 @@
     endif
   endfor
 
-  # ── Primary image ─────────────────────────────────────────────────────────
+  # ── Primary image + hover (secondary) image ───────────────────────────────
   assign primary_img = product.featured_image
+  assign secondary_img = nil
+  for pc_img in product.images
+    if pc_img.id != primary_img.id
+      assign secondary_img = pc_img
+      break
+    endif
+  endfor
+
+  # ── Brand eyebrow ──────────────────────────────────────────────────────────
+  # Restores brand visibility above the (often vendor-stripped) title.
+  # Hidden when the vendor is blank or is just the shop's own name.
+  assign show_brand = false
+  assign shop_name_downcase = shop.name | downcase | strip
+  if product.vendor != blank and product_vendor_downcase != shop_name_downcase
+    assign show_brand = true
+  endif
+
+  # ── Width availability note ──────────────────────────────────────────────
+  # Color is already communicated by the swatch dots; surface width here
+  # since it's a top shopper question ("do they come in wide?").
+  assign pc_width_note = ''
+  for pc_wopt in product.options_with_values
+    assign pc_wopt_dn = pc_wopt.name | downcase
+    if pc_wopt_dn contains 'width' and pc_wopt.values.size > 1
+      assign pc_width_note = pc_wopt.values | join: ' & '
+    endif
+  endfor
 -%}
 
 <article
@@ -143,6 +170,23 @@
           widths: '400, 600, 800, 1000',
           sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
       }}
+      {%- if secondary_img != blank -%}
+        {%- comment -%} Hover-reveal second angle — lazy, decorative, hidden from AT. {%- endcomment -%}
+        {{
+          secondary_img
+          | image_url: width: 800
+          | image_tag:
+            loading: 'lazy',
+            decoding: 'async',
+            class: 'product-card__img product-card__img--alt',
+            alt: '',
+            aria-hidden: 'true',
+            width: secondary_img.width,
+            height: secondary_img.height,
+            widths: '400, 600, 800',
+            sizes: '(max-width: 599px) calc(50vw - 20px), (max-width: 1023px) calc(50vw - 32px), calc((min(100vw, 1280px) - 96px - (var(--fp-cols, 4) - 1) * 24px) / var(--fp-cols, 4))'
+        }}
+      {%- endif -%}
     {%- else -%}
       <div class="product-card__img product-card__img--placeholder">
         {{- 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' -}}
@@ -157,8 +201,12 @@
 
   </div><!-- /.product-card__media -->
 
-  {%- comment -%} ── Card body: swatches → title → price ────────────────── {%- endcomment -%}
+  {%- comment -%} ── Card body: brand → swatches → title → price ─────────── {%- endcomment -%}
   <div class="product-card__body">
+
+    {%- if show_brand -%}
+      <span class="product-card__brand">{{ product.vendor | escape }}</span>
+    {%- endif -%}
 
     {%- if pc_colors != nil and pc_colors.size > 1 -%}
       {%- comment -%}
@@ -242,6 +290,10 @@
         {{- display_title | escape -}}
       </a>
     </h3>
+
+    {%- if pc_width_note != blank -%}
+      <span class="product-card__facts">{{ pc_width_note | escape }}</span>
+    {%- endif -%}
 
     <div class="product-card__prices">
       {%- render 'price', product: product, show_compare: true -%}

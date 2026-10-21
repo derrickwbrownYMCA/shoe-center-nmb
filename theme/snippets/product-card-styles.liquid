@@ -28,10 +28,23 @@
     height: 100%;
     object-fit: contain;
     object-position: center;
-    transition: transform 0.35s ease;
+    transition: transform 0.35s ease, opacity 0.3s ease;
   }
 
   .product-card:hover .product-card__img { transform: scale(1.03); }
+
+  /* Hover-reveal second angle — stacked over the primary, faded in on hover.
+     Only present when the product has a 2nd image. */
+  .product-card__img--alt {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  @media (hover: hover) {
+    .product-card:hover .product-card__img--alt { opacity: 1; }
+    .product-card:hover .product-card__img:not(.product-card__img--alt) { opacity: 0; }
+  }
 
   .product-card__img--placeholder {
     display: flex;
@@ -51,7 +64,7 @@
     z-index: 1;
     padding: 6px 10px;
     border-radius: 999px;
-    background: var(--color-accent, #F5E1E1);
+    background: var(--color-highlight, #E76F51);
     color: var(--color-heading, #000000);
     font-size: 9px;
     font-weight: 700;
@@ -63,6 +76,24 @@
   .product-card__badge--dark {
     background: var(--color-heading, #000000);
     color: var(--color-bg, #FAF9F6);
+  }
+
+  /* Brand eyebrow — sea glass, sits above the title */
+  .product-card__brand {
+    font-family: var(--font-body, sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-support, #476F68);
+    line-height: 1;
+  }
+
+  /* Width availability note — quiet, under the title */
+  .product-card__facts {
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--color-text-secondary, #6B7378);
   }
 
   /* ── Body: swatches → title → price ────────────────────────────────── */

@@ -169,6 +169,30 @@
             <input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">
           {%- endif -%}
 
+          {%- comment -%}
+            Responsive disclosure: on phones (<600px) the whole filter
+            block collapses behind a single "Filter" button so products
+            stay above the fold. On tablet/desktop the summary is hidden
+            and the block renders inline exactly as before. Defaults to
+            open so no-JS and desktop both show filters; the inline script
+            closes it on small screens.
+          {%- endcomment -%}
+          {%- assign active_filter_count = 0 -%}
+          {%- for filter in collection.filters -%}
+            {%- assign active_filter_count = active_filter_count | plus: filter.active_values.size -%}
+            {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+              {%- assign active_filter_count = active_filter_count | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <details class="collection-facets__disclosure" id="CollectionFacets" open>
+            <summary class="collection-facets__toggle">
+              <span class="collection-facets__toggle-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+                Filter{% if active_filter_count > 0 %} ({{ active_filter_count }}){% endif %}
+              </span>
+              <span class="collection-facets__toggle-chevron" aria-hidden="true">⌄</span>
+            </summary>
+
           <div class="collection-facets__heading-row">
             <p class="collection-facets__heading">Filter shoes</p>
             <a href="{{ collection.url }}" class="collection-facets__clear">Clear all</a>
@@ -238,10 +262,22 @@
               </details>
             {%- endfor -%}
           </div>
+          </details>
 
         </form>
       </div>
     </div>
+
+    <script>
+      /* Collapse the filter disclosure by default on phones so products
+         stay above the fold; desktop keeps it open (summary is hidden). */
+      (function () {
+        var d = document.getElementById('CollectionFacets');
+        if (d && window.matchMedia('(max-width: 599px)').matches) {
+          d.removeAttribute('open');
+        }
+      }());
+    </script>
   {%- endif -%}
 
   <!-- ── Active filters ─────────────────────────────────────────────────── -->
@@ -380,6 +416,42 @@
   .collection-facet__price label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 12px; }
   .collection-facet__price input { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-background); color: var(--color-text); }
   .collection-facet__apply { width: 100%; min-height: 42px; margin-top: 14px; padding: 10px 18px; }
+
+  /* ── Responsive filter disclosure ─────────────────────────────────────
+     Default-open wrapper. Desktop hides the toggle and renders inline;
+     phones (<600px) show the toggle and collapse the block. */
+  .collection-facets__toggle {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 48px;
+    padding: 10px 16px;
+    border: 1px solid var(--color-border, #E3DDD1);
+    border-radius: var(--radius-btn, 8px);
+    background: var(--color-card, #FFFFFF);
+    color: var(--color-heading, #18242E);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    cursor: pointer;
+    list-style: none;
+  }
+  .collection-facets__toggle::-webkit-details-marker { display: none; }
+  .collection-facets__toggle-label { display: inline-flex; align-items: center; gap: 9px; }
+  .collection-facets__toggle-chevron { font-size: 15px; transition: transform .18s ease; }
+  .collection-facets__disclosure[open] > .collection-facets__toggle .collection-facets__toggle-chevron { transform: rotate(180deg); }
+  .collection-facets__toggle:focus-visible { outline: 3px solid #005fcc; outline-offset: 2px; }
+
+  @media (max-width: 599px) {
+    .collection-facets__toggle { display: flex; }
+    /* Give the collapsed block breathing room from the products below */
+    .collection-facets__disclosure[open] .collection-facets__heading-row { margin-top: 14px; }
+    /* Facet dropdowns span the width on phones instead of floating narrow */
+    .collection-facets__groups { flex-direction: column; }
+    .collection-facet { width: 100%; }
+    .collection-facet__panel { position: static; width: 100%; min-width: 0; max-width: none; box-shadow: none; margin-top: 8px; }
+  }
 
   @media (max-width: 899px) {
     .collection-facets__groups { display: grid; grid-template-columns: 1fr; gap: 8px; }

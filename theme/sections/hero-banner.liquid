@@ -67,6 +67,29 @@
   if section.settings.cta_secondary_text != blank
     assign has_secondary_cta = true
   endif
+
+  # Scrim style: 'ink' (default) drops a bottom-weighted ink gradient and
+  # flips text to cream for a confident, editorial hero; 'light' keeps the
+  # original soft-cream overlay + dark text. When ink, text color is forced
+  # to cream regardless of the text_color setting.
+  assign scrim_style = section.settings.scrim_style | default: 'ink'
+  assign effective_text_color = section.settings.text_color
+  if scrim_style == 'ink'
+    assign effective_text_color = 'oninkcream'
+  endif
+
+  # Coral underline accent — wrap the first occurrence of the chosen word
+  # from the headline in a span. Escape everything first, then inject the
+  # span so the output stays safe with raw HTML.
+  assign heading_html = section.settings.heading | escape
+  assign accent_word = section.settings.heading_accent_word | strip
+  if accent_word != blank
+    assign accent_word_esc = accent_word | escape
+    if heading_html contains accent_word_esc
+      assign accent_wrap = '<span class="hero__accent">' | append: accent_word_esc | append: '</span>'
+      assign heading_html = heading_html | replace_first: accent_word_esc, accent_wrap
+    endif
+  endif
 -%}
 
 <section
@@ -135,10 +158,14 @@
         while giving the text a soft, dreamy surface to sit on.
         Setting opacity to 0 removes it entirely for full-bleed impact.
       {%- endcomment -%}
-      <div
-        class="hero__overlay"
-        style="background-color: rgba(241, 238, 232, {{ overlay_alpha }});"
-      ></div>
+      {%- if scrim_style == 'ink' -%}
+        <div class="hero__overlay hero__overlay--ink"></div>
+      {%- else -%}
+        <div
+          class="hero__overlay"
+          style="background-color: rgba(241, 238, 232, {{ overlay_alpha }});"
+        ></div>
+      {%- endif -%}
 
     {%- else -%}
       {%- comment -%}
@@ -155,10 +182,14 @@
         loading="eager"
         fetchpriority="high"
       >
-      <div
-        class="hero__overlay"
-        style="background-color: rgba(241, 238, 232, {{ overlay_alpha }});"
-      ></div>
+      {%- if scrim_style == 'ink' -%}
+        <div class="hero__overlay hero__overlay--ink"></div>
+      {%- else -%}
+        <div
+          class="hero__overlay"
+          style="background-color: rgba(241, 238, 232, {{ overlay_alpha }});"
+        ></div>
+      {%- endif -%}
     {%- endif -%}
 
   </div><!-- /.hero__media -->
@@ -170,7 +201,7 @@
   <div
     class="hero__content container"
     data-align="{{ section.settings.text_align }}"
-    data-color="{{ section.settings.text_color }}"
+    data-color="{{ effective_text_color }}"
   >
     <div class="hero__text">
 
@@ -188,7 +219,7 @@
         class="hero__heading"
         id="HeroHeading-{{ section.id }}"
       >
-        {{- section.settings.heading | escape -}}
+        {{ heading_html }}
       </h1>
 
       {%- if section.settings.subheading != blank -%}
@@ -203,7 +234,7 @@
           {%- if has_primary_cta -%}
             <a
               href="{{ section.settings.cta_primary_url | default: routes.collections_url }}"
-              class="btn hero__btn"
+              class="btn hero__btn{% if scrim_style == 'ink' %} hero__btn--onink{% endif %}"
               role="listitem"
             >
               {{- section.settings.cta_primary_text | escape -}}
@@ -399,6 +430,76 @@
   /* Text color modes */
   .hero__content[data-color="dark"]  { color: var(--color-heading); }
   .hero__content[data-color="light"] { color: #ffffff; }
+  .hero__content[data-color="oninkcream"] { color: var(--color-bg, #F6F4EF); }
+
+  /* ── Ink scrim ────────────────────────────────────────────────────
+    Bottom-weighted ink gradient: lets the top of the photo breathe
+    while anchoring the text in a legible ~14:1 zone against cream.
+  ──────────────────────────────────────────────────────────────── */
+  .hero__overlay--ink {
+    background: linear-gradient(
+      180deg,
+      rgba(24, 36, 46, 0.12) 0%,
+      rgba(24, 36, 46, 0.40) 52%,
+      rgba(24, 36, 46, 0.66) 100%
+    );
+  }
+
+  /* On the ink scrim the eyebrow and proof line read at higher opacity
+     (cream on ink has plenty of headroom) and the proof separators
+     switch to cream so they don't vanish. */
+  .hero__content[data-color="oninkcream"] .hero__eyebrow {
+    opacity: 0.9;
+    color: var(--color-bg, #F6F4EF);
+  }
+  .hero__content[data-color="oninkcream"] .hero__proof { opacity: 0.9; }
+  .hero__content[data-color="oninkcream"] .hero__proof span { color: var(--color-highlight, #E76F51); }
+
+  /* Coral underline accent behind one headline word. z-index:0 on the
+     span establishes a stacking context so the -1 pseudo paints above
+     the scrim but behind the glyphs. */
+  .hero__accent {
+    position: relative;
+    z-index: 0;
+    white-space: nowrap;
+  }
+  .hero__accent::after {
+    content: "";
+    position: absolute;
+    left: 1%;
+    right: 1%;
+    bottom: 0.04em;
+    height: 0.12em;
+    background: var(--color-highlight, #E76F51);
+    border-radius: 99px;
+    z-index: -1;
+    opacity: 0.92;
+  }
+
+  /* Primary CTA on the ink scrim: cream fill + ink text (an ink .btn
+     would disappear against the scrim). Overrides the global .btn. */
+  .hero__btn--onink {
+    background-color: var(--color-bg, #F6F4EF);
+    color: var(--color-heading, #18242E);
+  }
+  .hero__btn--onink:hover,
+  .hero__btn--onink:focus-visible {
+    background-color: #FFFFFF;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Secondary CTA on the ink scrim: outlined cream */
+  .hero__content[data-color="oninkcream"] .hero__btn--sec {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(246, 244, 239, 0.7);
+    color: var(--color-bg, #F6F4EF);
+  }
+  .hero__content[data-color="oninkcream"] .hero__btn--sec:hover,
+  .hero__content[data-color="oninkcream"] .hero__btn--sec:focus-visible {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: #FFFFFF;
+    box-shadow: none;
+  }
 
   /* ── Text stack ───────────────────────────────────────────────── */
   .hero__text {
@@ -743,6 +844,13 @@
       "default": "Shoes That Fit Right"
     },
     {
+      "type": "text",
+      "id": "heading_accent_word",
+      "label": "Underline this word (coral)",
+      "default": "Right",
+      "info": "The first matching word in the headline gets a coral underline accent. Leave blank for no underline."
+    },
+    {
       "type": "textarea",
       "id": "subheading",
       "label": "Subheadline",
@@ -868,6 +976,17 @@
       "content": "Style & height"
     },
     {
+      "type": "select",
+      "id": "scrim_style",
+      "label": "Overlay style",
+      "options": [
+        { "value": "ink",   "label": "Ink — dark gradient, cream text (recommended)" },
+        { "value": "light", "label": "Light — soft cream veil, dark text" }
+      ],
+      "default": "ink",
+      "info": "Ink gives a confident, editorial hero and works with most photos. Light uses the cream-overlay slider below."
+    },
+    {
       "type": "range",
       "id": "overlay_opacity",
       "label": "Cream overlay opacity",
@@ -896,8 +1015,10 @@
       "name": "Hero banner",
       "settings": {
         "heading": "Shoes That Fit Right",
+        "heading_accent_word": "Right",
         "subheading": "Modern comfort, performance, and dance shoes for women and men, backed by local fit expertise in North Myrtle Beach.",
         "eyebrow": "North Myrtle Beach, SC",
+        "scrim_style": "ink",
         "cta_primary_text": "Shop Women's",
         "cta_secondary_text": "Shop Men's",
         "story_text": "Discover Our Story",

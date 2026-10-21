@@ -38,12 +38,33 @@
     endfor
   endif
 
+  assign size_option_index = -1
   for product_option in product.options_with_values
     assign product_option_name = product_option.name | downcase
     if product_option_name contains 'size'
       assign requires_size_selection = true
+      assign size_option_index = forloop.index0
     endif
   endfor
+
+  # Selected value per option position, used by the variant-button UI to
+  # mark availability. The size slot stays blank until the shopper picks
+  # one — mirrors the "Select a size" placeholder logic on the selects.
+  assign sel_value_0 = current_variant.options[0]
+  assign sel_value_1 = current_variant.options[1]
+  assign sel_value_2 = current_variant.options[2]
+  if has_explicit_variant == false
+    if size_option_index == 0
+      assign sel_value_0 = ''
+    elsif size_option_index == 1
+      assign sel_value_1 = ''
+    elsif size_option_index == 2
+      assign sel_value_2 = ''
+    endif
+  endif
+
+  # Shared by the main buy form and the sticky purchase bar (form= attribute)
+  assign product_form_id = 'ProductForm-' | append: section_id
 
   if vendor_downcase == 'new balance'
     assign is_in_store_only = true
@@ -274,6 +295,71 @@
                   </option>
                 {%- endfor -%}
               </select>
+
+              {%- comment -%}
+                Variant buttons — progressive enhancement over the select.
+                Buttons write to the hidden select and dispatch 'change', so
+                VariantSelector remains the single source of truth (price,
+                URL, gallery filtering all keep working unchanged). CSS shows
+                the buttons and hides the select only after the inline script
+                adds .variant-buttons-ready — no-JS shoppers keep the select.
+                Availability marks reflect the other currently-selected
+                options; the inline script re-computes them on every change.
+              {%- endcomment -%}
+              {%- liquid
+                assign option_index = forloop.index0
+                assign is_width_option = false
+                if option_name_downcase contains 'width'
+                  assign is_width_option = true
+                endif
+              -%}
+              <div
+                class="variant-btns{% if is_width_option %} variant-btns--segmented{% endif %}"
+                data-option-buttons
+                data-option-index="{{ option_index }}"
+                role="group"
+                aria-label="{{ display_option_name | escape }}"
+              >
+                {%- for value in option.values -%}
+                  {%- liquid
+                    assign is_value_selected = false
+                    if current_option_value == value
+                      if is_size_option == false or has_explicit_variant
+                        assign is_value_selected = true
+                      endif
+                    endif
+
+                    assign value_is_available = false
+                    for availability_variant in product.variants
+                      unless availability_variant.available
+                        continue
+                      endunless
+                      if availability_variant.options[option_index] != value
+                        continue
+                      endif
+                      if option_index != 0 and sel_value_0 != blank and availability_variant.options[0] != sel_value_0
+                        continue
+                      endif
+                      if option_index != 1 and sel_value_1 != blank and availability_variant.options[1] != sel_value_1
+                        continue
+                      endif
+                      if option_index != 2 and sel_value_2 != blank and availability_variant.options[2] != sel_value_2
+                        continue
+                      endif
+                      assign value_is_available = true
+                      break
+                    endfor
+                  -%}
+                  <button
+                    type="button"
+                    class="variant-btn{% unless value_is_available %} is-unavailable{% endunless %}"
+                    data-value="{{ value | escape }}"
+                    aria-pressed="{% if is_value_selected %}true{% else %}false{% endif %}"
+                  >
+                    {{- value | escape -}}
+                  </button>
+                {%- endfor -%}
+              </div>
             </div>
           {%- endfor -%}
 
@@ -293,7 +379,6 @@
 
       <!-- Add to Cart form -->
       <product-form>
-        {%- assign product_form_id = 'ProductForm-' | append: section_id -%}
         {%- form 'product', product, id: product_form_id, novalidate: 'novalidate' -%}
 
           <input
@@ -347,7 +432,7 @@
             <p class="product-info__form-note">New Balance is available for purchase in our North Myrtle Beach store only.</p>
           {%- elsif requires_size_selection and has_explicit_variant == false -%}
             <button
-              class="btn btn--full product-info__add-btn js-add-to-cart"
+              class="btn btn--cta btn--full product-info__add-btn js-add-to-cart"
               type="submit"
               name="add"
               data-add-text="Add to Cart"
@@ -358,7 +443,7 @@
             </button>
           {%- elsif current_variant.available -%}
             <button
-              class="btn btn--full product-info__add-btn js-add-to-cart"
+              class="btn btn--cta btn--full product-info__add-btn js-add-to-cart"
               type="submit"
               name="add"
               data-add-text="Add to Cart"
@@ -367,7 +452,7 @@
             </button>
           {%- else -%}
             <button
-              class="btn btn--full product-info__add-btn"
+              class="btn btn--cta btn--full product-info__add-btn"
               type="submit"
               disabled
               aria-disabled="true"
@@ -387,7 +472,7 @@
       <ul class="product-info__trust" aria-label="Shopping reassurance">
         <li class="product-info__trust-item">
           <svg class="product-info__trust-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></svg>
-          <a href="/pages/contact">Paid pickup at our NMB store</a>
+          <a href="/pages/contact">Buy online, pick up in store</a>
         </li>
         <li class="product-info__trust-item">
           <svg class="product-info__trust-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="1" y="5" width="14" height="12" rx="1"/><path d="M15 9h4l3 4v4h-7"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>
@@ -435,7 +520,7 @@
           </svg>
         </summary>
         <div class="product-info__description rte">
-          <p><strong>Paid pickup available.</strong> Buy online, then pick up at our North Myrtle Beach store.</p>
+          <p><strong>In-store pickup.</strong> Buy online, then pick up at our North Myrtle Beach store — orders are usually ready within 2 hours.</p>
           <p><strong>Simple shipping.</strong> $7.95 shipping under $200; free standard shipping on orders of $200 or more.</p>
           <p><strong>14-day store credit.</strong> Unworn merchandise may be returned for store credit. <a href="{{ shop.refund_policy.url }}">Read the policy</a>.</p>
           <p><strong>Need fit help?</strong> Call <a href="tel:+18432726515">(843) 272-6515</a> for personal guidance before you order.</p>
@@ -445,6 +530,71 @@
     </div><!-- /.product-info -->
 
   </div><!-- /.main-product__layout -->
+
+  {%- comment -%}
+    Sticky purchase bar — mobile only (CSS-gated at 767px). The button
+    submits the main product form via its form="" attribute, so
+    ProductForm's submit interception (required-size guard, cart drawer)
+    applies unchanged. State mirrors the main button by listening to the
+    same variant:change event; shown/hidden by an IntersectionObserver
+    watching the buy box in the inline script below.
+  {%- endcomment -%}
+  <div class="pdp-sticky" data-pdp-sticky hidden>
+    {%- if featured_product_image != blank -%}
+      <img
+        class="pdp-sticky__thumb"
+        src="{{ featured_product_image | image_url: width: 96 }}"
+        alt=""
+        width="48"
+        height="48"
+        loading="lazy"
+        decoding="async"
+        aria-hidden="true"
+      >
+    {%- endif -%}
+    <div class="pdp-sticky__info">
+      <span class="pdp-sticky__title">{{ product.title | escape }}</span>
+      <span class="pdp-sticky__meta" data-sticky-meta>
+        {%- unless product.has_only_default_variant or has_explicit_variant == false -%}
+          {{ current_variant.title | replace: ' / ', ' · ' | escape }} ·
+        {%- endunless %}
+        {{ current_variant.price | money }}
+      </span>
+    </div>
+    {%- if is_in_store_only -%}
+      <a class="btn pdp-sticky__btn" href="tel:+18432726515">Call the Store</a>
+    {%- elsif requires_size_selection and has_explicit_variant == false -%}
+      <button
+        class="btn btn--cta pdp-sticky__btn"
+        type="submit"
+        name="add"
+        form="{{ product_form_id }}"
+        data-sticky-add
+        data-add-text="Add to Cart"
+        disabled
+        aria-disabled="true"
+      >Choose a Size</button>
+    {%- elsif current_variant.available -%}
+      <button
+        class="btn btn--cta pdp-sticky__btn"
+        type="submit"
+        name="add"
+        form="{{ product_form_id }}"
+        data-sticky-add
+        data-add-text="Add to Cart"
+      >Add to Cart</button>
+    {%- else -%}
+      <button
+        class="btn btn--cta pdp-sticky__btn"
+        type="submit"
+        form="{{ product_form_id }}"
+        data-sticky-add
+        data-add-text="Add to Cart"
+        disabled
+        aria-disabled="true"
+      >Sold Out</button>
+    {%- endif -%}
+  </div>
 </section>
 
 <!-- ── JSON-LD Structured Data ──────────────────────────────────────────── -->
@@ -694,7 +844,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--color-text-secondary, #A8A8A8);
+    color: var(--color-support, #476F68);
     text-decoration: none;
     transition: color 0.18s ease;
   }
@@ -891,7 +1041,7 @@
 
   .product-info__trust-icon {
     flex-shrink: 0;
-    color: var(--color-text-secondary, #6B7378);
+    color: var(--color-support, #476F68);
   }
 
   .product-info__trust-item a {
@@ -979,6 +1129,151 @@
   .product-info__description a { color: var(--color-heading, #000000); text-decoration: underline; }
   .product-info__description img { max-width: 100%; border-radius: 8px; }
 
+  /* ── Variant buttons (enhancement over the selects) ─────────────────────
+     Hidden until the inline script adds .variant-buttons-ready to
+     <variant-selector>; no-JS shoppers keep the native selects. */
+  .variant-btns {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .variant-buttons-ready .variant-btns { display: flex; }
+  .variant-buttons-ready .product-info__option-select { display: none; }
+
+  .variant-btn {
+    min-width: 54px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border, #E3DDD1);
+    border-radius: var(--radius-btn, 8px);
+    background: var(--color-card, #FFFFFF);
+    color: var(--color-heading, #18242E);
+    font-family: var(--font-body, sans-serif);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color 0.18s ease,
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+
+  .variant-btn:hover { border-color: var(--color-heading, #18242E); }
+
+  .variant-btn[aria-pressed="true"] {
+    background: var(--color-heading, #18242E);
+    border-color: var(--color-heading, #18242E);
+    color: var(--color-bg, #F6F4EF);
+  }
+
+  /* Unavailable for the current color/width combination — still clickable
+     so shoppers can pivot (ATC then reads Sold Out), but visibly struck. */
+  .variant-btn.is-unavailable {
+    background: var(--color-bg, #F6F4EF);
+    color: var(--color-text-secondary, #6B7378);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .variant-btn:focus-visible {
+    outline: 3px solid #005FCC;
+    outline-offset: 2px;
+  }
+
+  /* Width renders as a joined segmented control */
+  .variant-btns--segmented {
+    gap: 0;
+    width: fit-content;
+    border: 1px solid var(--color-border, #E3DDD1);
+    border-radius: var(--radius-btn, 8px);
+    overflow: hidden;
+  }
+
+  .variant-btns--segmented .variant-btn {
+    border: 0;
+    border-radius: 0;
+    min-width: 84px;
+  }
+
+  .variant-btns--segmented .variant-btn + .variant-btn {
+    border-left: 1px solid var(--color-border, #E3DDD1);
+  }
+
+  .variant-btns--segmented .variant-btn:focus-visible {
+    outline-offset: -3px;
+  }
+
+  /* Disabled ATC visual — class-independent so the JS text/disabled swaps
+     read correctly whether the button is ink or coral. */
+  .product-info__add-btn:disabled,
+  .product-info__add-btn[aria-disabled="true"],
+  .pdp-sticky__btn:disabled {
+    background-color: var(--color-border, #E3DDD1);
+    color: var(--color-text-secondary, #6B7378);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* ── Sticky purchase bar (mobile) ───────────────────────────────────────── */
+  .pdp-sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 10px max(12px, env(safe-area-inset-left))
+             calc(10px + env(safe-area-inset-bottom))
+             max(12px, env(safe-area-inset-right));
+    background: var(--color-card, #FFFFFF);
+    border-top: 1px solid var(--color-border, #E3DDD1);
+    box-shadow: 0 -6px 24px rgba(24, 36, 46, 0.10);
+  }
+
+  .pdp-sticky__thumb {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--color-border, #E3DDD1);
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .pdp-sticky__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .pdp-sticky__title {
+    font-weight: 600;
+    color: var(--color-heading, #18242E);
+    font-size: 13.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pdp-sticky__meta {
+    font-size: 12px;
+    color: var(--color-text-secondary, #6B7378);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pdp-sticky__btn {
+    flex-shrink: 0;
+    min-height: 46px;
+    padding: 0.7em 1.4em;
+    font-size: 13px;
+  }
+
   /* ── Responsive ─────────────────────────────────────────────────────────── */
   @media (max-width: 767px) {
     .main-product__layout {
@@ -989,8 +1284,110 @@
     .product-gallery__thumbs {
       max-width: calc(100vw - (var(--page-padding, 16px) * 2));
     }
+
+    .pdp-sticky:not([hidden]) { display: flex; }
+
+    /* WCAG 2.2 SC 2.4.11 — keep keyboard-focused elements from being
+       obscured behind the sticky bar when the page scrolls to them. */
+    html { scroll-padding-bottom: 96px; }
+    .main-product { padding-bottom: 84px; }
   }
 </style>
+
+<script>
+  /* Variant buttons + sticky purchase bar — scoped to this section.
+     The buttons are a thin input layer over the hidden <select>s, so
+     VariantSelector (theme.js) keeps owning variant matching, price,
+     URL state, and gallery filtering. The sticky bar mirrors buy-state
+     from the same variant:change event rather than watching the DOM. */
+  (() => {
+    const section = document.getElementById('MainProduct-{{ section_id }}');
+    if (!section) return;
+
+    const selector = section.querySelector('variant-selector');
+    const selects = selector ? Array.from(selector.querySelectorAll('select')) : [];
+    let variants = [];
+    try {
+      variants = JSON.parse(selector?.querySelector('[data-variant-json]')?.textContent || '[]');
+    } catch { variants = []; }
+
+    /* ── Variant buttons ── */
+    if (selector && selects.length) {
+      selector.classList.add('variant-buttons-ready');
+      const groups = Array.from(selector.querySelectorAll('[data-option-buttons]'));
+
+      const refresh = () => {
+        const sel = selects.map(s => s.value);
+        groups.forEach(group => {
+          const idx = parseInt(group.dataset.optionIndex, 10);
+          group.querySelectorAll('.variant-btn').forEach(btn => {
+            btn.setAttribute('aria-pressed', String(sel[idx] === btn.dataset.value));
+            const available = variants.some(v =>
+              v.available &&
+              v.options[idx] === btn.dataset.value &&
+              v.options.every((opt, j) => j === idx || !sel[j] || opt === sel[j])
+            );
+            btn.classList.toggle('is-unavailable', !available);
+          });
+        });
+      };
+
+      groups.forEach(group => {
+        group.addEventListener('click', e => {
+          const btn = e.target.closest('.variant-btn');
+          if (!btn) return;
+          const idx = parseInt(group.dataset.optionIndex, 10);
+          const select = selects.find(s => parseInt(s.dataset.optionIndex, 10) === idx);
+          if (!select || select.value === btn.dataset.value) return;
+          select.value = btn.dataset.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      });
+
+      document.addEventListener('variant:change', e => {
+        if (section.contains(e.target)) refresh();
+      });
+      refresh();
+    }
+
+    /* ── Sticky purchase bar ── */
+    const bar = section.querySelector('[data-pdp-sticky]');
+    const buyBox = section.querySelector('product-form');
+    if (bar && buyBox && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => {
+        /* Show only once the buy box has scrolled up out of view */
+        bar.hidden = entry.isIntersecting || entry.boundingClientRect.top > 0;
+      }, { threshold: 0 }).observe(buyBox);
+
+      const stickyBtn = bar.querySelector('[data-sticky-add]');
+      const stickyMeta = bar.querySelector('[data-sticky-meta]');
+      if (stickyBtn) {
+        document.addEventListener('variant:change', e => {
+          if (!section.contains(e.target)) return;
+          const { variant, incomplete } = e.detail;
+          const setDisabled = (disabled, label) => {
+            stickyBtn.disabled = disabled;
+            if (disabled) stickyBtn.setAttribute('aria-disabled', 'true');
+            else stickyBtn.removeAttribute('aria-disabled');
+            stickyBtn.textContent = label;
+          };
+          if (incomplete) setDisabled(true, 'Choose a Size');
+          else if (!variant) setDisabled(true, 'Unavailable');
+          else if (!variant.available) setDisabled(true, 'Sold Out');
+          else setDisabled(false, stickyBtn.dataset.addText || 'Add to Cart');
+
+          if (stickyMeta && variant) {
+            const price = (typeof formatMoney === 'function') ? formatMoney(variant.price) : '';
+            const title = variant.title && variant.title !== 'Default Title'
+              ? variant.title.split(' / ').join(' · ')
+              : '';
+            stickyMeta.textContent = [title, price].filter(Boolean).join(' · ');
+          }
+        });
+      }
+    }
+  })();
+</script>
 
 {% schema %}
 {
