@@ -1,0 +1,14 @@
+{%- if address != blank or hours != blank -%}
+  <div class="hero__visit">
+    {%- if address != blank -%}
+      <a class="hero__directions" href="https://www.google.com/maps/dir/?api=1&amp;destination={{ address | url_encode }}">Get directions <span aria-hidden="true">↗</span></a>
+      <p>{{ address | escape }}</p>
+    {%- endif -%}
+    {%- if hours != blank -%}<p>{{ hours | escape }}</p>{%- endif -%}
+  </div>
+{%- endif -%}
+<nav class="hero__activities" aria-label="Shop by activity">
+  <a href="{{ collections_url }}/everyday-comfort">Walking</a>
+  <a href="{{ collections_url }}/performance">Running</a>
+  <a href="{{ collections_url }}/dance">Carolina shag</a>
+</nav>

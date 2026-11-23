@@ -32,8 +32,7 @@
   ACCESSIBILITY
   ─────────────
   • <section aria-labelledby> + <h1 id> = proper landmark naming.
-  • .hero__media has aria-hidden="true" — the <img> alt text is the
-    only image description exposed to assistive technology.
+  • The hero image provides its own description to assistive technology.
   • Staggered fade-up animation is gated on prefers-reduced-motion:
     no-preference — never plays for users who opt out of motion.
   • Default cream overlay at 50% creates an effective background of
@@ -99,10 +98,9 @@
 >
 
   <!-- ── Media layer (image + overlay) ─────────────────────────────
-    aria-hidden="true" on the wrapper means AT skips the div entirely
-    and only reads the <img> alt text inside.
+    Keep the media accessible so the image description can be read.
   ──────────────────────────────────────────────────────────────── -->
-  <div class="hero__media" aria-hidden="true">
+  <div class="hero__media">
 
     {%- if image != blank -%}
       <picture>
@@ -143,7 +141,7 @@
             {{ image | image_url: width: 2400 }} 2400w
           "
           sizes="100vw"
-          alt="{{ section.settings.image_alt | escape }}"
+          alt="{{ section.settings.image_alt | default: image.alt | escape }}"
           width="{{ image.width }}"
           height="{{ image.height }}"
           loading="eager"
@@ -176,7 +174,7 @@
       <img
         class="hero__img"
         src="{{ 'tile-athletic-lacing.webp' | asset_url }}"
-        alt="{{ section.settings.image_alt | escape }}"
+        alt="A person tying a running shoe on a pedestrian bridge"
         width="1920"
         height="1080"
         loading="eager"
@@ -222,6 +220,10 @@
         {{ heading_html }}
       </h1>
 
+      {%- if request.page_type == 'index' -%}
+        {% render 'hero-store-visit', address: section.settings.visit_address, hours: section.settings.visit_hours, collections_url: routes.collections_url %}
+      {%- endif -%}
+
       {%- if section.settings.subheading != blank -%}
         <p class="hero__subheading">
           {{- section.settings.subheading | escape -}}
@@ -229,13 +231,12 @@
       {%- endif -%}
 
       {%- if has_primary_cta or has_secondary_cta -%}
-        <div class="hero__ctas" role="list">
+        <div class="hero__ctas">
 
           {%- if has_primary_cta -%}
             <a
               href="{{ section.settings.cta_primary_url | default: routes.collections_url }}"
               class="btn hero__btn{% if scrim_style == 'ink' %} hero__btn--onink{% endif %}"
-              role="listitem"
             >
               {{- section.settings.cta_primary_text | escape -}}
             </a>
@@ -245,7 +246,6 @@
             <a
               href="{{ section.settings.cta_secondary_url | default: routes.collections_url }}"
               class="btn btn--secondary hero__btn hero__btn--sec"
-              role="listitem"
             >
               {{- section.settings.cta_secondary_text | escape -}}
             </a>
@@ -726,6 +726,32 @@
     }
   }
 
+  .hero__visit {
+    background: #18242e;
+    color: #fff;
+    padding: .75rem 1rem;
+    border-inline-start: 3px solid #ed896e;
+    border-radius: 3px;
+    width: fit-content;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .hero__visit p { margin: 0; color: inherit; }
+  .hero__directions, .hero__activities a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+  .hero__directions { gap: .35em; }
+  .hero__activities { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .hero__content[data-align="center"] .hero__activities { justify-content: center; }
+  .hero__activities a { padding-inline: .6rem; border-radius: 3px; background: #18242e; color: #fff; }
+  .hero__visit a:focus-visible, .hero__activities a:focus-visible { outline: 3px solid #ed896e; outline-offset: 2px; }
+
   /* ── Mobile ───────────────────────────────────────────────────── */
   @media (max-width: 767px) {
     .hero {
@@ -802,6 +828,9 @@
   "class": "hero-section",
   "limit": 1,
   "settings": [
+    { "type": "header", "content": "Homepage store visit" },
+    { "type": "text", "id": "visit_address", "label": "Address and directions destination", "default": "710 Hwy 17 S, Suite I, North Myrtle Beach, SC 29582" },
+    { "type": "text", "id": "visit_hours", "label": "Store hours", "default": "Mon–Sat 10am–6pm · Sun 11am–5pm" },
     {
       "type": "header",
       "content": "Image"
@@ -822,7 +851,6 @@
       "type": "text",
       "id": "image_alt",
       "label": "Image description (alt text)",
-      "default": "Happy customers wearing comfortable shoes near the beach in North Myrtle Beach, SC",
       "info": "Describes the image for screen readers and search engines. Be specific and natural."
     },
 
