@@ -32,8 +32,7 @@
   ACCESSIBILITY
   ─────────────
   • <section aria-labelledby> + <h1 id> = proper landmark naming.
-  • .hero__media has aria-hidden="true" — the <img> alt text is the
-    only image description exposed to assistive technology.
+  • The hero image provides its own description to assistive technology.
   • Staggered fade-up animation is gated on prefers-reduced-motion:
     no-preference — never plays for users who opt out of motion.
   • Default cream overlay at 50% creates an effective background of
@@ -99,10 +98,9 @@
 >
 
   <!-- ── Media layer (image + overlay) ─────────────────────────────
-    aria-hidden="true" on the wrapper means AT skips the div entirely
-    and only reads the <img> alt text inside.
+    Keep the media accessible so the image description can be read.
   ──────────────────────────────────────────────────────────────── -->
-  <div class="hero__media" aria-hidden="true">
+  <div class="hero__media">
 
     {%- if image != blank -%}
       <picture>
@@ -143,7 +141,7 @@
             {{ image | image_url: width: 2400 }} 2400w
           "
           sizes="100vw"
-          alt="{{ section.settings.image_alt | escape }}"
+          alt="{{ section.settings.image_alt | default: image.alt | escape }}"
           width="{{ image.width }}"
           height="{{ image.height }}"
           loading="eager"
@@ -176,7 +174,7 @@
       <img
         class="hero__img"
         src="{{ 'tile-athletic-lacing.webp' | asset_url }}"
-        alt="{{ section.settings.image_alt | escape }}"
+        alt="A person tying a running shoe on a pedestrian bridge"
         width="1920"
         height="1080"
         loading="eager"
@@ -822,7 +820,6 @@
       "type": "text",
       "id": "image_alt",
       "label": "Image description (alt text)",
-      "default": "Happy customers wearing comfortable shoes near the beach in North Myrtle Beach, SC",
       "info": "Describes the image for screen readers and search engines. Be specific and natural."
     },
 
