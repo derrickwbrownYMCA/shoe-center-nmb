@@ -220,6 +220,10 @@
         {{ heading_html }}
       </h1>
 
+      {%- if request.page_type == 'index' -%}
+        {% render 'hero-store-visit', address: section.settings.visit_address, hours: section.settings.visit_hours, collections_url: routes.collections_url %}
+      {%- endif -%}
+
       {%- if section.settings.subheading != blank -%}
         <p class="hero__subheading">
           {{- section.settings.subheading | escape -}}
@@ -227,13 +231,12 @@
       {%- endif -%}
 
       {%- if has_primary_cta or has_secondary_cta -%}
-        <div class="hero__ctas" role="list">
+        <div class="hero__ctas">
 
           {%- if has_primary_cta -%}
             <a
               href="{{ section.settings.cta_primary_url | default: routes.collections_url }}"
               class="btn hero__btn{% if scrim_style == 'ink' %} hero__btn--onink{% endif %}"
-              role="listitem"
             >
               {{- section.settings.cta_primary_text | escape -}}
             </a>
@@ -243,7 +246,6 @@
             <a
               href="{{ section.settings.cta_secondary_url | default: routes.collections_url }}"
               class="btn btn--secondary hero__btn hero__btn--sec"
-              role="listitem"
             >
               {{- section.settings.cta_secondary_text | escape -}}
             </a>
@@ -724,6 +726,32 @@
     }
   }
 
+  .hero__visit {
+    background: #18242e;
+    color: #fff;
+    padding: .75rem 1rem;
+    border-inline-start: 3px solid #ed896e;
+    border-radius: 3px;
+    width: fit-content;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .hero__visit p { margin: 0; color: inherit; }
+  .hero__directions, .hero__activities a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+  .hero__directions { gap: .35em; }
+  .hero__activities { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .hero__content[data-align="center"] .hero__activities { justify-content: center; }
+  .hero__activities a { padding-inline: .6rem; border-radius: 3px; background: #18242e; color: #fff; }
+  .hero__visit a:focus-visible, .hero__activities a:focus-visible { outline: 3px solid #ed896e; outline-offset: 2px; }
+
   /* ── Mobile ───────────────────────────────────────────────────── */
   @media (max-width: 767px) {
     .hero {
@@ -800,6 +828,9 @@
   "class": "hero-section",
   "limit": 1,
   "settings": [
+    { "type": "header", "content": "Homepage store visit" },
+    { "type": "text", "id": "visit_address", "label": "Address and directions destination", "default": "710 Hwy 17 S, Suite I, North Myrtle Beach, SC 29582" },
+    { "type": "text", "id": "visit_hours", "label": "Store hours", "default": "Mon–Sat 10am–6pm · Sun 11am–5pm" },
     {
       "type": "header",
       "content": "Image"
